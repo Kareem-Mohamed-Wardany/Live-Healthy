@@ -21,14 +21,18 @@ def model_configuration():
     n = 3
     init_fm_dim = 16
 
-    shortcut_type = "identity" # or: projection
+    shortcut_type = "identity"  # or: projection
 
     # Number of steps per epoch is dependent on batch size
-    maximum_number_iterations = 64000 # per the He et al. paper
-    steps_per_epoch = tensorflow.math.floor(train_size / batch_size) # calculating Number of steps per epoch
+    maximum_number_iterations = 64000  # per the He et al. paper
+    steps_per_epoch = tensorflow.math.floor(
+        train_size / batch_size
+    )  # calculating Number of steps per epoch
     val_steps_per_epoch = tensorflow.math.floor(val_size / batch_size)
-    epochs = tensorflow.cast(tensorflow.math.floor(maximum_number_iterations / steps_per_epoch),\
-    dtype=tensorflow.int64)
+    epochs = tensorflow.cast(
+        tensorflow.math.floor(maximum_number_iterations / steps_per_epoch),
+        dtype=tensorflow.int64,
+    )
 
     # Define loss function
     loss = tensorflow.keras.losses.CategoricalCrossentropy(from_logits=True)
@@ -48,24 +52,19 @@ def model_configuration():
 
     # Load Tensorboard callback
     tensorboard = TensorBoard(
-    log_dir=os.path.join(os.getcwd(), "logs"),
-    histogram_freq=1,
-    write_images=True
+        log_dir=os.path.join(os.getcwd(), "logs"), histogram_freq=1, write_images=True
     )
 
     # Save a model checkpoint after every epoch
-    checkpoint = ModelCheckpoint("Data/ResNet.h5", monitor='val_accuracy', verbose=1, save_best_only=True)
-    early = EarlyStopping(monitor='val_accuracy', min_delta=0, patience=30, verbose=1)
+    checkpoint = ModelCheckpoint(
+        "Data/ResNet.h5", monitor="val_accuracy", verbose=1, save_best_only=True
+    )
+    early = EarlyStopping(monitor="val_accuracy", min_delta=0, patience=30, verbose=1)
 
     # Add callbacks to list
-    callbacks = [
-        tensorboard,
-        checkpoint,
-        early
-    ]
+    callbacks = [tensorboard, checkpoint, early]
 
-    # Create config dictionary
-    config = {
+    return {
         "width": width,
         "height": height,
         "dim": channels,
@@ -85,6 +84,5 @@ def model_configuration():
         "optim_additional_metrics": optimizer_additional_metrics,
         "initializer": initializer,
         "callbacks": callbacks,
-        "shortcut_type": shortcut_type
+        "shortcut_type": shortcut_type,
     }
-    return config

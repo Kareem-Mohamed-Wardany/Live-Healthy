@@ -1,0 +1,6 @@
+Import timedelta and date first.
+
+from datetime import timedelta, date
+And date.today() will return today's datetime, may be you want
+
+EndDate = date.today() + timedelta(days=10)
