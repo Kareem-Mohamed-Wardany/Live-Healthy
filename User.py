@@ -5,6 +5,7 @@ from PIL import Image
 
 from Database import *
 from GUIHelperFunctions import *
+from datetime import date
 
 
 class User:
@@ -129,5 +130,20 @@ class User:
             [self.userBalance, self.userid],
         )
         self.db.Commit()
+
+    # Specialist|Consultant Functions
+    def ReportUser(self, userID, Reason):
+        ReportDate = date.today()
+        self.db.Insert(
+            "INSERT INTO reports (Issuer_ID, Reporter_ID, Reason, ReportDate) VALUES (%s, %s, %s, %s)",
+            [userID, self.userid, Reason, ReportDate],
+        )
+        self.db.Commit()
+
+    def GetMyChatMembers(self):
+        return self.db.Select(
+            "SELECT Patient_ID FROM chatdata WHERE Chat_Status = %s and Doc_ID = %s",
+            ["ongoing", self.userid],
+        )
 
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#

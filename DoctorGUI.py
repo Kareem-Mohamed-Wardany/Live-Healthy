@@ -1,10 +1,12 @@
 import contextlib
 import tkinter as tk
 from datetime import date
+import queue
+import time
 
 import customtkinter as ctk
-from PIL import Image
 
+from Images import *
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
@@ -49,29 +51,29 @@ class App(ctk.CTk):
 
         # load images
         self.Male_image = ctk.CTkImage(
-            Image.open("asset\Male.png"),
+            MaleImage,
             size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
         )
         self.Female_image = ctk.CTkImage(
-            Image.open("asset\Female.png"),
+            FemaleImage,
             size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
         )
         self.Active_chats_image = ctk.CTkImage(
-            Image.open("asset\ActiveChats.png"),
+            ActiveChats,
             size=(
                 self.config.get("ButtonIconsSize"),
                 self.config.get("ButtonIconsSize"),
             ),
         )
         self.chat_image = ctk.CTkImage(
-            Image.open("asset\Chat.png"),
+            Chat,
             size=(
                 self.config.get("ButtonIconsSize"),
                 self.config.get("ButtonIconsSize"),
             ),
         )
         self.coin_image = ctk.CTkImage(
-            Image.open("asset\coin.png"),
+            coin,
             size=(
                 self.config.get("ButtonIconsSize"),
                 self.config.get("ButtonIconsSize"),
@@ -184,15 +186,6 @@ class App(ctk.CTk):
         )
         self.appearance_mode_menu.grid(row=7, column=0, padx=20, pady=20, sticky="s")
 
-        # create Active_Chats frame
-        self.LoadActiveChat()
-
-        # create PatientRequests frame
-        self.loadWaitingPatients()
-
-        # create credits frame
-        self.loadCreditWithdraw()
-
     def AssignPatient(self, id):
         # UPDATE requests SET Request_Status = "waiting"
         self.db.Update(
@@ -220,13 +213,27 @@ class App(ctk.CTk):
         self.RemoveAmount("")
 
         # Credit Card Section
+        self.CreditCardBlock()
+
+        # entering withdraw balance
+        self.WithdrawBlock()
+
+    def CreditCardBlock(self):
         self.InformationLabel = ctk.CTkLabel(
             self.credits_frame,
             text="Credit Card Information",
             width=60,
             font=ctk.CTkFont(size=20, weight="bold"),
         )
-        self.CardNumber()
+        self.InformationLabel.place(anchor="nw", relx=0.4, rely=0.05)
+
+        self.CardNumber = ctk.CTkEntry(
+            self.credits_frame,
+            placeholder_text="Credit Card Number",
+            width=160,
+            font=ctk.CTkFont(size=14),
+        )  # 5471462613718519
+        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.25)
         self.CardNumber.bind(
             "<FocusOut>", self.HandleCardNumber
         )  # Handle all functions will be applied for card number + validation
@@ -273,7 +280,7 @@ class App(ctk.CTk):
 
         self.CardChecked = False
 
-        # entering withdraw balance
+    def WithdrawBlock(self):
         self.WithdrawLabel = ctk.CTkLabel(
             self.credits_frame,
             text="Withdraw Credits",
@@ -295,41 +302,27 @@ class App(ctk.CTk):
         self.image = ctk.CTkLabel(
             self.QuickSelectionsFrame,
             text="",
-            image=ctk.CTkImage(Image.open("asset\cashlvl3.png"), size=(100, 100)),
+            image=ctk.CTkImage(cashlvl3, size=(100, 100)),
         )
         self.image.place(anchor="w", relx=0.61, rely=0.5)
 
         self.credit_val = tk.IntVar(value=0)
 
-        self.selec1 = ctk.CTkRadioButton(
-            self.QuickSelectionsFrame, variable=self.credit_val, text="5", value=5
+        self.selec1 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.18, self.credit_val, "5", 5
         )
-        self.selec1.place(anchor="w", relx=0.1, rely=0.18)
-        self.selec1.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
-
-        self.selec2 = ctk.CTkRadioButton(
-            self.QuickSelectionsFrame, variable=self.credit_val, text="50", value=50
+        self.selec2 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.36, self.credit_val, "50", 50
         )
-        self.selec2.place(anchor="w", relx=0.1, rely=0.36)
-        self.selec2.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
-
-        self.selec3 = ctk.CTkRadioButton(
-            self.QuickSelectionsFrame, variable=self.credit_val, text="500", value=500
+        self.selec3 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.54, self.credit_val, "500", 500
         )
-        self.selec3.place(anchor="w", relx=0.1, rely=0.54)
-        self.selec3.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
-
-        self.selec4 = ctk.CTkRadioButton(
-            self.QuickSelectionsFrame, variable=self.credit_val, text="5000", value=5000
+        self.selec4 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.72, self.credit_val, "5000", 5000
         )
-        self.selec4.place(anchor="w", relx=0.1, rely=0.72)
-        self.selec4.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
-
-        self.selec5 = ctk.CTkRadioButton(
-            self.QuickSelectionsFrame, variable=self.credit_val, text="Other", value=-1
+        self.selec5 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.9, self.credit_val, "Other", -1, False
         )
-        self.selec5.place(anchor="w", relx=0.1, rely=0.9)
-        self.selec5.bind("<Button-1>", self.HandleAmount)  # Show Entry Frame if found
 
         self.Withdraw_Button = ctk.CTkButton(
             self.credits_frame,
@@ -342,16 +335,14 @@ class App(ctk.CTk):
         )
         self.Withdraw_Button.place(anchor="nw", relx=0.66, rely=0.8)
 
-    def CardNumber(self):
-        self.InformationLabel.place(anchor="nw", relx=0.4, rely=0.05)
-
-        self.CardNumber = ctk.CTkEntry(
-            self.credits_frame,
-            placeholder_text="Credit Card Number",
-            width=160,
-            font=ctk.CTkFont(size=14),
-        )  # 5471462613718519
-        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.25)
+    def AddOption(self, master, x, y, vari, txt, val, fun=True):
+        option = ctk.CTkRadioButton(master, variable=vari, text=txt, value=val)
+        option.place(anchor="w", relx=x, rely=y)
+        if fun:
+            option.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
+        else:
+            option.bind("<Button-1>", self.HandleAmount)  # Show Entry Frame if found
+        return option
 
     def LoadActiveChat(self):
         # Prevent Error for stucking in this frame and can not enter other Frames
@@ -364,50 +355,45 @@ class App(ctk.CTk):
             self.Userclient.end()
         for widget in self.Active_Chats_frame.winfo_children():
             widget.destroy()
+
+        # Get Ids for all patients that chat with that doctor
+        res = self.user.GetMyChatMembers()
+        self.MyChats(res)
+
+    def MyChats(self, res):
         # Create Scrollable Frame to hold all chats for Doctor
         frame = ScrollableFrame(
             self.Active_Chats_frame, "gray30", width=250, height=714
         )
         frame.grid(row=0, column=0, sticky="nsew")
-        # Get Ids for all patients that chat with that doctor
-        res = self.db.Select(
-            "SELECT Patient_ID FROM chatdata WHERE Chat_Status = %s and Doc_ID = %s",
-            ["ongoing", self.user.userid],
+        start_time = time.time()
+        for pos, item in enumerate(res):
+            self.AddtoChatMenu(frame.scrollable_frame, item[0], pos)
+        print(f"--- {time.time() - start_time} seconds ---")
+
+    def AddtoChatMenu(self, master, id, pos):
+        output = self.db.Select("SELECT Name, Gender FROM users WHERE ID=%s", [id])
+        Name = output[0][0]
+        Gender = output[0][1]
+        if Gender == "Male":
+            Imagesrc = ctk.CTkImage(ChatMaleImage, size=(50, 50))
+        else:
+            Imagesrc = ctk.CTkImage(ChatFemaleImage, size=(50, 50))
+        self.patientChat = ctk.CTkButton(
+            master,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text=Name,
+            width=250,
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray20", "gray60"),
+            image=Imagesrc,
+            anchor="w",
+            command=lambda m=id: self.openChat(m),
         )
-        patientIDS = [res[i][0] for i in range(len(res))]
-        self.patientChat = []
-        for j in range(len(patientIDS)):  #
-            # for j in range(40): #
-            res = self.db.Select(
-                "SELECT Name, Gender FROM users WHERE ID=%s", [patientIDS[j]]
-            )
-            Name = res[0][0]
-            Gender = res[0][1]
-            self.patientChatFrame = ctk.CTkFrame(
-                frame.scrollable_frame, corner_radius=0, fg_color="gray40"
-            )
-            self.patientChatFrame.grid(row=j, column=0, pady=6)
-            if Gender == "Male":
-                Imagesrc = ctk.CTkImage(Image.open("asset\ChatMale.png"), size=(50, 50))
-            else:
-                Imagesrc = ctk.CTkImage(
-                    Image.open("asset\ChatFemale.png"), size=(50, 50)
-                )
-            self.patientChat = ctk.CTkButton(
-                self.patientChatFrame,
-                corner_radius=0,
-                height=40,
-                border_spacing=10,
-                text=Name,
-                width=250,
-                fg_color="transparent",
-                text_color=("gray10", "gray90"),
-                hover_color=("gray70", "gray30"),
-                image=Imagesrc,
-                anchor="w",
-                command=lambda m=patientIDS[j]: self.openChat(m),
-            )
-            self.patientChat.grid(row=0, column=0, sticky="ew")
+        self.patientChat.grid(row=pos, column=0, pady=6)
 
     def openChat(self, id):
         # Chat window that will contain ChatFrame that show the chat for the doctor and chatbox where the doctor type in his chat
@@ -416,6 +402,7 @@ class App(ctk.CTk):
             for widget in chatWindow.winfo_children():
                 widget.destroy()
             self.Userclient.end()
+        start_time = time.time()
         chatWindow = ctk.CTkFrame(
             self.Active_Chats_frame, corner_radius=0, width=840, fg_color="transparent"
         )
@@ -426,8 +413,33 @@ class App(ctk.CTk):
         )
         self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
 
+        # End Chat
+        self.EndChatButton(chatWindow, id)
+
+        # Report Patient
+        self.ReportPatient(chatWindow, id)
+
+        # Generate Prescription for a Patient
+        self.GeneratePrescription(chatWindow)
+
+        # ChatBox
+        self.ChatBoxBlock(chatWindow)
+
+        # Patient Basic data
+        self.PatientData(chatWindow, id)
+
+        # Patient Health Status
+        self.PatientHealthStatus(chatWindow, id)
+
+        # Patient Data Filled During Creating Request
+        self.PatientRequestData(chatWindow, id)
+        print(f"--- {time.time() - start_time} seconds ---")
+        # join Chat Servrt
+        # self.JoinChatServer()
+
+    def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
-            chatWindow, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25
+            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25
         )
         self.chatbox.place(anchor="nw", relx=0.01, rely=0.57)
         self.chatbox.bind(
@@ -437,34 +449,34 @@ class App(ctk.CTk):
             "<Shift-Return>", self.NewLine
         )  # Shift + Enter will make new line inspired by discord
 
-        sendimage = ctk.CTkImage(Image.open("asset\send.png"), size=(25, 25))
+        sendimage = ctk.CTkImage(sendICON, size=(25, 25))
 
         SendIcon = ctk.CTkLabel(
-            chatWindow, text="", image=sendimage, bg_color="transparent"
+            master, text="", image=sendimage, bg_color="transparent"
         )
         SendIcon.place(anchor="nw", relx=0.635, rely=0.57)
         SendIcon.bind(
             "<Button-1>", self.sendMessage
         )  # Bind if doctor pressed the image text will
 
-        # print(id)
+    def PatientData(self, master, id):
         PatientData = User(id)  # Get the patient Data
 
         if PatientData.userGender == "Male":
-            Imagesrc = ctk.CTkImage(Image.open("asset\Male.png"), size=(100, 100))
+            Imagesrc = ctk.CTkImage(MaleImage, size=(100, 100))
         else:
-            Imagesrc = ctk.CTkImage(Image.open("asset\Female.png"), size=(100, 100))
-        PImage = ctk.CTkLabel(chatWindow, height=40, text="", image=Imagesrc)
+            Imagesrc = ctk.CTkImage(FemaleImage, size=(100, 100))
+        PImage = ctk.CTkLabel(master, height=40, text="", image=Imagesrc)
         PImage.place(anchor="nw", relx=0.81, rely=0.005)
         PName = ctk.CTkLabel(
-            chatWindow,
+            master,
             height=10,
             text=PatientData.userName,
             font=ctk.CTkFont(size=16, weight="bold"),
         )
         PName.place(anchor="nw", relx=0.855, rely=0.15)
         PAge = ctk.CTkLabel(
-            chatWindow,
+            master,
             height=10,
             text=PatientData.userAge,
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -472,17 +484,19 @@ class App(ctk.CTk):
         PAge.place(anchor="nw", relx=0.855, rely=0.18)
 
         PBloodType = ctk.CTkLabel(
-            chatWindow,
+            master,
             height=10,
             text=PatientData.Blood_Type,
             font=ctk.CTkFont(size=14, weight="bold"),
         )
         PBloodType.place(anchor="nw", relx=0.855, rely=0.21)
 
-        # Frame that holds all health Status of the patients as Checkbox if he has that status it will be checked
+    def PatientHealthStatus(self, master, id):
+        PatientData = User(id)  # Get the patient Data
 
+        # Frame that holds all health Status of the patients as Checkbox if he has that status it will be checked
         HealthStatusFrame = ctk.CTkFrame(
-            chatWindow,
+            master,
             corner_radius=0,
             width=290,
             height=250,
@@ -570,7 +584,6 @@ class App(ctk.CTk):
         )
         HypertensionBox.place(anchor="nw", relx=0.5, rely=0.55)
 
-        # print(PatientData.Heart_Diseases)
         # Check the box if he has this state
         if PatientData.Heart_Diseases:
             Heart_DiseasesBox.select()
@@ -587,6 +600,8 @@ class App(ctk.CTk):
         if PatientData.Allergies:
             AllergiesBox.select()
 
+    def PatientRequestData(self, master, id):
+        PatientData = User(id)  # Get the patient Data
         res = self.db.Select(
             "SELECT Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time FROM requests WHERE Patient_ID= %s",
             [id],
@@ -606,14 +621,14 @@ class App(ctk.CTk):
             Medications = "-"
 
         # Create blocks that will contain Symptoms, Medications, Illness_Time, Extra_Info
-        self.Createblock(chatWindow, 0.71, 0.24, 230, 90, "Symptoms", Symptoms)
-        self.Createblock(chatWindow, 0.71, 0.38, 230, 90, "Medications", Medications)
-        self.Createblock(chatWindow, 0.71, 0.52, 230, 90, "Illness_Time", Illness_Time)
-        self.Createblock(chatWindow, 0.71, 0.66, 230, 90, "Extra_Info", Extra_Info)
+        self.Createblock(master, 0.71, 0.24, 230, 90, "Symptoms", Symptoms)
+        self.Createblock(master, 0.71, 0.38, 230, 90, "Medications", Medications)
+        self.Createblock(master, 0.71, 0.52, 230, 90, "Illness_Time", Illness_Time)
+        self.Createblock(master, 0.71, 0.66, 230, 90, "Extra_Info", Extra_Info)
 
         # Scan Block will contain Patient X-ray Scan with the prediction made by the system
         self.createScanBlock(
-            chatWindow,
+            master,
             PatientData.userName,
             0.39,
             0.63,
@@ -623,58 +638,79 @@ class App(ctk.CTk):
             Prediction,
         )
 
+    def EndChatButton(self, master, id):
         # END Chat
         EndChat = ctk.CTkLabel(
-            chatWindow,
+            master,
             text="",
             bg_color="transparent",
-            image=ctk.CTkImage(Image.open("asset\CloseChat.png"), size=(40, 40)),
+            image=ctk.CTkImage(CloseDoctorChat, size=(40, 40)),
         )
         EndChat.place(anchor="nw", relx=0.95, rely=0.92)
         EndChat.bind("<Button-1>", lambda event: self.EndButtonEvent(event, id))
 
+    def ReportPatient(self, master, id):
+        PatientData = User(id)  # Get the patient Data
         # Report Patient
         ReportPatient = ctk.CTkLabel(
-            chatWindow,
+            master,
             text="",
             bg_color="transparent",
-            image=ctk.CTkImage(Image.open("asset\ReportUser.png"), size=(40, 40)),
+            image=ctk.CTkImage(ReportUser, size=(40, 40)),
         )
         ReportPatient.place(anchor="nw", relx=0.89, rely=0.92)
         ReportPatient.bind(
-            "<Button-1>", lambda event: self.ReportUserButtonEvent(event, id)
+            "<Button-1>",
+            lambda event: self.ReportReasonBlock(event, PatientData.userName, id),
         )
 
-        # Generate Report for Patient
+    def GeneratePrescription(self, master):
+        # Generate Prescription for a Patient
         GenerateReport = ctk.CTkLabel(
-            chatWindow,
+            master,
             text="",
             bg_color="transparent",
-            image=ctk.CTkImage(Image.open("asset\GenerateReport.png"), size=(40, 40)),
+            image=ctk.CTkImage(GeneratePrescription, size=(40, 40)),
         )
         GenerateReport.place(anchor="nw", relx=0.83, rely=0.92)
 
+    def JoinChatServer(self):
         # Check if the Chat server is online
-        # try:
-        #     ADDR = ("127.0.0.1", 4073) # Get the Address of Chat Server
-        #     # Connect user to chat server and set the chat room to patient's ID as the patient will be in it
-        #     self.Userclient = Client(self.user.userName, ADDR, id)
+        try:
+            ADDR = ("127.0.0.1", 4073)  # Get the Address of Chat Server
+            # Connect user to chat server and set the chat room to patient's ID as the patient will be in it
+            self.Userclient = Client(self.user.userName, ADDR, id)
 
-        #     self.LoaddedChat = queue.Queue() # Queue that will hold the chat from the database to be shown in Chat box
-        #     self.ChatLOGS = queue.Queue() # Queue that will hold old chat + new chat and save them in database to load it later
-        #     self.LoadChatData(id) # Load Chat data to LoaddedChat Queue and also ChatLOGS Queue
-        #     self.AddLoadedChat() # Add old Chat to the Chatbox
+            self.LoaddedChat = (
+                queue.Queue()
+            )  # Queue that will hold the chat from the database to be shown in Chat box
+            self.ChatLOGS = (
+                queue.Queue()
+            )  # Queue that will hold old chat + new chat and save them in database to load it later
+            self.LoadChatData(
+                id
+            )  # Load Chat data to LoaddedChat Queue and also ChatLOGS Queue
+            self.AddLoadedChat()  # Add old Chat to the Chatbox
 
-        #     self.CurrentChat = queue.Queue() # Queue that hold new chat either send or recived
+            self.CurrentChat = (
+                queue.Queue()
+            )  # Queue that hold new chat either send or recived
 
-        #     self.AddTochatBox(id) # Function that will run every 1000 ms to check if doctor sends or recives any message
-        #     self.receiveThread = threading.Thread(target=self.Userclient.receiveFromServer, args=(self.CurrentChat,)) # Wait any messages from the patient
-        #     self.receiveThread.start()
-        #     #write thread
-        #     writeThread = threading.Thread(target=self.Userclient.writeToServer, args=(self.chatbox.get("1.0","end-1c"),)) # Send any message to the Patient
-        #     writeThread.start()
-        # except:
-        #     print("Chat Server is offline")
+            self.AddTochatBox(
+                id
+            )  # Function that will run every 1000 ms to check if doctor sends or recives any message
+            self.receiveThread = threading.Thread(
+                target=self.Userclient.receiveFromServer, args=(self.CurrentChat,)
+            )  # Wait any messages from the patient
+            self.receiveThread.start()
+            # write thread
+            writeThread = threading.Thread(
+                target=self.Userclient.writeToServer,
+                args=(self.chatbox.get("1.0", "end-1c"),),
+            )  # Send any message to the Patient
+            writeThread.start()
+        except Exception:
+            print("Chat Server is offline")
 
     def LoadChatData(self, Patientid):
         # Load the chat of Patient with id
@@ -840,7 +876,9 @@ class App(ctk.CTk):
             )  # add Credits to the doctor When he ends the chat
             # update button Balance
             if res != -1:
-                self._extracted_from_Withdraw_button_event_9("Credits added to your balance!")
+                self._extracted_from_Withdraw_button_event_9(
+                    "Credits added to your balance!"
+                )
         else:
             MessageBox(self, "warning", "Report Should be Generated")
 
@@ -871,23 +909,34 @@ class App(ctk.CTk):
         ][0]
         return len(res) != 0
 
-    def ReportUserButtonEvent(self, event, id):
-        print("Report")
-        dialog = ctk.CTkInputDialog(text="Enter Reason:", title="Report Patient")
-        center(dialog)
-        dialog.geometry("300x200")
-        reason = dialog.get_input()
-        if reason is None or len(reason) == 0:
+    def ReportReasonBlock(self, event, name, id):
+        # Create New Window
+        ReportWindow = ctk.CTkToplevel()
+        center(ReportWindow)  # Open the window in the center of the Screen
+        title = f"Report {name}"
+        ReportWindow.title(title)
+        ReportWindow.geometry("400x200")
+        ReportWindow.resizable(False, False)
+        self.reasonEntry = ctk.CTkEntry(
+            ReportWindow, width=270, placeholder_text="Enter Reason"
+        )
+        self.reasonEntry.place(anchor="nw", relx=0.15, rely=0.3)
+
+        ConfirmButton = ctk.CTkButton(
+            ReportWindow, text="Report", command=lambda: self.ReportEvent(id)
+        )
+        ConfirmButton.place(anchor="nw", relx=0.3, rely=0.6)
+
+    def ReportEvent(self, id):
+        Reason = self.reasonEntry.get()
+        if len(Reason) == 0:
             return MessageBox(self, "error", "Reason Should not be empty")
-        print(len(reason))
-        print("CTkInputDialog:", reason)
-        # self.EndChat(id, "Report")
-        res = self.user.updateBalance(
-            self, 100
-        )  # add Credits to the doctor When he ends the chat
+        self.user.ReportUser(id, Reason)
+        self.EndChat(id, "Report")
+        res = self.user.updateBalance(self, 100)
         # update button Balance
         if res != -1:
-            self.UpdateBalanceButton("Credits added to your balance!")
+            self.UpdateBalanceButton("User Reported Refund added to your balance")
 
     def loadWaitingPatients(self):
         # Prevent Error for stucking in this frame and can not enter other Frames
@@ -941,7 +990,7 @@ class App(ctk.CTk):
             ):  # check if the user is a Male to add Male image for him
                 Image_label = ctk.CTkLabel(
                     patient_border,
-                    image=ctk.CTkImage(Image.open("asset\Male.png"), size=(40, 40)),
+                    image=ctk.CTkImage(MaleImage, size=(40, 40)),
                     text="",
                     width=100,
                     height=20,
@@ -949,7 +998,7 @@ class App(ctk.CTk):
             else:  # check if the user is a Female to add Male image for him
                 Image_label = ctk.CTkLabel(
                     patient_border,
-                    image=ctk.CTkImage(Image.open("asset\Female.png"), size=(40, 40)),
+                    image=ctk.CTkImage(FemaleImage, size=(40, 40)),
                     text="",
                     width=100,
                     height=20,
@@ -959,9 +1008,7 @@ class App(ctk.CTk):
             if Patient_VIP == 1:
                 VIP = ctk.CTkLabel(
                     patient_border,
-                    image=ctk.CTkImage(
-                        Image.open("asset\\bronze-medal.png"), size=(40, 40)
-                    ),
+                    image=ctk.CTkImage(bronze, size=(40, 40)),
                     text="",
                     width=100,
                     height=20,
@@ -969,9 +1016,7 @@ class App(ctk.CTk):
             elif Patient_VIP == 2:
                 VIP = ctk.CTkLabel(
                     patient_border,
-                    image=ctk.CTkImage(
-                        Image.open("asset\\silver-medal.png"), size=(40, 40)
-                    ),
+                    image=ctk.CTkImage(silver, size=(40, 40)),
                     text="",
                     width=100,
                     height=20,
@@ -979,9 +1024,7 @@ class App(ctk.CTk):
             elif Patient_VIP == 3:
                 VIP = ctk.CTkLabel(
                     patient_border,
-                    image=ctk.CTkImage(
-                        Image.open("asset\\gold-medal.png"), size=(40, 40)
-                    ),
+                    image=ctk.CTkImage(gold, size=(40, 40)),
                     text="",
                     width=100,
                     height=20,
@@ -1040,14 +1083,14 @@ class App(ctk.CTk):
         Image_label.place(anchor="nw", relx=0, rely=0.25)
 
         NameLabel = ctk.CTkLabel(
-                patient_border,
-                text=Patient_Name,
-                bg_color="transparent",
-                fg_color="transparent",
-                width=100,
-                height=20,
-                font=ctk.CTkFont(size=15, weight="bold"),
-            )
+            patient_border,
+            text=Patient_Name,
+            bg_color="transparent",
+            fg_color="transparent",
+            width=100,
+            height=20,
+            font=ctk.CTkFont(size=15, weight="bold"),
+        )
         NameLabel.place(anchor="nw", relx=0.1, rely=0.35)
 
     def delType(self):
@@ -1061,14 +1104,25 @@ class App(ctk.CTk):
 
     def HandleCardNumber(self, event):
         # Validate on Card Number if its not 16 digit
+        self.CardNumberValidation()
+
+        # SHOW CARD TYPE
+        self.CreditCardType()
+
+        # Add a space after each 4 digits in card number like xxxx xxxx xxxx xxxx
+        self.FormateCreditCard
+
+        # Confirm that Credit Card is valid
+        self.CardChecked = True
+
+    def CardNumberValidation(self):
         if (
             len(self.CardNumber.get()) != 16 or self.CardNumber.get().isalpha()
         ):  # 5471462613718519
             self.CardChecked = False
-            MessageBox(self, "warning", "Credit Card is not 16 digit")
-            return
+            return MessageBox(self, "warning", "Credit Card is not 16 digit")
 
-        # SHOW CARD TYPE
+    def CreditCardType(self):
         # ---------------
         # American Express cards always begin with the number 3, more specifically 34 or 37.
         # Visa cards begin with the number 4.
@@ -1081,35 +1135,38 @@ class App(ctk.CTk):
                 self.Americanlabel = ctk.CTkLabel(
                     self,
                     text="",
-                    image=ctk.CTkImage(
-                        Image.open("asset\\americanexpress.png"), size=(25, 25)
-                    ),
+                    image=ctk.CTkImage(americanexpress, size=(25, 25)),
                 )
                 self.Americanlabel.place(anchor="nw", relx=0.318, rely=0.25)
             elif int(string[0]) == 4:
                 self.Visalabel = ctk.CTkLabel(
                     self.credits_frame,
                     text="",
-                    image=ctk.CTkImage(Image.open("asset\\visa.png"), size=(25, 25)),
+                    image=ctk.CTkImage(visa, size=(25, 25)),
                 )
                 self.Visalabel.place(anchor="nw", relx=0.2, rely=0.25)
             elif int(string[0]) == 5:
                 self.Masterlabel = ctk.CTkLabel(
                     self.credits_frame,
                     text="",
-                    image=ctk.CTkImage(
-                        Image.open("asset\\mastercard.png"), size=(25, 25)
-                    ),
+                    image=ctk.CTkImage(mastercard, size=(25, 25)),
                 )
                 self.Masterlabel.place(anchor="nw", relx=0.2, rely=0.25)
 
-            # Add a space after each 4 digits in card number like xxxx xxxx xxxx xxxx
-        x = " ".join(
-            string[i : i + 4] for i in range(0, len(string), 4)
-        )  # 3471462613718519 -> 3471 4626 1371 8519
-        self.CardNumber.delete("0", tk.END)  # Delete old card Number 3471462613718519
-        self.CardNumber.insert("end", x)  # Set Card Number IN GUI 3471 4626 1371 8519
-        self.CardChecked = True
+    def FormateCreditCard(self):
+
+        if len(self.CardNumber.get()) != 0:  # check if Card Number is not Empty
+            # load card Types Images into its label
+            string = self.CardNumber.get()
+            x = " ".join(
+                string[i : i + 4] for i in range(0, len(string), 4)
+            )  # 3471462613718519 -> 3471 4626 1371 8519
+            self.CardNumber.delete(
+                "0", tk.END
+            )  # Delete old card Number 3471462613718519
+            self.CardNumber.insert(
+                "end", x
+            )  # Set Card Number IN GUI 3471 4626 1371 8519
 
     def HandleCVV(self, event):
         if len(self.CVV.get()) != 3 or self.CVV.get().isalpha():
@@ -1179,7 +1236,6 @@ class App(ctk.CTk):
                     "Credits will be added to you bank account Soon!"
                 )
 
-    # TODO Rename this here and in `EndButtonEvent`, `ReportUserButtonEvent` and `Withdraw_button_event`
     def UpdateBalanceButton(self, arg0):
         self.Credits_button = ctk.CTkButton(
             self.LeftSideBar_frame,
@@ -1219,17 +1275,20 @@ class App(ctk.CTk):
         if name == "Active_Chats":
             self.Active_Chats_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.Active_Chats_frame.grid_forget()
+            with contextlib.suppress(Exception):
+                self.Active_Chats_frame.grid_forget()
 
         if name == "PatientRequests":
             self.PatientRequests_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.PatientRequests_frame.grid_forget()
+            with contextlib.suppress(Exception):
+                self.PatientRequests_frame.grid_forget()
 
         if name == "Credits":
             self.credits_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.credits_frame.grid_forget()
+            with contextlib.suppress(Exception):
+                self.credits_frame.grid_forget()
 
     def Active_Chats_button_event(self):
         self.LoadActiveChat()
