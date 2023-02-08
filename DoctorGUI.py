@@ -798,11 +798,11 @@ class App(ctk.CTk):
     def Zoom(self, event, name):
         # Create New Window
         ScanZoomWindow = ctk.CTkToplevel()
-        center(ScanZoomWindow)  # Open the window in the center of the Screen
         PatientName = name.split(".")[0]  # Get Patient Name from Image Name
         title = f"X-ray Scan of {PatientName}"
         ScanZoomWindow.title(title)
-        ScanZoomWindow.geometry("720x720")
+        # ScanZoomWindow.geometry("720x720")
+        center(ScanZoomWindow,720,720)  # Open the window in the center of the Screen
         ScanZoomWindow.resizable(False, False)
         X_ray = ctk.CTkLabel(
             ScanZoomWindow,
@@ -1315,5 +1315,5 @@ class App(ctk.CTk):
 if __name__ == "__main__":
     app = App()
     app.resizable(False, False)
-    center(app)
+    center(app, 1280, 720)
     app.mainloop()

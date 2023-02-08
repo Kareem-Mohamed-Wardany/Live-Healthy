@@ -27,6 +27,6 @@ class Login(ctk.CTk):
 if __name__ == "__main__":
     app = Login()
     app.resizable(False,False)
-    center(app)
+    center(app, 1280, 720)
     app.mainloop()
 

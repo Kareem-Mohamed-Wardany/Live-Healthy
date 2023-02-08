@@ -15,13 +15,11 @@ def MessageBox(parent, type, Text):
 
 
 # function to let any window be in the center of the screen
-def center(win):
+def center(win, w, h):
     """
     centers a tkinter window
     :param win: the main window or Toplevel window to center
     """
-    w = win.winfo_width()
-    h = win.winfo_height()
     ws = win.winfo_screenwidth()
     hs = win.winfo_screenheight()
     x = (ws/2) - (w/2)
@@ -38,7 +36,7 @@ def center(win):
     # x = win.winfo_screenwidth() // 2 - win_width // 2
     # y = win.winfo_screenheight() // 2 - win_height // 2
     # win.geometry(f"{width}x{height}+{x}+{y}")
-    win.deiconify()
+    # win.deiconify()
 
 
 # Class for scrollabe frame

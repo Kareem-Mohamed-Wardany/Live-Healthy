@@ -38,5 +38,5 @@ class Register(ctk.CTk):
 if __name__ == "__main__":
     app = Register()
     app.resizable(False, False)  # Disable resize for GUI
-    # center(app)  # center window in your screen
+    center(app, 1280, 720)  # center window in your screen
     app.mainloop()
