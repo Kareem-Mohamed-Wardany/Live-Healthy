@@ -33,7 +33,11 @@ class App(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-
+        self.WindowSettings()
+        self.LeftSideBar()
+       
+    # Main Constructor
+    def WindowSettings(self):
         # load Apperance model of the user
         ctk.set_appearance_mode(
             self.user.userSystemApperanceMode
@@ -49,7 +53,8 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)  # let the left sidebar take all the space
         self.grid_columnconfigure(1, weight=1)
 
-        # load images
+    def LeftSideBar(self):
+         # load images
         self.Male_image = ctk.CTkImage(
             MaleImage,
             size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
@@ -1251,6 +1256,7 @@ class App(ctk.CTk):
         self.Credits_button.grid(row=6, column=0, sticky="ew")
         MessageBox(self, "info", arg0)
 
+    # Other functions 
     def FetchPatientData(self, data):
         for j in range(len(data)):
             yield data[j]
