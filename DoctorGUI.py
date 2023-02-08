@@ -186,164 +186,7 @@ class App(ctk.CTk):
         )
         self.appearance_mode_menu.grid(row=7, column=0, padx=20, pady=20, sticky="s")
 
-    def AssignPatient(self, id):
-        # UPDATE requests SET Request_Status = "waiting"
-        self.db.Update(
-            "UPDATE requests SET Request_Status = %s WHERE Patient_ID= %s",
-            ["ongoing", id],
-        )
-        self.db.Insert(
-            "INSERT INTO chatdata (Patient_ID, Doc_ID, Chat_Status) Values (%s,%s,%s)",
-            [id, self.user.userid, "ongoing"],
-        )
-        self.loadWaitingPatients()
-        self.db.Commit()
-
-    def loadCreditWithdraw(self):
-
-        # Prevent Error for stucking in this frame and can not enter other Frames
-        if self.Created[2]:
-            self.credits_frame = ctk.CTkFrame(
-                self, corner_radius=0, fg_color="transparent"
-            )
-            self.Created[2] = False
-
-        # Remove card type|Specific amount entry in each start for frame as user may nav to other Frames and want to go back to this frame
-        self.delType()
-        self.RemoveAmount("")
-
-        # Credit Card Section
-        self.CreditCardBlock()
-
-        # entering withdraw balance
-        self.WithdrawBlock()
-
-    def CreditCardBlock(self):
-        self.InformationLabel = ctk.CTkLabel(
-            self.credits_frame,
-            text="Credit Card Information",
-            width=60,
-            font=ctk.CTkFont(size=20, weight="bold"),
-        )
-        self.InformationLabel.place(anchor="nw", relx=0.4, rely=0.05)
-
-        self.CardNumber = ctk.CTkEntry(
-            self.credits_frame,
-            placeholder_text="Credit Card Number",
-            width=160,
-            font=ctk.CTkFont(size=14),
-        )  # 5471462613718519
-        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.25)
-        self.CardNumber.bind(
-            "<FocusOut>", self.HandleCardNumber
-        )  # Handle all functions will be applied for card number + validation
-
-        self.CVV = ctk.CTkEntry(
-            self.credits_frame,
-            show="*",
-            placeholder_text="CVV",
-            width=42,
-            font=ctk.CTkFont(size=14),
-        )
-        self.CVV.place(anchor="nw", relx=0.35, rely=0.25)
-        self.CVV.bind("<Leave>", self.HandleCVV)
-
-        self.ExpireMonth = ctk.CTkComboBox(
-            self.credits_frame,
-            width=60,
-            values=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
-        )
-        self.ExpireMonth.place(anchor="nw", relx=0.55, rely=0.25)
-
-        self.slashLabel = ctk.CTkLabel(
-            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14)
-        )
-        self.slashLabel.place(anchor="nw", relx=0.615, rely=0.25)
-
-        self.ExpireYear = ctk.CTkComboBox(
-            self.credits_frame,
-            width=60,
-            values=["21", "22", "23", "24", "25", "26", "27"],
-        )
-        self.ExpireYear.place(anchor="nw", relx=0.64, rely=0.25)
-
-        self.CheckCard = ctk.CTkButton(
-            self.credits_frame,
-            text="Check Card Expiration",
-            anchor="w",
-            fg_color="gray50",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
-            command=self.CheckCard_button_event,
-        )
-        self.CheckCard.place(anchor="nw", relx=0.74, rely=0.25)
-
-        self.CardChecked = False
-
-    def WithdrawBlock(self):
-        self.WithdrawLabel = ctk.CTkLabel(
-            self.credits_frame,
-            text="Withdraw Credits",
-            width=60,
-            font=ctk.CTkFont(size=20, weight="bold"),
-        )
-        self.WithdrawLabel.place(anchor="nw", relx=0.4, rely=0.45)
-
-        self.QuickSelectionsFrame = ctk.CTkFrame(
-            self.credits_frame, corner_radius=0, fg_color="gray30", width=350
-        )
-        self.QuickSelectionsFrame.place(anchor="nw", relx=0.05, rely=0.65)
-
-        self.Label = ctk.CTkLabel(
-            self.QuickSelectionsFrame, text="Select Credits:", font=ctk.CTkFont(size=14)
-        )
-        self.Label.place(anchor="w", relx=0.41, rely=0.1)
-
-        self.image = ctk.CTkLabel(
-            self.QuickSelectionsFrame,
-            text="",
-            image=ctk.CTkImage(cashlvl3, size=(100, 100)),
-        )
-        self.image.place(anchor="w", relx=0.61, rely=0.5)
-
-        self.credit_val = tk.IntVar(value=0)
-
-        self.selec1 = self.AddOption(
-            self.QuickSelectionsFrame, 0.1, 0.18, self.credit_val, "5", 5
-        )
-        self.selec2 = self.AddOption(
-            self.QuickSelectionsFrame, 0.1, 0.36, self.credit_val, "50", 50
-        )
-        self.selec3 = self.AddOption(
-            self.QuickSelectionsFrame, 0.1, 0.54, self.credit_val, "500", 500
-        )
-        self.selec4 = self.AddOption(
-            self.QuickSelectionsFrame, 0.1, 0.72, self.credit_val, "5000", 5000
-        )
-        self.selec5 = self.AddOption(
-            self.QuickSelectionsFrame, 0.1, 0.9, self.credit_val, "Other", -1, False
-        )
-
-        self.Withdraw_Button = ctk.CTkButton(
-            self.credits_frame,
-            text="Withdraw",
-            anchor="w",
-            fg_color="gray50",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
-            command=self.Withdraw_button_event,
-        )
-        self.Withdraw_Button.place(anchor="nw", relx=0.66, rely=0.8)
-
-    def AddOption(self, master, x, y, vari, txt, val, fun=True):
-        option = ctk.CTkRadioButton(master, variable=vari, text=txt, value=val)
-        option.place(anchor="w", relx=x, rely=y)
-        if fun:
-            option.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
-        else:
-            option.bind("<Button-1>", self.HandleAmount)  # Show Entry Frame if found
-        return option
-
+    # Active Chat Section
     def LoadActiveChat(self):
         # Prevent Error for stucking in this frame and can not enter other Frames
         if self.Created[0]:
@@ -937,7 +780,10 @@ class App(ctk.CTk):
         # update button Balance
         if res != -1:
             self.UpdateBalanceButton("User Reported Refund added to your balance")
+    
+    # End of Active Chat Section
 
+    # Load LoadWaitingPatients Section
     def loadWaitingPatients(self):
         # Prevent Error for stucking in this frame and can not enter other Frames
         if self.Created[1]:
@@ -1093,6 +939,41 @@ class App(ctk.CTk):
         )
         NameLabel.place(anchor="nw", relx=0.1, rely=0.35)
 
+    def AssignPatient(self, id):
+        # UPDATE requests SET Request_Status = "waiting"
+        self.db.Update(
+            "UPDATE requests SET Request_Status = %s WHERE Patient_ID= %s",
+            ["ongoing", id],
+        )
+        self.db.Insert(
+            "INSERT INTO chatdata (Patient_ID, Doc_ID, Chat_Status) Values (%s,%s,%s)",
+            [id, self.user.userid, "ongoing"],
+        )
+        self.loadWaitingPatients()
+        self.db.Commit()
+    
+    # End of LoadWaitingPatients Section
+
+    # Credits section
+    def loadCreditWithdraw(self):
+
+        # Prevent Error for stucking in this frame and can not enter other Frames
+        if self.Created[2]:
+            self.credits_frame = ctk.CTkFrame(
+                self, corner_radius=0, fg_color="transparent"
+            )
+            self.Created[2] = False
+
+        # Remove card type|Specific amount entry in each start for frame as user may nav to other Frames and want to go back to this frame
+        self.delType()
+        self.RemoveAmount("")
+
+        # Credit Card Section
+        self.CreditCardBlock()
+
+        # entering withdraw balance
+        self.WithdrawBlock()
+    
     def delType(self):
         # Try to handle error if any type was not shown so it will throw an error
         with contextlib.suppress(NameError, AttributeError):
@@ -1102,25 +983,77 @@ class App(ctk.CTk):
         with contextlib.suppress(NameError, AttributeError):
             self.Masterlabel.destroy()
 
-    def HandleCardNumber(self, event):
-        # Validate on Card Number if its not 16 digit
-        self.CardNumberValidation()
+    def CreditCardBlock(self):
+        self.CardChecked = False
+        self.InformationLabel = ctk.CTkLabel(
+            self.credits_frame,
+            text="Credit Card Information",
+            width=60,
+            font=ctk.CTkFont(size=20, weight="bold"),
+        )
+        self.InformationLabel.place(anchor="nw", relx=0.4, rely=0.05)
 
-        # SHOW CARD TYPE
-        self.CreditCardType()
+        self.CardNumber = ctk.CTkEntry(
+            self.credits_frame,
+            placeholder_text="Credit Card Number",
+            width=160,
+            font=ctk.CTkFont(size=14),
+        )  # 5471462613718519
+        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.25)
+        self.CardNumber.bind(
+            "<Leave>", self.CardNumberValidation
+        )  # Handle all functions will be applied for card number + validation
 
-        # Add a space after each 4 digits in card number like xxxx xxxx xxxx xxxx
-        self.FormateCreditCard
+        self.CVV = ctk.CTkEntry(
+            self.credits_frame,
+            show="*",
+            placeholder_text="CVV",
+            width=42,
+            font=ctk.CTkFont(size=14),
+        )
+        self.CVV.place(anchor="nw", relx=0.35, rely=0.25)
+        self.CVV.bind("<Leave>", self.HandleCVV)
 
-        # Confirm that Credit Card is valid
-        self.CardChecked = True
+        self.ExpireMonth = ctk.CTkComboBox(
+            self.credits_frame,
+            width=60,
+            values=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+        )
+        self.ExpireMonth.place(anchor="nw", relx=0.55, rely=0.25)
 
-    def CardNumberValidation(self):
+        self.slashLabel = ctk.CTkLabel(
+            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14)
+        )
+        self.slashLabel.place(anchor="nw", relx=0.615, rely=0.25)
+
+        self.ExpireYear = ctk.CTkComboBox(
+            self.credits_frame,
+            width=60,
+            values=["21", "22", "23", "24", "25", "26", "27"],
+        )
+        self.ExpireYear.place(anchor="nw", relx=0.64, rely=0.25)
+
+        self.CheckCard = ctk.CTkButton(
+            self.credits_frame,
+            text="Check Card Expiration",
+            anchor="w",
+            fg_color="gray50",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            command=self.CheckCard_button_event,
+        )
+        self.CheckCard.place(anchor="nw", relx=0.74, rely=0.25)
+
+    def CardNumberValidation(self, event):
         if (
             len(self.CardNumber.get()) != 16 or self.CardNumber.get().isalpha()
         ):  # 5471462613718519
             self.CardChecked = False
             return MessageBox(self, "warning", "Credit Card is not 16 digit")
+        else:
+            self.FormateCreditCard()
+            self.CreditCardType()
+            self.CardChecked = True
 
     def CreditCardType(self):
         # ---------------
@@ -1175,6 +1108,70 @@ class App(ctk.CTk):
         else:
             self.CardChecked = True
 
+    def WithdrawBlock(self):
+        self.WithdrawLabel = ctk.CTkLabel(
+            self.credits_frame,
+            text="Withdraw Credits",
+            width=60,
+            font=ctk.CTkFont(size=20, weight="bold"),
+        )
+        self.WithdrawLabel.place(anchor="nw", relx=0.4, rely=0.45)
+
+        self.QuickSelectionsFrame = ctk.CTkFrame(
+            self.credits_frame, corner_radius=0, fg_color="gray30", width=350
+        )
+        self.QuickSelectionsFrame.place(anchor="nw", relx=0.05, rely=0.65)
+
+        self.Label = ctk.CTkLabel(
+            self.QuickSelectionsFrame, text="Select Credits:", font=ctk.CTkFont(size=14)
+        )
+        self.Label.place(anchor="w", relx=0.41, rely=0.1)
+
+        self.image = ctk.CTkLabel(
+            self.QuickSelectionsFrame,
+            text="",
+            image=ctk.CTkImage(cashlvl3, size=(100, 100)),
+        )
+        self.image.place(anchor="w", relx=0.61, rely=0.5)
+
+        self.credit_val = tk.IntVar(value=0)
+
+        self.selec1 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.18, self.credit_val, "5", 5
+        )
+        self.selec2 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.36, self.credit_val, "50", 50
+        )
+        self.selec3 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.54, self.credit_val, "500", 500
+        )
+        self.selec4 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.72, self.credit_val, "5000", 5000
+        )
+        self.selec5 = self.AddOption(
+            self.QuickSelectionsFrame, 0.1, 0.9, self.credit_val, "Other", -1, False
+        )
+
+        self.Withdraw_Button = ctk.CTkButton(
+            self.credits_frame,
+            text="Withdraw",
+            anchor="w",
+            fg_color="gray50",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            command=self.Withdraw_button_event,
+        )
+        self.Withdraw_Button.place(anchor="nw", relx=0.66, rely=0.8)
+
+    def AddOption(self, master, x, y, vari, txt, val, fun=True):
+        option = ctk.CTkRadioButton(master, variable=vari, text=txt, value=val)
+        option.place(anchor="w", relx=x, rely=y)
+        if fun:
+            option.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
+        else:
+            option.bind("<Button-1>", self.HandleAmount)  # Show Entry Frame if found
+        return option
+
     def HandleAmount(self, event):
         if self.Created[3]:
             self.AmountFrame = ctk.CTkFrame(
@@ -1205,12 +1202,13 @@ class App(ctk.CTk):
 
     def CheckCard_button_event(self):
         Year = f"20{self.ExpireYear.get()}"
+        print(Year,self.ExpireMonth.get(),date.today().month,date.today().year)
         if int(Year) < date.today().year:
             self.CardChecked = False
-            MessageBox(self, "error", "Credit Card Expired")
-        elif int(self.ExpireMonth.get()) < date.today().month:
+            return MessageBox(self, "error", "Credit Card Expired")
+        if int(self.ExpireMonth.get()) < date.today().month and int(Year) == date.today().year:
             self.CardChecked = False
-            MessageBox(self, "error", "Credit Card Expired")
+            return MessageBox(self, "error", "Credit Card Expired")
         else:
             self.CardChecked = True
 
