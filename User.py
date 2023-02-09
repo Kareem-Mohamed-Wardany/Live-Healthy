@@ -138,6 +138,10 @@ class User:
             "INSERT INTO reports (Issuer_ID, Reporter_ID, Reason, ReportDate) VALUES (%s, %s, %s, %s)",
             [userID, self.userid, Reason, ReportDate],
         )
+        self.db.Insert(
+            "INSERT INTO suspended (User_ID, Suspention_Type, Suspention_Date, Reason) VALUES (%s, %s, %s, %s)",
+            [userID, "temp", ReportDate, Reason],
+        )
         self.db.Commit()
 
     def GetMyChatMembers(self):
