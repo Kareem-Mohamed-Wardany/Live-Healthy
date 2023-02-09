@@ -300,7 +300,7 @@ class App(ctk.CTk):
         )  # Enter Button will send the message
         self.chatbox.bind(
             "<Shift-Return>", self.NewLine
-        )  # Shift + Enter will make new line inspired by discord
+        )  # Shift + Enter will make new line inspired by discord and WhatsApp
 
         sendimage = ctk.CTkImage(sendICON, size=(25, 25))
 
