@@ -47,5 +47,6 @@ class Database:
 
     def write_file(self, data, filename):
         # Convert binary data to proper format and write it on Hard Disk
+        filename = f"Data/PatientScans/{filename}.png"
         with open(filename, "wb") as file:
             file.write(data)

@@ -3,7 +3,7 @@ import tkinter as tk
 from datetime import date
 import queue
 import time
-
+import os
 import customtkinter as ctk
 
 from Images import *
@@ -35,7 +35,7 @@ class App(ctk.CTk):
         super().__init__()
         self.WindowSettings()
         self.LeftSideBar()
-       
+
     # Main Constructor
     def WindowSettings(self):
         # load Apperance model of the user
@@ -48,13 +48,18 @@ class App(ctk.CTk):
         self.title(Title)
 
         # set Dimension of GUI
-        self.geometry(self.config.get("FramesSize"))  # Get Frame size from config File
+        center(
+            self,
+            self.config.get("FramesSizeWidth"),
+            self.config.get("FramesSizeHeight"),
+        )  # Get Frame size from config File and center the window
+        self.resizable(False, False)
 
         self.grid_rowconfigure(0, weight=1)  # let the left sidebar take all the space
         self.grid_columnconfigure(1, weight=1)
 
     def LeftSideBar(self):
-         # load images
+        # load images
         self.Male_image = ctk.CTkImage(
             MaleImage,
             size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
@@ -618,20 +623,21 @@ class App(ctk.CTk):
         blockFrame.place(anchor="nw", relx=x, rely=y)
 
         # save binary Data of image as an image named as PatientName.png
-        n = f"{name}.png"
-        self.db.write_file(scan, n)
+        self.db.write_file(scan, name)
+
+        scanImage = f"Data/PatientScans/{name}.png"
 
         X_ray = ctk.CTkLabel(
             blockFrame,
             height=10,
             text="",
-            image=ctk.CTkImage(Image.open(n), size=(220, 220)),
+            image=ctk.CTkImage(Image.open(scanImage), size=(220, 220)),
             font=ctk.CTkFont(size=12, weight="bold"),
             bg_color="gray40",
         )
         X_ray.place(anchor="nw", relx=0.05, rely=0.05)
         X_ray.bind(
-            "<Button-1>", lambda event: self.Zoom(event, n)
+            "<Button-1>", lambda event: self.Zoom(event, scanImage)
         )  # When doctor click on the scan it will be opend in new window with size 720x720
 
         predictionLabel = ctk.CTkLabel(
@@ -646,11 +652,13 @@ class App(ctk.CTk):
     def Zoom(self, event, name):
         # Create New Window
         ScanZoomWindow = ctk.CTkToplevel()
-        PatientName = name.split(".")[0]  # Get Patient Name from Image Name
+        PatientName = name.split("/")[-1].split(".")[
+            0
+        ]  # Get Patient Name from Image Name
         title = f"X-ray Scan of {PatientName}"
         ScanZoomWindow.title(title)
         # ScanZoomWindow.geometry("720x720")
-        center(ScanZoomWindow,720,720)  # Open the window in the center of the Screen
+        center(ScanZoomWindow, 720, 720)  # Open the window in the center of the Screen
         ScanZoomWindow.resizable(False, False)
         X_ray = ctk.CTkLabel(
             ScanZoomWindow,
@@ -717,7 +725,16 @@ class App(ctk.CTk):
         return "break"
 
     def EndButtonEvent(self, event, id):
-        if self.ReportGenerated(id):
+        if not self.ReportGenerated(id):
+            list(
+                map(
+                    os.unlink,
+                    (
+                        os.path.join("Data/PatientScans/", f)
+                        for f in os.listdir("Data/PatientScans/")
+                    ),
+                )
+            )
             self.EndChat(id, "Close")
             res = self.user.updateBalance(
                 self, 100
@@ -785,7 +802,7 @@ class App(ctk.CTk):
         # update button Balance
         if res != -1:
             self.UpdateBalanceButton("User Reported Refund added to your balance")
-    
+
     # End of Active Chat Section
 
     # Load LoadWaitingPatients Section
@@ -956,7 +973,7 @@ class App(ctk.CTk):
         )
         self.loadWaitingPatients()
         self.db.Commit()
-    
+
     # End of LoadWaitingPatients Section
 
     # Credits section
@@ -978,7 +995,7 @@ class App(ctk.CTk):
 
         # entering withdraw balance
         self.WithdrawBlock()
-    
+
     def delType(self):
         # Try to handle error if any type was not shown so it will throw an error
         with contextlib.suppress(NameError, AttributeError):
@@ -1207,11 +1224,14 @@ class App(ctk.CTk):
 
     def CheckCard_button_event(self):
         Year = f"20{self.ExpireYear.get()}"
-        print(Year,self.ExpireMonth.get(),date.today().month,date.today().year)
+        print(Year, self.ExpireMonth.get(), date.today().month, date.today().year)
         if int(Year) < date.today().year:
             self.CardChecked = False
             return MessageBox(self, "error", "Credit Card Expired")
-        if int(self.ExpireMonth.get()) < date.today().month and int(Year) == date.today().year:
+        if (
+            int(self.ExpireMonth.get()) < date.today().month
+            and int(Year) == date.today().year
+        ):
             self.CardChecked = False
             return MessageBox(self, "error", "Credit Card Expired")
         else:
@@ -1256,7 +1276,7 @@ class App(ctk.CTk):
         self.Credits_button.grid(row=6, column=0, sticky="ew")
         MessageBox(self, "info", arg0)
 
-    # Other functions 
+    # Other functions
     def FetchPatientData(self, data):
         for j in range(len(data)):
             yield data[j]
@@ -1318,6 +1338,4 @@ class App(ctk.CTk):
 
 if __name__ == "__main__":
     app = App()
-    app.resizable(False, False)
-    center(app, 1280, 720)
     app.mainloop()
