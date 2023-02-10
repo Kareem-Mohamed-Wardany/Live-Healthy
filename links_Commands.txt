@@ -1,0 +1,28 @@
+LINKS:
+-------
+https://www.apachefriends.org/download.html
+https://git-scm.com/download/win
+
+
+VS Code Git Setup:
+------------------
+git config --global user.name "NAME"
+git config --global user.email "MAIL"
+
+
+Extensions:
+-----------
+ms-python.black-formatter
+ms-python.vscode-pylance
+ms-python.python
+sourcery.sourcery
+TabNine.tabnine-vscode
+
+
+Python Libraries:
+-----------------
+pip install mysql-connector-python
+pip install Pillow
+pip3 install customtkinter or pip install customtkinter
+pip install opencv-python
+pip install tensorflow
