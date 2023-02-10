@@ -288,7 +288,7 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        # self.JoinChatServer()
+        self.JoinChatServer()
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
