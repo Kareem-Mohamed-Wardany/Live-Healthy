@@ -24,7 +24,6 @@ def center(win, w, h):
     hs = win.winfo_screenheight()
     x = (ws/2) - (w/2)
     y = (hs/2) - (h/2)
-
     win.geometry('%dx%d+%d+%d' % (w, h, x, y))
     # win.update_idletasks()
     # width = win.winfo_width()
