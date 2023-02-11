@@ -288,7 +288,7 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        self.JoinChatServer()
+        self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -527,7 +527,7 @@ class App(ctk.CTk):
         )
         GenerateReport.place(anchor="nw", relx=0.83, rely=0.92)
 
-    def JoinChatServer(self):
+    def JoinChatServer(self,id):
         # Check if the Chat server is online
         try:
             ADDR = ("127.0.0.1", 4073)  # Get the Address of Chat Server

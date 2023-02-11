@@ -30,7 +30,7 @@ import queue
 # symp = "Fever, "+ "Cough, "+"difficulty breathing, "+"Fatigue, "+"Headache, "+"loss of taste and smell, " + "Sore throat"
 # # print(symp)
 
-res2 = db.Update("UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
+res1 = db.Update("UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
 res2 = db.Update("UPDATE requests SET Request_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
 db.Commit()
 
