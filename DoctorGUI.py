@@ -44,6 +44,7 @@ class App(ctk.CTk):
         )  # Set Appearance mode of the user to what he has chosen
 
         # let title be 'Welcome Specialist|Consultant UserName'
+        self.iconbitmap("asset\TitleImage.ico")
         Title = f"Welcome {self.user.userType} {self.user.userName}"
         self.title(Title)
 
