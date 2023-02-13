@@ -8,7 +8,6 @@ from GUIHelperFunctions import *
 from datetime import date
 from fpdf import FPDF
 
-
 class User:
 
     # --------------------------------VARIABLES SECTION----------------------------------------------#
@@ -159,43 +158,48 @@ class User:
         )
         self.db.write_file(res[0][0], patient.userName)
         # print()
+        # pdf = FPDF()
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=16)
+        pdf.set_font("Times", size=15)
 
         # Add System LOGO
         pdf.image("asset\\report.png", x=0, y=0, w=219, h=300, type="PNG")
         # pdf.image("asset\Logo.png", x=70, y=None, w=25, h=25, type="PNG")
 
         # Add Doctor Name
+        pdf.set_xy(20,45)
         DoctorName = f"Doctor {self.userName}"
-        pdf.cell(180, 10,txt=DoctorName, ln=1, align="R")
-        Date = f"Date: {date.today().day}/{date.today().month}/{date.today().year}"
-        pdf.cell(180, 10, txt=Date, ln=2, align="R")
+        pdf.cell(180, 10,txt=DoctorName, ln=1, align="C")
+        Doctortitle = f"{self.userType} in Department of Respiratory Diseases at Live Healthy"
+        pdf.set_xy(20,55)
+        pdf.cell(180, 10,txt=Doctortitle, ln=0, align="C")
 
         # Add Patient information
         Name = f"Name: {patient.userName}"
         Age = f"Age: {str(patient.userAge)}"
         Gender = f"Gender: {patient.userGender}"
+        pdf.set_xy(10,70)
         pdf.cell(200, 10, txt=Name, ln=1, align="L")
+        pdf.set_xy(10,80)
         pdf.cell(200, 10, txt=Age, ln=2, align="L")
+        pdf.set_xy(40,80)
         pdf.cell(200, 10, txt=Gender, ln=2, align="L")
 
+        Date = f"Date: {date.today().day}/{date.today().month}/{date.today().year}"
+        pdf.set_xy(80,80)
+        pdf.cell(180, 10, txt=Date, ln=2, align="L")
 
-        # Add Scan information
-        Prediction = f"Scan Prediction: {res[0][1]}"
-        ScanLocation = f"Data/PatientScans/{patient.userName}.png"
-        pdf.image(ScanLocation, x=150, y=55, w=50, h=50)
+        # # Add Scan information
+        Prediction = f"Prediction: {res[0][1]}"
+        pdf.set_xy(130,80)
         pdf.cell(180, 10, txt=Prediction, ln=1, align="L")
-        pdf.cell(180, 10, txt=" ", ln=1, align="L")
 
-        # Medicine Section
-        pdf.cell(180, 10, txt="Medicines:", ln=2, align="L")
+        # # Medicine Section
         for pos,item in enumerate(Medicine):
             Med = f"R/ {item}"
             pdf.cell(180, 10, txt=Med, ln=2, align="L")
-            pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="C")
-        # save the pdf with name .pdf
+            pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="R")
         pdf.output("GFG.pdf")
 
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#

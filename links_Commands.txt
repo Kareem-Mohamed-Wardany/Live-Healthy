@@ -26,3 +26,4 @@ pip install Pillow
 pip3 install customtkinter or pip install customtkinter
 pip install opencv-python
 pip install tensorflow
+pip install tkcalendar
