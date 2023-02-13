@@ -157,17 +157,14 @@ class User:
             [id],
         )
         self.db.write_file(res[0][0], patient.userName)
-        # print()
-        # pdf = FPDF()
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Times", size=15)
 
-        # Add System LOGO
+        # Add MainPage Style
         pdf.image("asset\\report.png", x=0, y=0, w=219, h=300, type="PNG")
-        # pdf.image("asset\Logo.png", x=70, y=None, w=25, h=25, type="PNG")
 
-        # Add Doctor Name
+        # Add Doctor information
         pdf.set_xy(20,45)
         DoctorName = f"Doctor {self.userName}"
         pdf.cell(180, 10,txt=DoctorName, ln=1, align="C")
@@ -177,35 +174,38 @@ class User:
 
         # Add Patient information
         Name = f"Name: {patient.userName}"
-        Age = f"Age: {str(patient.userAge)}"
-        Gender = f"Gender: {patient.userGender}"
         pdf.set_xy(10,70)
         pdf.cell(200, 10, txt=Name, ln=1, align="L")
+
+        Age = f"Age: {str(patient.userAge)}"
         pdf.set_xy(10,80)
         pdf.cell(200, 10, txt=Age, ln=2, align="L")
+
+        Gender = f"Gender: {patient.userGender}"
         pdf.set_xy(40,80)
         pdf.cell(200, 10, txt=Gender, ln=2, align="L")
 
         Date = f"Date: {date.today().day}/{date.today().month}/{date.today().year}"
-        pdf.set_xy(80,80)
+        pdf.set_xy(85,80)
         pdf.cell(180, 10, txt=Date, ln=2, align="L")
 
-        # # Add Scan information
         Prediction = f"Prediction: {res[0][1]}"
         pdf.set_xy(130,80)
         pdf.cell(180, 10, txt=Prediction, ln=1, align="L")
 
-        # # Medicine Section
+        pdf.set_xy(15,85)
+        pdf.cell(180, 10, txt="_________________________________________________________________", ln=1, align="L")
+
+        pdf.set_xy(10,100)
+        # Medicine Section
         for pos,item in enumerate(Medicine):
+            pdf.set_font("Times", size=14)
             Med = f"R/ {item}"
             pdf.cell(180, 10, txt=Med, ln=2, align="L")
-            pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="R")
-        pdf.output("GFG.pdf")
-
+            pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="C")
+        file = f"Data\Prescriptions\{patient.userName}.pdf"
+        pdf.output(file)
+        binaryFile = self.db.convertToBinaryData(file)
+        self.db.Update("UPDATE chatdata SET Report= %s Where Patient_ID= %s",[binaryFile, patient.userid])
+        self.db.Commit()
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#
-
-
-s = User(4)
-med = ["Nirmatrelvir with Ritonavir (Paxlovid)","Remdesivir (Veklury)","Molnupiravir (Lagevrio)"]
-medcom = ["Taken at home by mouth (orally)","Intravenous (IV) infusions at a healthcare facility for 3 consecutive days","Taken at home by mouth (orally)"]
-s.MakePrescription(5,med,medcom)
