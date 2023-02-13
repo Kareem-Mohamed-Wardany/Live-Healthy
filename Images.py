@@ -38,3 +38,10 @@ CloseDoctorChat = Image.open("asset\CloseChat.png")
 
 # Send Icon for Chatbox
 sendICON = Image.open("asset\send.png")
+
+# Predict X-ray scan
+predict_image = Image.open("asset\predict.png")
+
+# Purchase VIP
+PurchaseVIP = Image.open("asset\\vip.png")
+
