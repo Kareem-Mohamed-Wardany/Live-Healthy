@@ -1,5 +1,8 @@
 from PIL import Image
 
+# Logo
+logo = Image.open("asset\Logo.png")
+
 
 # Male and Female Images
 MaleImage = Image.open("asset\Male.png")

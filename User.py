@@ -6,6 +6,7 @@ from PIL import Image
 from Database import *
 from GUIHelperFunctions import *
 from datetime import date
+from fpdf import FPDF
 
 
 class User:
@@ -150,4 +151,57 @@ class User:
             ["ongoing", self.userid],
         )
 
+    def MakePrescription(self, id, Medicine, MedicineComment):
+        patient = User(id)
+        res = self.db.Select(
+            "SELECT X_ray_scan, Prediction FROM requests WHERE Patient_ID= %s",
+            [id],
+        )
+        self.db.write_file(res[0][0], patient.userName)
+        # print()
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=16)
+
+        # Add System LOGO
+        pdf.image("asset\\report.png", x=0, y=0, w=219, h=300, type="PNG")
+        # pdf.image("asset\Logo.png", x=70, y=None, w=25, h=25, type="PNG")
+
+        # Add Doctor Name
+        DoctorName = f"Doctor {self.userName}"
+        pdf.cell(180, 10,txt=DoctorName, ln=1, align="R")
+        Date = f"Date: {date.today().day}/{date.today().month}/{date.today().year}"
+        pdf.cell(180, 10, txt=Date, ln=2, align="R")
+
+        # Add Patient information
+        Name = f"Name: {patient.userName}"
+        Age = f"Age: {str(patient.userAge)}"
+        Gender = f"Gender: {patient.userGender}"
+        pdf.cell(200, 10, txt=Name, ln=1, align="L")
+        pdf.cell(200, 10, txt=Age, ln=2, align="L")
+        pdf.cell(200, 10, txt=Gender, ln=2, align="L")
+
+
+        # Add Scan information
+        Prediction = f"Scan Prediction: {res[0][1]}"
+        ScanLocation = f"Data/PatientScans/{patient.userName}.png"
+        pdf.image(ScanLocation, x=150, y=55, w=50, h=50)
+        pdf.cell(180, 10, txt=Prediction, ln=1, align="L")
+        pdf.cell(180, 10, txt=" ", ln=1, align="L")
+
+        # Medicine Section
+        pdf.cell(180, 10, txt="Medicines:", ln=2, align="L")
+        for pos,item in enumerate(Medicine):
+            Med = f"R/ {item}"
+            pdf.cell(180, 10, txt=Med, ln=2, align="L")
+            pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="C")
+        # save the pdf with name .pdf
+        pdf.output("GFG.pdf")
+
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#
+
+
+s = User(4)
+med = ["Nirmatrelvir with Ritonavir (Paxlovid)","Remdesivir (Veklury)","Molnupiravir (Lagevrio)"]
+medcom = ["Taken at home by mouth (orally)","Intravenous (IV) infusions at a healthcare facility for 3 consecutive days","Taken at home by mouth (orally)"]
+s.MakePrescription(5,med,medcom)
