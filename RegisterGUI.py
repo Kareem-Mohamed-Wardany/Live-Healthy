@@ -24,6 +24,7 @@ class Register(ctk.CTk):
         self.geometry(self.config.get("FramesSize"))
         self.mainTitle()
         self.mainRegister()
+        self.patient()
 
         # Enter all your buttons,Entries here
     def mainTitle(self):
@@ -185,14 +186,61 @@ class Register(ctk.CTk):
             variable=var,
             value=1
         )
-        MaleRadio.place(anchor="nw",relx=0.55, rely=0.58)
+        MaleRadio.place(anchor="nw",relx=0.57, rely=0.58)
         FemaleRadio = ctk.CTkRadioButton(
             mainFrame,
             text="Female",
             variable=var,
             value=2
         )
-        FemaleRadio.place(anchor="nw",relx=0.55, rely=0.63)
+        FemaleRadio.place(anchor="nw",relx=0.57, rely=0.64)
+        TypeLabel = ctk.CTkLabel(
+            mainFrame,
+            text="User Type*",
+            width=65,
+            height=20,
+            font=ctk.CTkFont(size=20),
+        )
+        TypeLabel.place(anchor="nw",relx=0.55, rely=0.7)
+        TypeCombo = ctk.CTkOptionMenu(mainFrame,
+        width=300,
+        bg_color="#F0F0F0",
+        dropdown_text_color="#DCD427",
+        dropdown_hover_color="#969696",
+        values=["Patient", "Radiologist", "Consultant", "Specialist"],
+        command=self.UserType
+        )
+        TypeCombo.place(anchor="nw",relx=0.55, rely=0.76)
+
+    def UserType(self, Utype):
+        if(Utype=="Patient"):
+            self.patient()
+    def patient(self):
+        PatientFrame = ctk.CTkFrame(
+            self,
+            bg_color="#969696",
+            width=600,
+            height=515
+        )
+        PatientFrame.place(anchor="nw",relx=0.57, rely=0.17)
+        HealthLabel = ctk.CTkLabel(
+            PatientFrame,
+            text="Patient's Health Status",
+            width=65,
+            height=20,
+            font=ctk.CTkFont(size=30),
+        )
+        HealthLabel.place(anchor="nw",relx=0.2, rely=0.04)
+        heart = IntVar()
+        HeartCheck = ctk.CTkCheckBox(
+            PatientFrame,
+            text="Heart Diseases",
+            variable=heart,
+            onvalue=1,
+            offvalue=0
+        )
+        HeartCheck.place(anchor="nw",relx=0.01, rely=0.14)
+
 
         
         
