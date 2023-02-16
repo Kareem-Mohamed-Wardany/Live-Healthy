@@ -5,6 +5,7 @@ import queue
 import time
 import os
 import customtkinter as ctk
+import subprocess
 
 from Images import *
 from Config import *
@@ -44,7 +45,6 @@ class App(ctk.CTk):
         )  # Set Appearance mode of the user to what he has chosen
 
         # let title be 'Welcome Specialist|Consultant UserName'
-        self.iconbitmap("asset\TitleImage.ico")
         Title = f"Welcome {self.user.userType} {self.user.userName}"
         self.title(Title)
 
@@ -274,7 +274,7 @@ class App(ctk.CTk):
         self.ReportPatient(chatWindow, id)
 
         # Generate Prescription for a Patient
-        self.GeneratePrescription(chatWindow)
+        self.GeneratePrescription(chatWindow, id)
 
         # ChatBox
         self.ChatBoxBlock(chatWindow)
@@ -289,7 +289,7 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        self.JoinChatServer(id)
+        # self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -320,30 +320,35 @@ class App(ctk.CTk):
             Imagesrc = ctk.CTkImage(MaleImage, size=(100, 100))
         else:
             Imagesrc = ctk.CTkImage(FemaleImage, size=(100, 100))
-        PImage = ctk.CTkLabel(master, height=40, text="", image=Imagesrc)
-        PImage.place(anchor="nw", relx=0.81, rely=0.005)
+
+        Patientinfo = ctk.CTkFrame(master)
+        Patientinfo.place(anchor="nw", relx=0.76, rely=0.005)
+
+        PImage = ctk.CTkLabel(Patientinfo, height=40, text="", image=Imagesrc)
+        PImage.grid(row=0, column=0)
         PName = ctk.CTkLabel(
-            master,
+            Patientinfo,
             height=10,
             text=PatientData.userName,
             font=ctk.CTkFont(size=16, weight="bold"),
         )
-        PName.place(anchor="nw", relx=0.855, rely=0.15)
+        PName.grid(row=1, column=0)
+
         PAge = ctk.CTkLabel(
-            master,
+            Patientinfo,
             height=10,
             text=PatientData.userAge,
             font=ctk.CTkFont(size=14, weight="bold"),
         )
-        PAge.place(anchor="nw", relx=0.855, rely=0.18)
+        PAge.grid(row=2, column=0)
 
         PBloodType = ctk.CTkLabel(
-            master,
+            Patientinfo,
             height=10,
             text=PatientData.Blood_Type,
             font=ctk.CTkFont(size=14, weight="bold"),
         )
-        PBloodType.place(anchor="nw", relx=0.855, rely=0.21)
+        PBloodType.grid(row=3, column=0)
 
     def PatientHealthStatus(self, master, id):
         PatientData = User(id)  # Get the patient Data
@@ -518,7 +523,7 @@ class App(ctk.CTk):
             lambda event: self.ReportReasonBlock(event, PatientData.userName, id),
         )
 
-    def GeneratePrescription(self, master):
+    def GeneratePrescription(self, master, id):
         # Generate Prescription for a Patient
         GenerateReport = ctk.CTkLabel(
             master,
@@ -527,6 +532,90 @@ class App(ctk.CTk):
             image=ctk.CTkImage(GeneratePrescription, size=(40, 40)),
         )
         GenerateReport.place(anchor="nw", relx=0.83, rely=0.92)
+        GenerateReport.bind("<Button-1>", lambda event: self.HandlePrescription(event, id))
+        
+    def HandlePrescription(self, event, id):
+        patient = User(id)
+        path = f"Data\Prescriptions\{patient.userName}.pdf"
+        if self.ReportGenerated(id): 
+            subprocess.Popen([path],shell=True) # Show the Prescription for the Doctor
+        else:
+            self.FillMedication(id)
+
+    def FillMedication(self, id):
+        patient = User(id)
+        self.MedicineWindow = ctk.CTkToplevel()
+        title = f"Fill Medication for Prescription of {patient.userName}"
+        self.MedicineWindow.title(title)
+        center(self.MedicineWindow, 720, 400)  # Open the window in the center of the Screen
+        self.MedicineWindow.resizable(False, False)
+
+        Text = ctk.CTkLabel(self.MedicineWindow,text="Add Medications:",font=ctk.CTkFont(size=16,weight="bold"))
+        Text.place(anchor="nw", relx=0.01, rely=0)
+
+        self.loc = 0
+        Add = ctk.CTkLabel(self.MedicineWindow,text="",image=(ctk.CTkImage(AddIcon,size=(25,25))))
+        Add.place(anchor="nw", relx=0.9, rely=0.01)
+        Add.bind("<Button-1>", self.AddNewMedication)
+
+        delete = ctk.CTkLabel(self.MedicineWindow,text="",image=(ctk.CTkImage(DeleteIcon,size=(25,25))))
+        delete.place(anchor="nw", relx=0.95, rely=0.01)
+        delete.bind("<Button-1>", self.DelMedications)
+
+        self.MedicineFrame = ScrollableFrame(
+            self.MedicineWindow, "gray40", width=690, height=300, scrollafter=14
+        )
+        self.MedicineFrame.place(anchor="nw", relx=0.01, rely=0.1)
+        self.MedicineFrame.scrollable_frame
+
+        Show = ctk.CTkButton(self.MedicineWindow,text="Show",command=lambda: self.FinalizePrescription(id,"Show"),bg_color="#6495ED",fg_color="#6495ED",hover_color="#0047AB")
+        Show.place(anchor="nw", relx=0.75, rely=0.9)
+
+        Save = ctk.CTkButton(self.MedicineWindow,text="Save",command=lambda: self.FinalizePrescription(id,"Save"),bg_color="#097969",fg_color="#097969",hover_color="#088F8F")
+        Save.place(anchor="nw", relx=0.55, rely=0.9)
+
+    def AddNewMedication(self, event):
+        print(len(self.MedicineFrame.scrollable_frame.winfo_children()))
+        MedicinEntry = ctk.CTkEntry(self.MedicineFrame.scrollable_frame,placeholder_text="Enter Medicine Name", width=300,height=40)
+        MedicinEntry.grid(row=self.loc,column=0)
+
+        MedicinEntry = ctk.CTkEntry(self.MedicineFrame.scrollable_frame,placeholder_text="Enter Medicine Note", width=300,height=40)
+        MedicinEntry.grid(row=self.loc,column=1)
+        self.loc+=1
+
+    def DelMedications(self, event):
+        with contextlib.suppress(Exception):
+            self.loc = 0
+            for widget in self.MedicineFrame.scrollable_frame.winfo_children():
+                widget.destroy()
+            self.MedicineFrame.disable_scroll()
+            self.MedicineFrame.moveto(0)
+    
+    def FinalizePrescription(self, id, type):
+        patient = User(id)
+        path = f"Data\Prescriptions\{patient.userName}.pdf"
+        if len(self.MedicineFrame.scrollable_frame.winfo_children()) ==0:
+            return MessageBox(self.MedicineFrame, "error", "No Medicine to be added to Prescription")
+        if type =="Show":
+            Medicines = []
+            MedicinesNotes = []
+            for pos, widget in enumerate(self.MedicineFrame.scrollable_frame.winfo_children()):
+                if pos % 2 == 0:
+                    if len(widget.get()) == 0:
+                        return MessageBox(self,"error", "Medicine Name cannot be empty")
+                    else:
+                        Medicines.append(widget.get())
+                else:
+                    if len(widget.get()) == 0:
+                        MedicinesNotes.append("")
+                    else:
+                        MedicinesNotes.append(widget.get())
+            self.user.MakePrescription(id, Medicines, MedicinesNotes)
+            subprocess.Popen([path],shell=True) # Show the Prescription for the Doctor
+        else:
+            self.user.SavePrescription(path, id)
+            self.MedicineWindow.destroy()
+            return MessageBox(self,"info", "Prescription Created")
 
     def JoinChatServer(self,id):
         # Check if the Chat server is online

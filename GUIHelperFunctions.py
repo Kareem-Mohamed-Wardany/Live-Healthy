@@ -25,6 +25,7 @@ def center(win, w, h):
     x = (ws/2) - (w/2)
     y = (hs/2) - (h/2)
     win.geometry('%dx%d+%d+%d' % (w, h, x, y))
+    win.iconbitmap("asset\TitleImage.ico")
     # win.update_idletasks()
     # width = win.winfo_width()
     # frm_width = win.winfo_rootx() - win.winfo_x()
@@ -75,6 +76,14 @@ class ScrollableFrame(ctk.CTkFrame):
             len(self.scrollable_frame.winfo_children()) > self.ScrollAfter
         ):  # show scrollbar when needed
             self.scrollbar.pack(side="right", fill="y")
+        else:
+            self.disable_scroll()
+
+    def disable_scroll(self):
+        self.scrollbar.pack_forget()
+
+    def moveto(self, loc):
+        self.canvas.yview_moveto(loc)
 
     def _bound_to_mousewheel(self, event):
         self.ShowScrollbar()
@@ -88,3 +97,5 @@ class ScrollableFrame(ctk.CTkFrame):
             len(self.scrollable_frame.winfo_children()) > self.ScrollAfter
         ):  # disable Scroll Wheel when items is less than ScrollAfter
             self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        else:
+            self.disable_scroll()

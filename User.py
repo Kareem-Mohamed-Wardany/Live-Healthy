@@ -205,7 +205,12 @@ class User:
             pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="C")
         file = f"Data\Prescriptions\{patient.userName}.pdf"
         pdf.output(file)
-        binaryFile = self.db.convertToBinaryData(file)
-        self.db.Update("UPDATE chatdata SET Report= %s Where Patient_ID= %s",[binaryFile, patient.userid])
+        # binaryFile = self.db.convertToBinaryData(file)
+        # self.db.Update("UPDATE chatdata SET Report= %s Where Patient_ID= %s",[binaryFile, patient.userid])
+        # self.db.Commit()
+    def SavePrescription(self, path, id):
+        binaryFile = self.db.convertToBinaryData(path)
+        self.db.Update("UPDATE chatdata SET Report= %s Where Patient_ID= %s",[binaryFile, id])
         self.db.Commit()
+
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#
