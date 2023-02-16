@@ -217,7 +217,7 @@ class App(ctk.CTk):
     def MyChats(self, res):
         # Create Scrollable Frame to hold all chats for Doctor
         frame = ScrollableFrame(
-            self.Active_Chats_frame, "gray30", width=250, height=self.winfo_height()
+            self.Active_Chats_frame, "gray30", width=250, height=self.winfo_height()-10
         )
         frame.grid(row=0, column=0, sticky="nsew")
         start_time = time.time()
