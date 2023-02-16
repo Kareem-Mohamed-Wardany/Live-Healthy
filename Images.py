@@ -33,6 +33,10 @@ bronze = Image.open("asset\\bronze-medal.png")
 # Generate Prescription for Patient
 GeneratePrescription = Image.open("asset\GenerateReport.png")
 
+AddIcon = Image.open("asset\\add.png")
+
+DeleteIcon = Image.open("asset\\trash.png")
+
 # Report User
 ReportUser = Image.open("asset\ReportUser.png")
 
