@@ -7,6 +7,9 @@ import customtkinter as ctk
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
+from tkinter.filedialog import askopenfilename
+from PIL import Image
+
 
 
 class Register(ctk.CTk):
@@ -70,7 +73,7 @@ class Register(ctk.CTk):
         FirstLabel.place(anchor="nw", relx=0.015, rely=0.06)
         firstEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Input Your First Name",
+        placeholder_text="Input Your First Name...",
         width=300,
         height=35
         )
@@ -86,7 +89,7 @@ class Register(ctk.CTk):
         SecondLabel.place(anchor="nw", relx=0.55, rely=0.06)
         SecondEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Input Your Second Name",
+        placeholder_text="Input Your Second Name...",
         width=300,
         height=35
         )
@@ -102,7 +105,7 @@ class Register(ctk.CTk):
         MailLabel.place(anchor="nw", relx=0.015, rely=0.22)
         MailEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Input Your Email",
+        placeholder_text="Input Your Email...",
         width=300,
         height=35
         )
@@ -118,7 +121,7 @@ class Register(ctk.CTk):
         PhoneLabel.place(anchor="nw",relx=0.55, rely=0.22)
         PhoneEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Input Your Phone Number",
+        placeholder_text="Input Your Phone Number...",
         width=300,
         height=35
         )
@@ -134,7 +137,7 @@ class Register(ctk.CTk):
         PassLabel.place(anchor="nw",relx=0.015, rely=0.37)
         PassEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Input Your Password",
+        placeholder_text="Input Your Password...",
         width=300,
         height=35
         )
@@ -150,7 +153,7 @@ class Register(ctk.CTk):
         ConfirmPassLabel.place(anchor="nw",relx=0.55, rely=0.37)
         ConfirmPassEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Confirm Your Password",
+        placeholder_text="Confirm Your Password...",
         width=300,
         height=35
         )
@@ -215,12 +218,14 @@ class Register(ctk.CTk):
     def UserType(self, Utype):
         if(Utype=="Patient"):
             self.patient()
+        elif (Utype=="Consultant" or Utype=="Specialist"):
+            self.doctor()
     def patient(self):
         PatientFrame = ctk.CTkFrame(
             self,
             bg_color="#969696",
             width=600,
-            height=515
+            height=580
         )
         PatientFrame.place(anchor="nw",relx=0.57, rely=0.17)
         HealthLabel = ctk.CTkLabel(
@@ -231,15 +236,160 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=30),
         )
         HealthLabel.place(anchor="nw",relx=0.2, rely=0.04)
+        self.patientsHealthCheck()
+    def patientsHealthCheck (self):
+        PatientHealthFrame = ctk.CTkFrame(
+            self,
+            bg_color="#969696",
+            width=515,
+            height=380
+        )
+        PatientHealthFrame.place(anchor="nw",relx=0.59, rely=0.3)
         heart = IntVar()
         HeartCheck = ctk.CTkCheckBox(
-            PatientFrame,
+            PatientHealthFrame,
             text="Heart Diseases",
             variable=heart,
             onvalue=1,
             offvalue=0
         )
-        HeartCheck.place(anchor="nw",relx=0.01, rely=0.14)
+        HeartCheck.place(anchor="nw",relx=0.15, rely=0.03)
+
+        diabetes = IntVar()
+        DiabetesCheck = ctk.CTkCheckBox(
+            PatientHealthFrame,
+            text="Diabetes",
+            variable=diabetes,
+            onvalue=1,
+            offvalue=0
+        )
+        DiabetesCheck.place(anchor="nw",relx=0.6, rely=0.03)
+
+        
+        cancer = IntVar()
+        CancerCheck = ctk.CTkCheckBox(
+            PatientHealthFrame,
+            text="Cancer",
+            variable=cancer,
+            onvalue=1,
+            offvalue=0
+        )
+        CancerCheck.place(anchor="nw",relx=0.15, rely=0.17)
+
+        Obesity = IntVar()
+        ObesityCheck = ctk.CTkCheckBox(
+            PatientHealthFrame,
+            text="Obesity",
+            variable=Obesity,
+            onvalue=1,
+            offvalue=0
+        )
+        ObesityCheck.place(anchor="nw",relx=0.6, rely=0.17)
+
+
+        Smoker = IntVar()
+        SmokerCheck = ctk.CTkCheckBox(
+            PatientHealthFrame,
+            text="Smoker",
+            variable=Smoker,
+            onvalue=1,
+            offvalue=0
+        )
+        SmokerCheck.place(anchor="nw",relx=0.15, rely=0.31)
+
+        Hypertension = IntVar()
+        HypertensionCheck = ctk.CTkCheckBox(
+            PatientHealthFrame,
+            text="Hypertension",
+            variable=Hypertension,
+            onvalue=1,
+            offvalue=0
+        )
+        HypertensionCheck.place(anchor="nw",relx=0.6, rely=0.31)
+
+        Allergies = IntVar()
+        AllergiesCheck = ctk.CTkCheckBox(
+            PatientHealthFrame,
+            text="Allergies",
+            variable=Allergies,
+            onvalue=1,
+            offvalue=0
+        )
+        AllergiesCheck.place(anchor="nw",relx=0.15, rely=0.45)
+        BloodTypeLabel = ctk.CTkLabel(
+            PatientHealthFrame,
+            text="Blood Type:",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=14),
+        )
+        BloodTypeLabel.place(anchor="nw", relx=0.469, rely=0.45)
+
+        BloodTypeCombo = ctk.CTkOptionMenu(
+        PatientHealthFrame,
+        width=100,
+        bg_color="#F0F0F0",
+        dropdown_text_color="#DCD427",
+        dropdown_hover_color="#969696",
+        values=["O-","O+","B-","B+","A-","A+","AB-","AB+","Unknown"],
+        command=self.UserType,
+        font = ctk.CTkFont(size =17)
+        )
+        BloodTypeCombo.place(anchor="nw",relx=0.66, rely=0.45)
+    def doctor(self):
+        self.DoctorFrame = ctk.CTkFrame(
+            self,
+            bg_color="#969696",
+            width=600,
+            height=580
+        )
+        self.DoctorFrame.place(anchor="nw",relx=0.57, rely=0.17)
+        self.ImageFrame = ctk.CTkFrame(
+            self.DoctorFrame,
+            bg_color="#969696",
+            width=350,
+            height=197
+        )
+        self.ImageFrame.place(anchor="nw",relx=0.05, rely=0.01)
+        self.ImageFrame2 = ctk.CTkFrame(
+            self.DoctorFrame,
+            bg_color="#969696",
+            width=350,
+            height=197
+        )
+        self.ImageFrame2.place(anchor="nw",relx=0.05, rely=0.38)
+        ImportIDButton = ctk.CTkButton(self.DoctorFrame,text="Import ID", command=self.ImportID)
+        ImportIDButton.place(anchor="nw", relx=0.66, rely=0.08)
+        ImportLicenseButton = ctk.CTkButton(self.DoctorFrame,text="Import Profession License", command=self.ImportLicense)
+        ImportLicenseButton.place(anchor="nw", relx=0.641, rely=0.49)
+
+        UniLabel = ctk.CTkLabel(
+            self.DoctorFrame,
+            text="University:",
+            width=65,
+            height=20,
+            font=ctk.CTkFont(size=20),
+        )
+        UniLabel.place(anchor="nw",relx=0.041, rely=0.75)
+        UniEntry = ctk.CTkEntry(
+        self.DoctorFrame,
+        placeholder_text="Input The University You Graduated From...",
+        width=300,
+        height=30
+        )
+        UniEntry.place(anchor="nw",relx=0.21,rely=0.75)
+    def ImportID(self):
+        self.IDPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
+        ScanImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(350,197)))
+        ScanImage.place(anchor="nw", relx=0, rely=0)
+    def ImportLicense(self):
+        self.LicensePath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
+        ScanImage = ctk.CTkLabel(self.ImageFrame2,text="",image=ctk.CTkImage(Image.open(self.LicensePath),size=(350,197)))
+        ScanImage.place(anchor="nw", relx=0, rely=0)
+
+
+
+
 
 
         
