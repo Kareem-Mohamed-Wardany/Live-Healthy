@@ -29,7 +29,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = User("5")  
+    user = User("3")  
 
     Created = [
         True,
@@ -229,68 +229,22 @@ class App(ctk.CTk):
                 widget.destroy()
         self.ScanPathEntry = ctk.CTkEntry(self.Predict_Scan_frame, width=700, state="disabled")
         self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
-        ImportScanButton = ctk.CTkButton(self.Predict_Scan_frame,text="Select Scans ZIP folder", command=self.ImportScan)
+        ImportScanButton = ctk.CTkButton(self.Predict_Scan_frame,text="Import Folder", command=self.ImportScanFolder)
         ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
 
-    def ImportScan(self):
+    def ImportScanFolder(self):
         if self.ScanPathEntry.get() != "":
             self.ScanPathEntry.configure(state="normal")
             self.ScanPathEntry.delete(0, tk.END)
-       # self.ScanPath = askopenfilename(filetypes=(("ZIP File", ["*.zip"]),))
-        self.ScanPath= filedialog.askdirectory()
-        image=[]
-        with ZipFile(self.ScanPath , 'r') as zip:
-            zip.extractall()
-        
-        print(image,sep='\n')
+        self.ScansFolderPath= filedialog.askdirectory()
+        print(self.ScansFolderPath)
+        print(self.ScansFolderPath)
+        print(self.ScansFolderPath)
+        print(self.ScansFolderPath)
+        print(self.ScansFolderPath)
         self.ScanPathEntry.configure(state="normal")
-        self.ScanPathEntry.insert("end", self.ScanPath) 
+        self.ScanPathEntry.insert("end", self.ScansFolderPath) 
         self.ScanPathEntry.configure(state="disabled")
-        ScanImage = ctk.CTkLabel(self.Predict_Scan_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
-        ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
-        self.Predict()
-
-
-    
-    def Predict(self):
-        m = ResNetModel()
-        prediction = m.PredictScan(self.ScanPath)
-        self.max1 = 0
-        self.max2 = 0
-        self.p1=""
-        self.p2=""
-        for i in prediction:
-            value = float(i[1].split("%")[0])
-            if value > self.max1 or value > self.max2:
-                if self.max1 < self.max2:
-                    self.max1 = value
-                    self.p1 = i[0]
-                else:
-                    self.max2 = value
-                    self.p2 = i[0]
-        Label1 = f"{self.p1} ➜ {self.max1}%"
-        Label2 = f"{self.p2} ➜ {self.max2}%"
-        # print(Label1)
-        # print(Label2)
-        if self.ScanPathEntry2.get() != "" or self.ScanPathEntry3.get() !="":
-            self.ScanPathEntry2.configure(state="normal")
-            self.ScanPathEntry2.delete(0, tk.END)
-            self.ScanPathEntry3.configure(state="normal")
-            self.ScanPathEntry3.delete(0, tk.END)
-        self.pr1 = f"Highest Class Percentage: {Label1}"
-        self.pr2 = f"Second Class Percentage: {Label2}"
-        self.ScanPathEntry2.configure(state="normal")
-        self.ScanPathEntry2.insert("end", self.pr1) 
-        self.ScanPathEntry3.configure(state="normal")
-        self.ScanPathEntry3.insert("end", self.pr2)
-        print(self.ScanPath)
-        
-    def SavePrediction(self):
-        newpath = self.ScanPath.split(".")[0]
-        newpath = f"{newpath}.txt"
-        with open(newpath, "w") as f:
-            f.write(f"Highest Class Percentage: {self.p1} --> {self.max1}% \n")
-            f.write(f"Second Class Percentage: {self.p2} --> {self.max2}%")
 
 
     def select_frame_by_name(self, name):
