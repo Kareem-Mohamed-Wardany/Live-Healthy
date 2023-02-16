@@ -217,7 +217,7 @@ class App(ctk.CTk):
     def MyChats(self, res):
         # Create Scrollable Frame to hold all chats for Doctor
         frame = ScrollableFrame(
-            self.Active_Chats_frame, "gray30", width=250, height=714
+            self.Active_Chats_frame, "gray30", width=250, height=self.winfo_height()
         )
         frame.grid(row=0, column=0, sticky="nsew")
         start_time = time.time()
@@ -742,7 +742,7 @@ class App(ctk.CTk):
             )  # add Credits to the doctor When he ends the chat
             # update button Balance
             if res != -1:
-                self._extracted_from_Withdraw_button_event_9(
+                self.UpdateBalanceButton(
                     "Credits added to your balance!"
                 )
         else:
