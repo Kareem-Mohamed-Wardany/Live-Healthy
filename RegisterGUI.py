@@ -9,6 +9,7 @@ from Database import *
 from GUIHelperFunctions import *
 from tkinter.filedialog import askopenfilename
 from PIL import Image
+import re
 
 
 
@@ -90,7 +91,7 @@ class Register(ctk.CTk):
         SecondLabel.place(anchor="nw", relx=0.55, rely=0.06)
         self.SecondEntry = ctk.CTkEntry(
         mainFrame,
-        placeholder_text="Input Your Second Name...",
+        placeholder_text="Input Your Last Name...",
         width=300,
         height=35
         )
@@ -461,20 +462,43 @@ class Register(ctk.CTk):
     def gender(self):
         return "Male" if self.GenderVar.get() == 1 else "Female"
     def dataValidator(self):
-        if self.emptyFields() or self.passwordMismatch():
-            MessageBox(self, "error", "1-Please fill all the fields! \n2-Password mismatch!")
+        if self.emptyFields():
+            MessageBox(self, "error", "1- Please fill all the fields!")
+        if self.userNameChecker():
+            MessageBox(self, "error", "1- Names can't include numbers!")
+        self.passwordChecker()
+        if self.emailChecker():
+            MessageBox(self, "error", "1- Invalid email address!")
+        if not self.phoneChecker():
+            MessageBox(self, "error", "1- Invalid phone number!")
+
+
+
+
+
     def emptyFields(self):
         return (
             self.firstEntry.get() == ""
             or self.SecondEntry.get() == ""
             or self.Phone == ""
+            or self.Email == ""
             or self.Password == ""
             or self.ConfirmPassword == ""
             or self.Gender == 0
         )
-    def passwordMismatch(self):
-        return self.Password != self.ConfirmPassword
-        
+    def passwordChecker(self):
+        if self.Password != self.ConfirmPassword:
+            MessageBox(self, "error", "1- Password Mismatch!")
+        if len(self.Password) < 8:
+            MessageBox(self, "error", "1- Password should be longer than 8 characters!")
+    def userNameChecker(self):
+        return any(char.isdigit() for char in self.userName)
+    def emailChecker(self):
+        pat = "^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
+        return not re.match(pat,self.Email)
+    def phoneChecker(self):
+        return bool(self.Phone.isnumeric())
+
 
 
 
