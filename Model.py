@@ -229,7 +229,7 @@ class ResNetModel:
         percentage_list = []
         classes = [
             "Normal",
-            "COVID",
+            "Covid-19",
             "Bacterial PNEUMONIA",
             "Viral PNEUMONIA",
             "Fibrosis",

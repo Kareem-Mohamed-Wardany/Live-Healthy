@@ -14,8 +14,6 @@ from GUIHelperFunctions import *
 from User import *
 from client import *
 from tkinter.ttk import *
-# importing askopenfile function
-# from class filedialog
 from tkinter.filedialog import askopenfilename
 
 
@@ -27,7 +25,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = User("5")  
+    user = User("9")  
 
     Created = [
         True,
@@ -244,7 +242,6 @@ class App(ctk.CTk):
         )
         self.appearance_mode_menu.grid(row=10, column=0, padx=20, pady=20, sticky="s")
 
-
     def LoadPredictScanFrame(self):
         if self.Created[0]:
             self.Predict_Scan_frame = ctk.CTkFrame(
@@ -265,8 +262,6 @@ class App(ctk.CTk):
         ImportScanButton2 = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", command=self.SavePrediction)
         ImportScanButton2.place(anchor="nw", relx=0.05, rely=0.35)
         
-
-
     def ImportScan(self):
         if self.ScanPathEntry.get() != "":
             self.ScanPathEntry.configure(state="normal")
@@ -312,7 +307,6 @@ class App(ctk.CTk):
         self.ScanPathEntry2.insert("end", self.pr1) 
         self.ScanPathEntry3.configure(state="normal")
         self.ScanPathEntry3.insert("end", self.pr2)
-        print(self.ScanPath)
         
     def SavePrediction(self):
         newpath = self.ScanPath.split(".")[0]
@@ -378,7 +372,6 @@ class App(ctk.CTk):
         self.db.Commit()
 
     def ChatWithDoctor(self):  # Fix the box colors, turn them all Textbox instead of Entry
-        # sourcery skip: extract-duplicate-method
         if self.Created[1]:
             self.ChatWithDoctor_frame = ctk.CTkFrame(
                 self, corner_radius=0, fg_color="transparent"
@@ -387,44 +380,88 @@ class App(ctk.CTk):
         with contextlib.suppress(Exception):
             for widget in self.ChatWithDoctor_frame.winfo_children():
                 widget.destroy()
-        self.ScanPathEntry = ctk.CTkEntry(self.ChatWithDoctor_frame, width=700, state = "disabled")
-        self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
-        Sym = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Symptoms",font= ctk.CTkFont(size=14))
-        Sym.place(anchor="nw", relx=0.05, rely=0.10)
-        self.symptoms = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=140)
-        self.symptoms.place(anchor="nw", relx=0.05, rely=0.15)
-        sw = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Since when have you been suffering these symptoms?",font= ctk.CTkFont(size=14))
-        sw.place(anchor="nw", relx=0.05, rely=0.35)
-        self.sw2 = ctk.CTkEntry(self.ChatWithDoctor_frame, width=100)
-        self.sw2.place(anchor="nw", relx=0.05, rely=0.40)
-        med = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Current medications",font= ctk.CTkFont(size=14))
-        med.place(anchor="nw", relx=0.05, rely=0.45)
-        self.med2 = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120)
-        self.med2.place(anchor="nw", relx=0.05, rely=0.50)
-        ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.ImportScan)
-        ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
-        extra = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Extra information",font= ctk.CTkFont(size=14))
-        extra.place(anchor="nw", relx=0.05, rely=0.67)
-        self.extra2 = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120)
-        self.extra2.place(anchor="nw", relx=0.05, rely=0.72)
-        ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.ImportScan)
-        ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
-        FillRequestButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Fill Request",width=15)
-        FillRequestButton.place(anchor="nw", relx=0.72, rely=0.85)
 
-    def ImportScan2(self):
-        if self.ScanPathEntry.get() != "":
-            self.ScanPathEntry.configure(state="normal")
-            self.ScanPathEntry.delete(0, tk.END)
+        if self.user.checkRequest(): # Check if the Patient already has a request
+            print("a7a")
+        else:
+            self.ScanPathTextbox = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=700, state = "disabled", height=10)
+            self.ScanPathTextbox.place(anchor="nw", relx=0.05, rely=0.05)
+
+            ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.ImportScan2)
+            ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
+
+            Sym = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Symptoms*",font= ctk.CTkFont(size=16))
+            Sym.place(anchor="nw", relx=0.05, rely=0.10)
+
+            self.symptoms = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=140)
+            self.symptoms.place(anchor="nw", relx=0.05, rely=0.15)
+
+            sw = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Since when have you been suffering these symptoms?*",font= ctk.CTkFont(size=16))
+            sw.place(anchor="nw", relx=0.05, rely=0.35)
+
+            self.illnessTime = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=100,  height=10)
+            self.illnessTime.place(anchor="nw", relx=0.05, rely=0.40)
+
+            med = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Current medications*",font= ctk.CTkFont(size=16))
+            med.place(anchor="nw", relx=0.05, rely=0.45)
+
+            self.medications = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120)
+            self.medications.place(anchor="nw", relx=0.05, rely=0.50)
+            
+            extra = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Extra information",font= ctk.CTkFont(size=16))
+            extra.place(anchor="nw", relx=0.05, rely=0.67)
+
+            self.extraInfo = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120)
+            self.extraInfo.place(anchor="nw", relx=0.05, rely=0.72)
+
+            FillRequestButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Fill Request",width=15, command=self.FillRequest)
+            FillRequestButton.place(anchor="nw", relx=0.72, rely=0.85)
+
+    def ImportScan2(self):  # sourcery skip: avoid-builtin-shadow
+        if self.ScanPathTextbox.get("end") != "":
+            self.ScanPathTextbox.configure(state="normal")
+            self.ScanPathTextbox.delete(0, tk.END)
         self.ScanPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        self.ScanPathEntry.configure(state="normal")
-        self.ScanPathEntry.insert("end", self.ScanPath) 
-        self.ScanPathEntry.configure(state="disabled")
-        ScanImage = ctk.CTkLabel(self.ChatWithDoctor_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
-        ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
-        self.Predict()
-        # m = ResNetModel()
-        # print(m.PredictScan(self.ScanPath))
+        self.ScanPathTextbox.configure(state="normal")
+        self.ScanPathTextbox.insert("end", self.ScanPath) 
+        self.ScanPathTextbox.configure(state="disabled")
+        m = ResNetModel()
+        prediction = m.PredictScan(self.ScanPath)
+        max = 0
+        for i in prediction:
+            value = float(i[1].split("%")[0])
+            if value > max:
+                max = value
+                self.prediction= i[0]
+        print(self.prediction)
+
+    def FillRequest(self):
+        if self.symptoms.get("1.0", "end-1c") == "":
+            return MessageBox(self.ChatWithDoctor_frame, "error","Symptoms can not be empty")
+
+        if self.illnessTime.get("1.0", "end-1c") == "":
+            return MessageBox(self.ChatWithDoctor_frame, "error","Illness Time can not be empty")
+
+        if self.medications.get("1.0", "end-1c") == "":
+            return MessageBox(self.ChatWithDoctor_frame, "error","Medications can not be empty")
+
+        symptoms = self.symptoms.get("1.0", "end-1c")
+
+        illnessTime = self.illnessTime.get("1.0", "end-1c")
+
+        medications = self.medications.get("1.0", "end-1c")
+
+        if self.extraInfo.get("1.0", "end-1c") == "":
+            extraInfo = "-"
+        else:
+            extraInfo = self.extraInfo.get("1.0", "end-1c")
+
+        self.user.addRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
+        self.ChatWithDoctor()
+        return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
+
+
+
 
 if __name__ == "__main__":
     app = App()

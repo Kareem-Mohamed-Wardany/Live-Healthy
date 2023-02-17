@@ -131,6 +131,31 @@ class User:
         )
         self.db.Commit()
 
+    def checkRequest(self):
+        res = self.db.Select(
+            "SELECT * FROM requests WHERE Patient_ID= %s", [self.userid]
+        )
+        return len(res) > 0
+
+    def addRequest(self, ScanPath, prediction, symptoms, illnessTime, medications, extraInfo):
+        binaryimage = self.db.convertToBinaryData(ScanPath)
+        RequestDate = date.today()
+        self.db.Insert(
+            "INSERT INTO requests (Patient_ID, Request_Date, Request_Status, Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            [
+                self.userid,
+                RequestDate,
+                "waiting",
+                symptoms,
+                binaryimage,
+                prediction,
+                medications,
+                extraInfo,
+                illnessTime
+            ],
+        )
+        self.db.Commit()
+
     # Specialist|Consultant Functions
     def ReportUser(self, userID, Reason):
         ReportDate = date.today()
