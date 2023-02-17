@@ -188,20 +188,20 @@ class App(ctk.CTk):
         )  
         self.Predict_Scan_button.grid(row=5, column=0, sticky="ew")
 
-        # self.ChatWithDoctor_button = ctk.CTkButton(
-        #     self.LeftSideBar_frame,
-        #     corner_radius=0,
-        #     height=40,
-        #     border_spacing=10,
-        #     text="Chat with our Doctor",
-        #     fg_color="transparent",
-        #     text_color=("gray10", "gray90"),
-        #     hover_color=("gray70", "gray30"),
-        #     image=self.chat_image,
-        #     anchor="w",
-        #     command=self.PatientRequests_button_event,
-        # )
-        # self.ChatWithDoctor_button.grid(row=6, column=0, sticky="ew")
+        self.ChatWithDoctor_button = ctk.CTkButton(
+            self.LeftSideBar_frame,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Chat with our Doctor",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=self.chat_image,
+            anchor="w",
+            command=self.ChatWithDoctor_button_event,
+        )
+        self.ChatWithDoctor_button.grid(row=6, column=0, sticky="ew")
         
         # self.PurchaseVIP_button = ctk.CTkButton(
         #     self.LeftSideBar_frame,
@@ -344,11 +344,11 @@ class App(ctk.CTk):
             with contextlib.suppress(Exception):
                 self.Predict_Scan_frame.grid_forget()
 
-        # if name == "PatientRequests":
-        #     self.PatientRequests_frame.grid(row=0, column=1, sticky="nsew")
-        # else:
-        #     with contextlib.suppress(Exception):
-        #         self.PatientRequests_frame.grid_forget()
+        if name == "ChatWithDoctor":
+            self.ChatWithDoctor_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            with contextlib.suppress(Exception):
+                self.ChatWithDoctor_frame.grid_forget()
 
         # if name == "Credits":
         #     self.credits_frame.grid(row=0, column=1, sticky="nsew")
@@ -360,9 +360,9 @@ class App(ctk.CTk):
         self.LoadPredictScanFrame()
         self.select_frame_by_name("Predict_Scan")
 
-    def PatientRequests_button_event(self):
-        # self.loadWaitingPatients()
-        self.select_frame_by_name("PatientRequests")
+    def ChatWithDoctor_button_event(self):
+        self.ChatWithDoctor()
+        self.select_frame_by_name("ChatWithDoctor")
 
     def Credits_button_event(self):
         # self.loadCreditWithdraw()
@@ -377,6 +377,54 @@ class App(ctk.CTk):
         )
         self.db.Commit()
 
+    def ChatWithDoctor(self):  # Fix the box colors, turn them all Textbox instead of Entry
+        # sourcery skip: extract-duplicate-method
+        if self.Created[1]:
+            self.ChatWithDoctor_frame = ctk.CTkFrame(
+                self, corner_radius=0, fg_color="transparent"
+            )
+            self.Created[1] = False
+        with contextlib.suppress(Exception):
+            for widget in self.ChatWithDoctor_frame.winfo_children():
+                widget.destroy()
+        self.ScanPathEntry = ctk.CTkEntry(self.ChatWithDoctor_frame, width=700, state = "disabled")
+        self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
+        Sym = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Symptoms",font= ctk.CTkFont(size=14))
+        Sym.place(anchor="nw", relx=0.05, rely=0.10)
+        self.symptoms = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=140)
+        self.symptoms.place(anchor="nw", relx=0.05, rely=0.15)
+        sw = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Since when have you been suffering these symptoms?",font= ctk.CTkFont(size=14))
+        sw.place(anchor="nw", relx=0.05, rely=0.35)
+        self.sw2 = ctk.CTkEntry(self.ChatWithDoctor_frame, width=100)
+        self.sw2.place(anchor="nw", relx=0.05, rely=0.40)
+        med = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Current medications",font= ctk.CTkFont(size=14))
+        med.place(anchor="nw", relx=0.05, rely=0.45)
+        self.med2 = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120)
+        self.med2.place(anchor="nw", relx=0.05, rely=0.50)
+        ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.ImportScan)
+        ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
+        extra = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Extra information",font= ctk.CTkFont(size=14))
+        extra.place(anchor="nw", relx=0.05, rely=0.67)
+        self.extra2 = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120)
+        self.extra2.place(anchor="nw", relx=0.05, rely=0.72)
+        ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.ImportScan)
+        ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
+        FillRequestButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Fill Request",width=15)
+        FillRequestButton.place(anchor="nw", relx=0.72, rely=0.85)
+
+    def ImportScan2(self):
+        if self.ScanPathEntry.get() != "":
+            self.ScanPathEntry.configure(state="normal")
+            self.ScanPathEntry.delete(0, tk.END)
+        self.ScanPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
+        self.ScanPathEntry.configure(state="normal")
+        self.ScanPathEntry.insert("end", self.ScanPath) 
+        self.ScanPathEntry.configure(state="disabled")
+        ScanImage = ctk.CTkLabel(self.ChatWithDoctor_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
+        ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
+        self.Predict()
+        # m = ResNetModel()
+        # print(m.PredictScan(self.ScanPath))
 
 if __name__ == "__main__":
     app = App()
