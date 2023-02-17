@@ -454,23 +454,22 @@ class Register(ctk.CTk):
         self.Phone = self.PhoneEntry.get()
         self.Password = self.PassEntry.get()
         self.ConfirmPassword = self.ConfirmPassEntry.get()
-        self.DoF = self.cal.get_date()
+        self.DoB = self.cal.get_date()
         self.Gender = self.gender()
         self.UserType = self.TypeCombo.get()
         self.dataValidator()
     def gender(self):
         return "Male" if self.GenderVar.get() == 1 else "Female"
     def dataValidator(self):
-        if self.emptyFields or self.passwordMismatch:
+        if self.emptyFields() or self.passwordMismatch():
             MessageBox(self, "error", "1-Please fill all the fields! \n2-Password mismatch!")
     def emptyFields(self):
         return (
-            self.userName == ""
-            or self.Email == ""
+            self.firstEntry.get() == ""
+            or self.SecondEntry.get() == ""
             or self.Phone == ""
             or self.Password == ""
             or self.ConfirmPassword == ""
-            or self.DoF == ""
             or self.Gender == 0
         )
     def passwordMismatch(self):
