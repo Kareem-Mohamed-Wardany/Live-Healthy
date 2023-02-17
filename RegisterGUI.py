@@ -28,6 +28,7 @@ class Register(ctk.CTk):
         self.mainTitle()
         self.mainRegister()
         self.patient()
+        self.Registerbutton()
 
         # Enter all your buttons,Entries here
     def mainTitle(self):
@@ -71,14 +72,14 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         FirstLabel.place(anchor="nw", relx=0.015, rely=0.06)
-        firstEntry = ctk.CTkEntry(
+        self.firstEntry = ctk.CTkEntry(
         mainFrame,
         placeholder_text="Input Your First Name...",
         width=300,
-        height=35
+        height=35,
         )
         # n, ne, e, se, s, sw, w, nw, or center
-        firstEntry.place(anchor="nw",relx=0.015,rely=0.12)
+        self.firstEntry.place(anchor="nw",relx=0.015,rely=0.12)
         SecondLabel = ctk.CTkLabel(
             mainFrame,
             text="Second Name*",
@@ -87,14 +88,14 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         SecondLabel.place(anchor="nw", relx=0.55, rely=0.06)
-        SecondEntry = ctk.CTkEntry(
+        self.SecondEntry = ctk.CTkEntry(
         mainFrame,
         placeholder_text="Input Your Second Name...",
         width=300,
         height=35
         )
         # n, ne, e, se, s, sw, w, nw, or center
-        SecondEntry.place(anchor="nw",relx=0.55,rely=0.12)
+        self.SecondEntry.place(anchor="nw",relx=0.55,rely=0.12)
         MailLabel = ctk.CTkLabel(
             mainFrame,
             text="Email*",
@@ -103,14 +104,14 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         MailLabel.place(anchor="nw", relx=0.015, rely=0.22)
-        MailEntry = ctk.CTkEntry(
+        self.MailEntry = ctk.CTkEntry(
         mainFrame,
         placeholder_text="Input Your Email...",
         width=300,
         height=35
         )
         # n, ne, e, se, s, sw, w, nw, or center
-        MailEntry.place(anchor="nw",relx=0.015,rely=0.27)
+        self.MailEntry.place(anchor="nw",relx=0.015,rely=0.27)
         PhoneLabel = ctk.CTkLabel(
             mainFrame,
             text="Phone Number*",
@@ -119,14 +120,14 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         PhoneLabel.place(anchor="nw",relx=0.55, rely=0.22)
-        PhoneEntry = ctk.CTkEntry(
+        self.PhoneEntry = ctk.CTkEntry(
         mainFrame,
         placeholder_text="Input Your Phone Number...",
         width=300,
         height=35
         )
         # n, ne, e, se, s, sw, w, nw, or center
-        PhoneEntry.place(anchor="nw",relx=0.55,rely=0.27)
+        self.PhoneEntry.place(anchor="nw",relx=0.55,rely=0.27)
         PassLabel = ctk.CTkLabel(
             mainFrame,
             text="Password*",
@@ -135,14 +136,14 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         PassLabel.place(anchor="nw",relx=0.015, rely=0.37)
-        PassEntry = ctk.CTkEntry(
+        self.PassEntry = ctk.CTkEntry(
         mainFrame,
         placeholder_text="Input Your Password...",
         width=300,
         height=35
         )
         # n, ne, e, se, s, sw, w, nw, or center
-        PassEntry.place(anchor="nw",relx=0.015,rely=0.43)
+        self.PassEntry.place(anchor="nw",relx=0.015,rely=0.43)
         ConfirmPassLabel = ctk.CTkLabel(
             mainFrame,
             text="Confirm Password*",
@@ -151,14 +152,14 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         ConfirmPassLabel.place(anchor="nw",relx=0.55, rely=0.37)
-        ConfirmPassEntry = ctk.CTkEntry(
+        self.ConfirmPassEntry = ctk.CTkEntry(
         mainFrame,
         placeholder_text="Confirm Your Password...",
         width=300,
         height=35
         )
         # n, ne, e, se, s, sw, w, nw, or center
-        ConfirmPassEntry.place(anchor="nw",relx=0.55,rely=0.43)
+        self.ConfirmPassEntry.place(anchor="nw",relx=0.55,rely=0.43)
         AgeLabel = ctk.CTkLabel(
             mainFrame,
             text="Date of Birth*",
@@ -167,12 +168,12 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         AgeLabel.place(anchor="nw",relx=0.015, rely=0.52)
-        cal = Calendar(mainFrame,
+        self.cal = Calendar(mainFrame,
         selectmode = 'day',
         year = 2001,
         month = 1,
         day = 1)
-        cal.place(anchor="nw", relx=0.015,rely=0.58)
+        self.cal.place(anchor="nw", relx=0.015,rely=0.58)
         # cal.get_date()
         GenderLabel = ctk.CTkLabel(
             mainFrame,
@@ -182,18 +183,18 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         GenderLabel.place(anchor="nw",relx=0.55, rely=0.52)
-        var = IntVar();
+        self.GenderVar = tk.IntVar(value = 0)
         MaleRadio = ctk.CTkRadioButton(
             mainFrame,
             text="Male",
-            variable=var,
+            variable=self.GenderVar,
             value=1
         )
         MaleRadio.place(anchor="nw",relx=0.57, rely=0.58)
         FemaleRadio = ctk.CTkRadioButton(
             mainFrame,
             text="Female",
-            variable=var,
+            variable=self.GenderVar,
             value=2
         )
         FemaleRadio.place(anchor="nw",relx=0.57, rely=0.64)
@@ -205,7 +206,7 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         TypeLabel.place(anchor="nw",relx=0.55, rely=0.7)
-        TypeCombo = ctk.CTkOptionMenu(mainFrame,
+        self.TypeCombo = ctk.CTkOptionMenu(mainFrame,
         width=300,
         bg_color="#F0F0F0",
         dropdown_text_color="#DCD427",
@@ -213,13 +214,17 @@ class Register(ctk.CTk):
         values=["Patient", "Radiologist", "Consultant", "Specialist"],
         command=self.UserType
         )
-        TypeCombo.place(anchor="nw",relx=0.55, rely=0.76)
-
+        self.TypeCombo.place(anchor="nw",relx=0.55, rely=0.76)
     def UserType(self, Utype):
-        if(Utype=="Patient"):
+        if Utype=="Patient":
             self.patient()
-        elif (Utype=="Consultant" or Utype=="Specialist"):
+            self.Registerbutton()
+        elif Utype=="Consultant" or Utype=="Specialist":
             self.doctor()
+            self.Registerbutton()
+        elif Utype=="Radiologist":
+            self.radiologist()
+            self.Registerbutton()
     def patient(self):
         PatientFrame = ctk.CTkFrame(
             self,
@@ -306,7 +311,6 @@ class Register(ctk.CTk):
             offvalue=0
         )
         HypertensionCheck.place(anchor="nw",relx=0.6, rely=0.31)
-
         Allergies = IntVar()
         AllergiesCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
@@ -324,7 +328,6 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=14),
         )
         BloodTypeLabel.place(anchor="nw", relx=0.469, rely=0.45)
-
         BloodTypeCombo = ctk.CTkOptionMenu(
         PatientHealthFrame,
         width=100,
@@ -332,7 +335,6 @@ class Register(ctk.CTk):
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
         values=["O-","O+","B-","B+","A-","A+","AB-","AB+","Unknown"],
-        command=self.UserType,
         font = ctk.CTkFont(size =17)
         )
         BloodTypeCombo.place(anchor="nw",relx=0.66, rely=0.45)
@@ -362,7 +364,6 @@ class Register(ctk.CTk):
         ImportIDButton.place(anchor="nw", relx=0.66, rely=0.08)
         ImportLicenseButton = ctk.CTkButton(self.DoctorFrame,text="Import Profession License", command=self.ImportLicense)
         ImportLicenseButton.place(anchor="nw", relx=0.641, rely=0.49)
-
         UniLabel = ctk.CTkLabel(
             self.DoctorFrame,
             text="University:",
@@ -377,7 +378,7 @@ class Register(ctk.CTk):
         width=300,
         height=30
         )
-        UniEntry.place(anchor="nw",relx=0.21,rely=0.75)
+        UniEntry.place(anchor="nw",relx=0.21,rely=0.748)
     def ImportID(self):
         self.IDPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
         ScanImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(350,197)))
@@ -386,14 +387,97 @@ class Register(ctk.CTk):
         self.LicensePath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
         ScanImage = ctk.CTkLabel(self.ImageFrame2,text="",image=ctk.CTkImage(Image.open(self.LicensePath),size=(350,197)))
         ScanImage.place(anchor="nw", relx=0, rely=0)
+    def radiologist(self):
+        RadiologistFrame = ctk.CTkFrame(
+            self,
+            bg_color="#969696",
+            width=600,
+            height=580
+        )
+        RadiologistFrame.place(anchor="nw",relx=0.57, rely=0.17)
 
+        RadioCenterLabel = ctk.CTkLabel(
+            RadiologistFrame,
+            text="Radiology Center:",
+            width=65,
+            height=20,
+            font=ctk.CTkFont(size=30),
+        )
+        RadioCenterLabel.place(anchor="nw",relx=0.27, rely=0.1)
 
+        RadioCenterCombo = ctk.CTkOptionMenu(
+        RadiologistFrame,
+        width=330,
+        bg_color="#F0F0F0",
+        dropdown_text_color="#DCD427",
+        dropdown_hover_color="#969696",
+        values=["Patient", "Radiologist", "Consultant", "Specialist"],
+        font=ctk.CTkFont(size = 25),
+        )
+        RadioCenterCombo.place(anchor="nw",relx=0.21, rely=0.189)
+        RadioCenterCodeLabel = ctk.CTkLabel(
+            RadiologistFrame,
+            text="Center Verification Code:",
+            width=65,
+            height=20,
+            font=ctk.CTkFont(size=28),
+        )
+        RadioCenterCodeLabel.place(anchor="nw",relx=0.21, rely=0.36)
+        RadioCenterCodeEntry = ctk.CTkEntry(
+        RadiologistFrame,
+        placeholder_text="Input Your Center's Verification Code...",
+        width=400,
+        height=35
+        )
+        RadioCenterCodeEntry.place(anchor="nw",relx=0.15,rely=0.44)
+    def Registerbutton(self):
+        RegisterButtonFrame = ctk.CTkFrame(
+            self,
+            bg_color="#969696",
+            width=200,
+            height=80
+        )
+        RegisterButtonFrame.place(anchor="nw", relx=0.71, rely=0.84)
 
-
-
-
+        RegisterButton = ctk.CTkButton(
+        RegisterButtonFrame,
+        text="Register",
+        width= 200,
+        height=80,
+        font = ctk.CTkFont(size=23),
+        command=self.fetchData
+        )
+        RegisterButton.place(anchor="nw", relx=0, rely=0)
+    def fetchData(self):
+        self.userName = f"{self.firstEntry.get()} {self.SecondEntry.get()}"
+        self.Email = self.MailEntry.get()
+        self.Phone = self.PhoneEntry.get()
+        self.Password = self.PassEntry.get()
+        self.ConfirmPassword = self.ConfirmPassEntry.get()
+        self.DoF = self.cal.get_date()
+        self.Gender = self.gender()
+        self.UserType = self.TypeCombo.get()
+        self.dataValidator()
+    def gender(self):
+        return "Male" if self.GenderVar.get() == 1 else "Female"
+    def dataValidator(self):
+        if self.emptyFields or self.passwordMismatch:
+            MessageBox(self, "error", "1-Please fill all the fields! \n2-Password mismatch!")
+    def emptyFields(self):
+        return (
+            self.userName == ""
+            or self.Email == ""
+            or self.Phone == ""
+            or self.Password == ""
+            or self.ConfirmPassword == ""
+            or self.DoF == ""
+            or self.Gender == 0
+        )
+    def passwordMismatch(self):
+        return self.Password != self.ConfirmPassword
         
-        
+
+
 
 if __name__ == "__main__":
     app = Register()
