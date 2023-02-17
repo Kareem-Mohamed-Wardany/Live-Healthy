@@ -5,7 +5,7 @@ import queue
 import time
 import os
 import customtkinter as ctk
-from Model import *
+# from Model import *
 
 from Images import *
 from Config import *
@@ -25,7 +25,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = User("9")  
+    user = User("5")  
 
     Created = [
         True,
@@ -373,8 +373,9 @@ class App(ctk.CTk):
 
     def ChatWithDoctor(self):  # Fix the box colors, turn them all Textbox instead of Entry
         if self.Created[1]:
+            print(self.winfo_height())
             self.ChatWithDoctor_frame = ctk.CTkFrame(
-                self, corner_radius=0, fg_color="transparent"
+                self, corner_radius=0, fg_color="transparent", height= self.winfo_height(), width= self.winfo_width()
             )
             self.Created[1] = False
         with contextlib.suppress(Exception):
@@ -382,7 +383,12 @@ class App(ctk.CTk):
                 widget.destroy()
 
         if self.user.checkRequest(): # Check if the Patient already has a request
-            print("a7a")
+            res = self.db.Select("SELECT Request_Status FROM requests WHERE Patient_ID= %s", [self.user.userid])[0][0]
+            if res == "waiting":
+                return MessageBox(self.ChatWithDoctor_frame,"info", "Waiting for a doctor to respond")
+            else:
+                self.openChat()
+
         else:
             self.ScanPathTextbox = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=700, state = "disabled", height=10)
             self.ScanPathTextbox.place(anchor="nw", relx=0.05, rely=0.05)
@@ -460,8 +466,154 @@ class App(ctk.CTk):
         self.ChatWithDoctor()
         return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
 
+    # Chat Section
+    def openChat(self):
+    # Chat window that will contain ChatFrame that show the chat for the doctor and chatbox where the doctor type in his chat
+    # also send icon that will show the text in chatbox on ChatFrame for both patient and doctor
+        with contextlib.suppress(Exception):
+            for widget in chatWindow.winfo_children():
+                widget.destroy()
+            self.Userclient.end()
+        start_time = time.time()
+        chatWindow = ctk.CTkFrame(
+            self.ChatWithDoctor_frame, corner_radius=0, width=840, fg_color="transparent", height=720
+        )
+        chatWindow.place(anchor="nw",relx = 0.01,rely = 0.01)
 
+        self.ChatFrame = ScrollableFrame(
+            chatWindow, "gray40", width=550, height=330, scrollafter=8
+        )
+        self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
 
+        # ChatBox
+        self.ChatBoxBlock(chatWindow)
+        print(f"--- {time.time() - start_time} seconds ---")
+        # join Chat Servrt
+        self.JoinChatServer()
+
+    def ChatBoxBlock(self, master):
+        self.chatbox = ctk.CTkTextbox(
+            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25
+        )
+        self.chatbox.place(anchor="nw", relx=0.01, rely=0.48)
+        self.chatbox.bind(
+            "<Return>", self.sendMessage
+        )  # Enter Button will send the message
+        self.chatbox.bind(
+            "<Shift-Return>", self.NewLine
+        )  # Shift + Enter will make new line inspired by discord and WhatsApp
+
+        sendimage = ctk.CTkImage(sendICON, size=(25, 25))
+
+        SendIcon = ctk.CTkLabel(
+            master, text="", image=sendimage, bg_color="transparent"
+        )
+        SendIcon.place(anchor="nw", relx=0.635, rely=0.48)
+        SendIcon.bind(
+            "<Button-1>", self.sendMessage
+        )  # Bind if doctor pressed the image text will
+
+    def JoinChatServer(self):
+        # Check if the Chat server is online
+        # try:
+            ADDR = ("127.0.0.1", 4053)  # Get the Address of Chat Server
+            # Connect user to chat server and set the chat room to patient's ID as the patient will be in it
+            self.Userclient = Client(self.user.userName, ADDR, self.user.userid)
+
+            self.LoaddedChat = (
+                queue.Queue()
+            )  # Queue that will hold the chat from the database to be shown in Chat box
+            self.ChatLOGS = (
+                queue.Queue()
+            )  # Queue that will hold old chat + new chat and save them in database to load it later
+            self.LoadChatData(
+                self.user.userid
+            )  # Load Chat data to LoaddedChat Queue and also ChatLOGS Queue
+            self.AddLoadedChat()  # Add old Chat to the Chatbox
+
+            self.CurrentChat = (
+                queue.Queue()
+            )  # Queue that hold new chat either send or recived
+
+            self.AddTochatBox()  # Function that will run every 1000 ms to check if doctor sends or recives any message
+            self.receiveThread = threading.Thread(
+                target=self.Userclient.receiveFromServer, args=(self.CurrentChat,)
+            )  # Wait any messages from the patient
+            self.receiveThread.start()
+            # write thread
+            writeThread = threading.Thread(
+                target=self.Userclient.writeToServer,
+
+            )  # Send any message to the Patient
+            writeThread.start()
+        # except Exception:
+        #     print("Chat Server is offline")
+
+    def LoadChatData(self, Patientid):
+        # Load the chat of Patient with id
+        res = self.db.Select(
+            "SELECT Chat_Logs FROM chatdata WHERE Patient_ID= %s", [self.user.userid]
+        )[0][0]
+        msg = res.split(
+            "&,&"
+        )  # split the chat as queue was saved as one string each item separated by &,&
+        for i in msg:  # put each message in two Queues
+            self.LoaddedChat.put(i)  # Queue that will be Loaded at chat box
+            self.ChatLOGS.put(i)  # Queue that will save old chat with the new chat
+
+    def SaveChat(self, chatqueue):
+        c = list(chatqueue.queue)  # convert Queue to List
+        textChat = "".join(c[i] if i == 0 else f"&,&{c[i]}" for i in range(len(c)))
+        # Update the chat in database
+        res = self.db.Update(
+            "UPDATE chatdata SET Chat_Logs= %s WHERE Patient_ID= %s", [textChat, self.user.userid]
+        )
+        self.db.Commit()
+
+    def AddLoadedChat(self):
+        # check that there is no items in LoaddedChat
+        while self.LoaddedChat.qsize() > 0:
+            msg = self.LoaddedChat.get()  # get chat data from the Queue
+            self.ChatBlock(msg)  # add Chat to Chatbox
+
+    def AddTochatBox(self):
+        if not self.CurrentChat.empty():  # check if CurrentChat is not empty
+            msg = self.CurrentChat.get()  # get the message
+            self.ChatLOGS.put(msg)  # save the message in ChatLOGS
+            self.SaveChat(self.ChatLOGS)  # update database with new chat data
+            if msg != "":
+                self.ChatBlock(msg)  # add Chat to Chatbox
+
+        self.ChatFrame.after(
+            1000, self.AddTochatBox)  # Repeat the function after 1000 ms
+
+    def ChatBlock(self, msg):
+        # Create Frame that will hold message of the user
+        m_frame = ctk.CTkFrame(self.ChatFrame.scrollable_frame, bg_color="#595656")
+        m_frame.pack(anchor="nw", pady=5)
+        m_frame.columnconfigure(0, weight=1)
+
+        m_label = tk.Label(
+            m_frame,
+            wraplength=250,
+            fg="black",
+            bg="#c5c7c9",
+            text=msg,
+            font="lucida 14 bold",
+            justify="left",
+            anchor="w",
+        )
+        m_label.grid(row=1, column=1, padx=2, pady=2, sticky="w")
+
+    def sendMessage(self, event):
+        # -1c means remove the last char which is an end line added by textbox
+        self.Userclient.writeToServer(self.chatbox.get("1.0", "end-1c"))
+        self.chatbox.delete("1.0", "end")
+        return "break"  # to remove defult end line of the textbox
+
+    def NewLine(self, event):
+        self.chatbox.insert("end", "\n")  # add an endline to the end of text in textbox
+        return "break"
 
 if __name__ == "__main__":
     app = App()

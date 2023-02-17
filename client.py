@@ -18,7 +18,7 @@ class Client:
     # format for messages
     FORMAT = "utf-8"
     HOST = "127.0.0.1"
-    PORT = 4073
+    PORT = 4053
 
     # creating a socket for client
     # initializing
@@ -30,12 +30,13 @@ class Client:
         self.clientsocket.connect(addr)
 
     # function for sending messages to a server
-    def writeToServer(self, userInput):
+    def writeToServer(self, userInput=None):
         # name input
-        message = f"{self.name}: {userInput}"
+        if userInput is not None:
+            message = f"{self.name}: {userInput}"
 
-        # send name to server
-        self.clientsocket.send(message.encode(self.FORMAT))
+            # send name to server
+            self.clientsocket.send(message.encode(self.FORMAT))
 
     def receiveFromServer(self, q):
         while True:
@@ -46,9 +47,9 @@ class Client:
                 # if the message contains a keyword "+getName+Channel", send name and channel to server
                 if message == "getData":
                     self.clientsocket.send(
-                        f"{self.name} {self.channel}".encode(self.FORMAT)
+                        f"{self.name}&,&{self.channel}".encode(self.FORMAT)
                     )
-                elif message != "Please enter message":
+                elif message != "Please enter message" or message != "":
                     q.put(message)
             except Exception:
                 self.clientsocket.close()
