@@ -10,6 +10,7 @@ from GUIHelperFunctions import *
 from tkinter.filedialog import askopenfilename
 from PIL import Image
 import re
+from datetime import datetime
 
 
 
@@ -30,7 +31,6 @@ class Register(ctk.CTk):
         self.mainRegister()
         self.patient()
         self.Registerbutton()
-
         # Enter all your buttons,Entries here
     def mainTitle(self):
         infoFrame = ctk.CTkFrame(
@@ -209,7 +209,6 @@ class Register(ctk.CTk):
         TypeLabel.place(anchor="nw",relx=0.55, rely=0.7)
         self.TypeCombo = ctk.CTkOptionMenu(mainFrame,
         width=300,
-        bg_color="#F0F0F0",
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
         values=["Patient", "Radiologist", "Consultant", "Specialist"],
@@ -251,72 +250,72 @@ class Register(ctk.CTk):
             height=380
         )
         PatientHealthFrame.place(anchor="nw",relx=0.59, rely=0.3)
-        heart = IntVar()
+        self.Heart = IntVar()
         HeartCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Heart Diseases",
-            variable=heart,
+            variable=self.Heart,
             onvalue=1,
             offvalue=0
         )
         HeartCheck.place(anchor="nw",relx=0.15, rely=0.03)
 
-        diabetes = IntVar()
+        self.Diabetes = IntVar()
         DiabetesCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Diabetes",
-            variable=diabetes,
+            variable=self.Diabetes,
             onvalue=1,
             offvalue=0
         )
         DiabetesCheck.place(anchor="nw",relx=0.6, rely=0.03)
 
         
-        cancer = IntVar()
+        self.Cancer = IntVar()
         CancerCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Cancer",
-            variable=cancer,
+            variable=self.Cancer,
             onvalue=1,
             offvalue=0
         )
         CancerCheck.place(anchor="nw",relx=0.15, rely=0.17)
 
-        Obesity = IntVar()
+        self.Obesity = IntVar()
         ObesityCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Obesity",
-            variable=Obesity,
+            variable=self.Obesity,
             onvalue=1,
             offvalue=0
         )
         ObesityCheck.place(anchor="nw",relx=0.6, rely=0.17)
 
 
-        Smoker = IntVar()
+        self.Smoker = IntVar()
         SmokerCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Smoker",
-            variable=Smoker,
+            variable=self.Smoker,
             onvalue=1,
             offvalue=0
         )
         SmokerCheck.place(anchor="nw",relx=0.15, rely=0.31)
 
-        Hypertension = IntVar()
+        self.Hypertension = IntVar()
         HypertensionCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Hypertension",
-            variable=Hypertension,
+            variable=self.Hypertension,
             onvalue=1,
             offvalue=0
         )
         HypertensionCheck.place(anchor="nw",relx=0.6, rely=0.31)
-        Allergies = IntVar()
+        self.Allergies = IntVar()
         AllergiesCheck = ctk.CTkCheckBox(
             PatientHealthFrame,
             text="Allergies",
-            variable=Allergies,
+            variable=self.Allergies,
             onvalue=1,
             offvalue=0
         )
@@ -329,16 +328,15 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=14),
         )
         BloodTypeLabel.place(anchor="nw", relx=0.469, rely=0.45)
-        BloodTypeCombo = ctk.CTkOptionMenu(
+        self.BloodTypeCombo = ctk.CTkOptionMenu(
         PatientHealthFrame,
         width=100,
-        bg_color="#F0F0F0",
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
         values=["O-","O+","B-","B+","A-","A+","AB-","AB+","Unknown"],
         font = ctk.CTkFont(size =17)
         )
-        BloodTypeCombo.place(anchor="nw",relx=0.66, rely=0.45)
+        self.BloodTypeCombo.place(anchor="nw",relx=0.66, rely=0.45)
     def doctor(self):
         self.DoctorFrame = ctk.CTkFrame(
             self,
@@ -373,13 +371,13 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=20),
         )
         UniLabel.place(anchor="nw",relx=0.041, rely=0.75)
-        UniEntry = ctk.CTkEntry(
+        self.UniEntry = ctk.CTkEntry(
         self.DoctorFrame,
         placeholder_text="Input The University You Graduated From...",
         width=300,
         height=30
         )
-        UniEntry.place(anchor="nw",relx=0.21,rely=0.748)
+        self.UniEntry.place(anchor="nw",relx=0.21,rely=0.748)
     def ImportID(self):
         self.IDPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
         ScanImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(350,197)))
@@ -406,16 +404,17 @@ class Register(ctk.CTk):
         )
         RadioCenterLabel.place(anchor="nw",relx=0.27, rely=0.1)
 
-        RadioCenterCombo = ctk.CTkOptionMenu(
+        res = self.db.Select("SELECT Name FROM radiologycenters")
+        RadioCenters = [i[0] for i in res]
+        self.RadioCenterCombo = ctk.CTkOptionMenu(
         RadiologistFrame,
         width=330,
-        bg_color="#F0F0F0",
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
-        values=["Patient", "Radiologist", "Consultant", "Specialist"],
+        values=RadioCenters,
         font=ctk.CTkFont(size = 25),
         )
-        RadioCenterCombo.place(anchor="nw",relx=0.21, rely=0.189)
+        self.RadioCenterCombo.place(anchor="nw",relx=0.21, rely=0.189)
         RadioCenterCodeLabel = ctk.CTkLabel(
             RadiologistFrame,
             text="Center Verification Code:",
@@ -424,13 +423,13 @@ class Register(ctk.CTk):
             font=ctk.CTkFont(size=28),
         )
         RadioCenterCodeLabel.place(anchor="nw",relx=0.21, rely=0.36)
-        RadioCenterCodeEntry = ctk.CTkEntry(
+        self.RadioCenterCodeEntry = ctk.CTkEntry(
         RadiologistFrame,
         placeholder_text="Input Your Center's Verification Code...",
         width=400,
         height=35
         )
-        RadioCenterCodeEntry.place(anchor="nw",relx=0.15,rely=0.44)
+        self.RadioCenterCodeEntry.place(anchor="nw",relx=0.15,rely=0.44)
     def Registerbutton(self):
         RegisterButtonFrame = ctk.CTkFrame(
             self,
@@ -446,36 +445,44 @@ class Register(ctk.CTk):
         width= 200,
         height=80,
         font = ctk.CTkFont(size=23),
-        command=self.fetchData
+        command=self.fetchUserData
         )
         RegisterButton.place(anchor="nw", relx=0, rely=0)
-    def fetchData(self):
+    def fetchUserData(self):
         self.userName = f"{self.firstEntry.get()} {self.SecondEntry.get()}"
         self.Email = self.MailEntry.get()
         self.Phone = self.PhoneEntry.get()
         self.Password = self.PassEntry.get()
         self.ConfirmPassword = self.ConfirmPassEntry.get()
-        self.DoB = self.cal.get_date()
+        self.DoB = datetime.strptime(self.cal.get_date(), '%m/%d/%y').date()
         self.Gender = self.gender()
         self.UserType = self.TypeCombo.get()
-        self.dataValidator()
+        #self.dataValidator()
+        self.fetchUserTypeData()
+        self.insertUserInfo()
     def gender(self):
         return "Male" if self.GenderVar.get() == 1 else "Female"
     def dataValidator(self):
         if self.emptyFields():
-            MessageBox(self, "error", "1- Please fill all the fields!")
+            MessageBox(self, "error", "Please fill all the fields!")
         if self.userNameChecker():
-            MessageBox(self, "error", "1- Names can't include numbers!")
+            MessageBox(self, "error", "Names can't include numbers!")
         self.passwordChecker()
         if self.emailChecker():
-            MessageBox(self, "error", "1- Invalid email address!")
-        if not self.phoneChecker():
-            MessageBox(self, "error", "1- Invalid phone number!")
-
-
-
-
-
+            MessageBox(self, "error", "Invalid email address!")
+        self.phoneChecker()     
+    def CheckRadioCenter(self):
+        res = self.db.Select("SELECT Registercode, Center_Limit FROM radiologycenters WHERE Name=%s",[self.radioCenter])
+        limit = res[0][1]
+        code = res[0][0]
+        if self.radioCenterCode == code and limit > 0:
+            limit -= 1
+            self.db.Update("UPDATE radiologycenters SET Center_Limit=%s WHERE Name=%s",[limit,self.radioCenter])
+            self.db.Commit()
+        if limit == 0:
+            MessageBox(self, "error", "Your radiology center has reached its maximum amount of users!")
+        if self.radioCenterCode != code:
+            MessageBox(self, "error", "Invalid radiology center code!")
     def emptyFields(self):
         return (
             self.firstEntry.get() == ""
@@ -497,7 +504,57 @@ class Register(ctk.CTk):
         pat = "^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
         return not re.match(pat,self.Email)
     def phoneChecker(self):
-        return bool(self.Phone.isnumeric())
+        if not self.Phone.isnumeric():
+            MessageBox(self, "error", "Invalid phone number!")
+        if len(self.Phone) < 11 or len(self.Phone) > 15:
+            MessageBox(self, "error", "Invalid phone number!")
+    def fetchUserTypeData(self):
+        if self.TypeCombo.get() == "Patient":
+            self.heart = self.Heart.get()
+            self.diabetes = self.Diabetes.get()
+            self.cancer = self.Cancer.get()
+            self.obesity = self.Obesity.get()
+            self.smoker = self.Smoker.get()
+            self.hypertension = self.Hypertension.get()
+            self.allergies = self.Allergies.get()
+            self.Blood = self.BloodTypeCombo.get()
+        #print(self.heart, self.diabetes, self.hypertension, self.allergies, self.cancer, self.obesity, self.smoker, self.Blood)
+        if self.TypeCombo.get() == "Radiologist":
+            self.radioCenter = self.RadioCenterCombo.get()
+            self.radioCenterCode = self.RadioCenterCodeEntry.get()
+            self.CheckRadioCenter()
+        #print(self.radioCenterCode, self.radioCenter)
+        if self.TypeCombo.get() == "Specialist" or self.TypeCombo.get() == "Consultant":
+            self.uni = self.UniEntry.get()
+            self.IDbinary = self.db.convertToBinaryData(self.IDPath)
+            self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
+    def insertUserInfo(self):
+        appearence = "System"
+        res = self.db.Select("SELECT ID FROM users")
+        IDs = [i[0] for i in res]
+        newID = len(IDs)
+        if self.TypeCombo.get() == "Patient":
+            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
+            self.db.Insert("INSERT INTO patienthealthstatus VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.heart, self.diabetes, self.cancer,self.obesity,self.smoker,self.hypertension,self.allergies,self.Blood])
+            self.db.Commit()
+        if self.TypeCombo.get() == "Radiologist":
+            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
+            res = self.db.Select("SELECT ID FROM radiologycenters where Name=%s",[self.radioCenter])
+            centerID = res[0][0]
+            self.db.Insert("INSERT INTO radiologists VALUES (%s,%s)",[newID,centerID])
+            self.db.Commit()
+        if  self.TypeCombo.get() == "Consultant" or self.TypeCombo.get() == "Specialist":
+            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
+            self.db.Insert("INSERT INTO doctordata VALUES (%s,%s,%s,%s,%s)",[newID, 0, self.uni,self.IDbinary, self.LicenseBinary])
+            self.db.Commit()
+
+
+        
+
+
+
+
+
 
 
 
