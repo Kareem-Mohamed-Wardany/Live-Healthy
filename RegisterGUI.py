@@ -457,10 +457,10 @@ class Register(ctk.CTk):
         self.DoB = datetime.strptime(self.cal.get_date(), '%m/%d/%y').date()
         self.Gender = self.gender()
         self.UserType = self.TypeCombo.get()
-        #self.dataValidator()
+        self.dataValidator()
         self.fetchUserTypeData()
-        #self.emptyUserTypeFields()
-        #self.insertUserInfo()
+        self.emptyUserTypeFields()
+        self.insertUserInfo()
         return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self)
 
     def gender(self):
