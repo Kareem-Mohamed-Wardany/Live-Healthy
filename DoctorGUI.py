@@ -1,18 +1,19 @@
 import contextlib
+import os
+import queue
+import subprocess
+import time
 import tkinter as tk
 from datetime import date
-import queue
-import time
-import os
-import customtkinter as ctk
-import subprocess
 
-from Images import *
+import customtkinter as ctk
+
+from client import *
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
+from Images import *
 from User import *
-from client import *
 
 
 class App(ctk.CTk):
@@ -217,7 +218,10 @@ class App(ctk.CTk):
     def MyChats(self, res):
         # Create Scrollable Frame to hold all chats for Doctor
         frame = ScrollableFrame(
-            self.Active_Chats_frame, "gray30", width=250, height=self.winfo_height()-10
+            self.Active_Chats_frame,
+            "gray30",
+            width=250,
+            height=self.winfo_height() - 10,
         )
         frame.grid(row=0, column=0, sticky="nsew")
         start_time = time.time()
@@ -532,13 +536,15 @@ class App(ctk.CTk):
             image=ctk.CTkImage(GeneratePrescription, size=(40, 40)),
         )
         GenerateReport.place(anchor="nw", relx=0.83, rely=0.92)
-        GenerateReport.bind("<Button-1>", lambda event: self.HandlePrescription(event, id))
-        
+        GenerateReport.bind(
+            "<Button-1>", lambda event: self.HandlePrescription(event, id)
+        )
+
     def HandlePrescription(self, event, id):
         patient = User(id)
         path = f"Data\Prescriptions\{patient.userName}.pdf"
-        if self.ReportGenerated(id): 
-            subprocess.Popen([path],shell=True) # Show the Prescription for the Doctor
+        if self.ReportGenerated(id):
+            subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
         else:
             self.FillMedication(id)
 
@@ -547,18 +553,30 @@ class App(ctk.CTk):
         self.MedicineWindow = ctk.CTkToplevel()
         title = f"Fill Medication for Prescription of {patient.userName}"
         self.MedicineWindow.title(title)
-        center(self.MedicineWindow, 720, 400)  # Open the window in the center of the Screen
+        center(
+            self.MedicineWindow, 720, 400
+        )  # Open the window in the center of the Screen
         self.MedicineWindow.resizable(False, False)
 
-        Text = ctk.CTkLabel(self.MedicineWindow,text="Add Medications:",font=ctk.CTkFont(size=16,weight="bold"))
+        Text = ctk.CTkLabel(
+            self.MedicineWindow,
+            text="Add Medications:",
+            font=ctk.CTkFont(size=16, weight="bold"),
+        )
         Text.place(anchor="nw", relx=0.01, rely=0)
 
         self.loc = 0
-        Add = ctk.CTkLabel(self.MedicineWindow,text="",image=(ctk.CTkImage(AddIcon,size=(25,25))))
+        Add = ctk.CTkLabel(
+            self.MedicineWindow, text="", image=(ctk.CTkImage(AddIcon, size=(25, 25)))
+        )
         Add.place(anchor="nw", relx=0.9, rely=0.01)
         Add.bind("<Button-1>", self.AddNewMedication)
 
-        delete = ctk.CTkLabel(self.MedicineWindow,text="",image=(ctk.CTkImage(DeleteIcon,size=(25,25))))
+        delete = ctk.CTkLabel(
+            self.MedicineWindow,
+            text="",
+            image=(ctk.CTkImage(DeleteIcon, size=(25, 25))),
+        )
         delete.place(anchor="nw", relx=0.95, rely=0.01)
         delete.bind("<Button-1>", self.DelMedications)
 
@@ -568,20 +586,44 @@ class App(ctk.CTk):
         self.MedicineFrame.place(anchor="nw", relx=0.01, rely=0.1)
         self.MedicineFrame.scrollable_frame
 
-        Show = ctk.CTkButton(self.MedicineWindow,text="Show",command=lambda: self.FinalizePrescription(id,"Show"),bg_color="#6495ED",fg_color="#6495ED",hover_color="#0047AB")
+        Show = ctk.CTkButton(
+            self.MedicineWindow,
+            text="Show",
+            command=lambda: self.FinalizePrescription(id, "Show"),
+            bg_color="#6495ED",
+            fg_color="#6495ED",
+            hover_color="#0047AB",
+        )
         Show.place(anchor="nw", relx=0.75, rely=0.9)
 
-        Save = ctk.CTkButton(self.MedicineWindow,text="Save",command=lambda: self.FinalizePrescription(id,"Save"),bg_color="#097969",fg_color="#097969",hover_color="#088F8F")
+        Save = ctk.CTkButton(
+            self.MedicineWindow,
+            text="Save",
+            command=lambda: self.FinalizePrescription(id, "Save"),
+            bg_color="#097969",
+            fg_color="#097969",
+            hover_color="#088F8F",
+        )
         Save.place(anchor="nw", relx=0.55, rely=0.9)
 
     def AddNewMedication(self, event):
         print(len(self.MedicineFrame.scrollable_frame.winfo_children()))
-        MedicinEntry = ctk.CTkEntry(self.MedicineFrame.scrollable_frame,placeholder_text="Enter Medicine Name", width=300,height=40)
-        MedicinEntry.grid(row=self.loc,column=0)
+        MedicinEntry = ctk.CTkEntry(
+            self.MedicineFrame.scrollable_frame,
+            placeholder_text="Enter Medicine Name",
+            width=300,
+            height=40,
+        )
+        MedicinEntry.grid(row=self.loc, column=0)
 
-        MedicinEntry = ctk.CTkEntry(self.MedicineFrame.scrollable_frame,placeholder_text="Enter Medicine Note", width=300,height=40)
-        MedicinEntry.grid(row=self.loc,column=1)
-        self.loc+=1
+        MedicinEntry = ctk.CTkEntry(
+            self.MedicineFrame.scrollable_frame,
+            placeholder_text="Enter Medicine Note",
+            width=300,
+            height=40,
+        )
+        MedicinEntry.grid(row=self.loc, column=1)
+        self.loc += 1
 
     def DelMedications(self, event):
         with contextlib.suppress(Exception):
@@ -590,19 +632,25 @@ class App(ctk.CTk):
                 widget.destroy()
             self.MedicineFrame.disable_scroll()
             self.MedicineFrame.moveto(0)
-    
+
     def FinalizePrescription(self, id, type):
         patient = User(id)
         path = f"Data\Prescriptions\{patient.userName}.pdf"
-        if len(self.MedicineFrame.scrollable_frame.winfo_children()) ==0:
-            return MessageBox(self.MedicineFrame, "error", "No Medicine to be added to Prescription")
-        if type =="Show":
+        if len(self.MedicineFrame.scrollable_frame.winfo_children()) == 0:
+            return MessageBox(
+                self.MedicineFrame, "error", "No Medicine to be added to Prescription"
+            )
+        if type == "Show":
             Medicines = []
             MedicinesNotes = []
-            for pos, widget in enumerate(self.MedicineFrame.scrollable_frame.winfo_children()):
+            for pos, widget in enumerate(
+                self.MedicineFrame.scrollable_frame.winfo_children()
+            ):
                 if pos % 2 == 0:
                     if len(widget.get()) == 0:
-                        return MessageBox(self,"error", "Medicine Name cannot be empty")
+                        return MessageBox(
+                            self, "error", "Medicine Name cannot be empty"
+                        )
                     else:
                         Medicines.append(widget.get())
                 else:
@@ -611,13 +659,13 @@ class App(ctk.CTk):
                     else:
                         MedicinesNotes.append(widget.get())
             self.user.MakePrescription(id, Medicines, MedicinesNotes)
-            subprocess.Popen([path],shell=True) # Show the Prescription for the Doctor
+            subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
         else:
             self.user.SavePrescription(path, id)
             self.MedicineWindow.destroy()
-            return MessageBox(self,"info", "Prescription Created")
+            return MessageBox(self, "info", "Prescription Created")
 
-    def JoinChatServer(self,id):
+    def JoinChatServer(self, id):
         # Check if the Chat server is online
         try:
             ADDR = ("127.0.0.1", 4073)  # Get the Address of Chat Server
@@ -831,9 +879,7 @@ class App(ctk.CTk):
             )  # add Credits to the doctor When he ends the chat
             # update button Balance
             if res != -1:
-                self.UpdateBalanceButton(
-                    "Credits added to your balance!"
-                )
+                self.UpdateBalanceButton("Credits added to your balance!")
         else:
             MessageBox(self, "warning", "Report Should be Generated")
 
@@ -1429,6 +1475,3 @@ class App(ctk.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
-
-#hello world
