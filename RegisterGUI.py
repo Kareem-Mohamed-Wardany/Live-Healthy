@@ -467,12 +467,12 @@ class Register(ctk.CTk):
         return "Male" if self.GenderVar.get() == 1 else "Female"
     def dataValidator(self):
         if self.emptyMainFields():
-            MessageBox(self, "error", "Please fill all the fields!")
+            return MessageBox(self, "error", "Please fill all the fields!")
         if self.userNameChecker():
-            MessageBox(self, "error", "Names can't include numbers!")
+            return MessageBox(self, "error", "Names can't include numbers!")
         self.passwordChecker()
         if self.emailChecker():
-            MessageBox(self, "error", "Invalid email address!")
+            return MessageBox(self, "error", "Invalid email address!")
         self.phoneChecker()     
     def CheckRadioCenter(self):
         res = self.db.Select("SELECT Registercode, Center_Limit FROM radiologycenters WHERE Name=%s",[self.radioCenter])
@@ -483,9 +483,9 @@ class Register(ctk.CTk):
             self.db.Update("UPDATE radiologycenters SET Center_Limit=%s WHERE Name=%s",[limit,self.radioCenter])
             self.db.Commit()
         if limit == 0:
-            MessageBox(self, "error", "Your radiology center has reached its maximum amount of users!")
+            return MessageBox(self, "error", "Your radiology center has reached its maximum amount of users!")
         if self.radioCenterCode != code:
-            MessageBox(self, "error", "Invalid radiology center code!")
+            return MessageBox(self, "error", "Invalid radiology center code!")
     def emptyMainFields(self):
         return (
             self.firstEntry.get() == ""
@@ -505,12 +505,12 @@ class Register(ctk.CTk):
             or len(self.LicensePath) == 0
             or len(self.uni) == 0
         ):
-            MessageBox(self, "error", "Please fill all the fields!")
+            return MessageBox(self, "error", "Please fill all the fields!")
     def passwordChecker(self):
         if self.Password != self.ConfirmPassword:
-            MessageBox(self, "error", "Password Mismatch!")
+            return MessageBox(self, "error", "Password Mismatch!")
         if len(self.Password) < 8:
-            MessageBox(self, "error", "Password should be longer than 8 characters!")
+            return MessageBox(self, "error", "Password should be longer than 8 characters!")
     def userNameChecker(self):
         return any(char.isdigit() for char in self.userName)
     def emailChecker(self):
@@ -518,9 +518,9 @@ class Register(ctk.CTk):
         return not re.match(pat,self.Email)
     def phoneChecker(self):
         if not self.Phone.isnumeric():
-            MessageBox(self, "error", "Invalid phone number!")
+            return MessageBox(self, "error", "Invalid phone number!")
         if len(self.Phone) < 11 or len(self.Phone) > 15:
-            MessageBox(self, "error", "Invalid phone number!")
+            return MessageBox(self, "error", "Invalid phone number!")
     def fetchUserTypeData(self):
         if self.TypeCombo.get() == "Patient":
             self.heart = self.Heart.get()
@@ -539,7 +539,7 @@ class Register(ctk.CTk):
         #print(self.radioCenterCode, self.radioCenter)
         if self.TypeCombo.get() == "Specialist" or self.TypeCombo.get() == "Consultant":
             if self.UniEntry.get() == "":
-                MessageBox(self, "error", "Please fill all the fields!")
+                return MessageBox(self, "error", "Please fill all the fields!")
             else:
                 self.uni = self.UniEntry.get()
                 self.IDbinary = self.db.convertToBinaryData(self.IDPath)
