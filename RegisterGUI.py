@@ -333,7 +333,7 @@ class Register(ctk.CTk):
         width=100,
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
-        values=["O-","O+","B-","B+","A-","A+","AB-","AB+","Unknown"],
+        values=["Unknown","O-","O+","B-","B+","A-","A+","AB-","AB+"],
         font = ctk.CTkFont(size =17)
         )
         self.BloodTypeCombo.place(anchor="nw",relx=0.66, rely=0.45)
@@ -445,10 +445,10 @@ class Register(ctk.CTk):
         width= 200,
         height=80,
         font = ctk.CTkFont(size=23),
-        command=self.fetchUserData
+        command=self.fetchAllData
         )
         RegisterButton.place(anchor="nw", relx=0, rely=0)
-    def fetchUserData(self):
+    def fetchAllData(self):
         self.userName = f"{self.firstEntry.get()} {self.SecondEntry.get()}"
         self.Email = self.MailEntry.get()
         self.Phone = self.PhoneEntry.get()
@@ -459,11 +459,14 @@ class Register(ctk.CTk):
         self.UserType = self.TypeCombo.get()
         #self.dataValidator()
         self.fetchUserTypeData()
-        self.insertUserInfo()
+        #self.emptyUserTypeFields()
+        #self.insertUserInfo()
+        return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self)
+
     def gender(self):
         return "Male" if self.GenderVar.get() == 1 else "Female"
     def dataValidator(self):
-        if self.emptyFields():
+        if self.emptyMainFields():
             MessageBox(self, "error", "Please fill all the fields!")
         if self.userNameChecker():
             MessageBox(self, "error", "Names can't include numbers!")
@@ -483,7 +486,7 @@ class Register(ctk.CTk):
             MessageBox(self, "error", "Your radiology center has reached its maximum amount of users!")
         if self.radioCenterCode != code:
             MessageBox(self, "error", "Invalid radiology center code!")
-    def emptyFields(self):
+    def emptyMainFields(self):
         return (
             self.firstEntry.get() == ""
             or self.SecondEntry.get() == ""
@@ -493,11 +496,21 @@ class Register(ctk.CTk):
             or self.ConfirmPassword == ""
             or self.Gender == 0
         )
+    def emptyUserTypeFields(self):
+        if (
+            self.TypeCombo.get() == "Specialist"
+            or self.TypeCombo.get() == "Consultant"
+        ) and (
+            len(self.IDPath) == 0
+            or len(self.LicensePath) == 0
+            or len(self.uni) == 0
+        ):
+            MessageBox(self, "error", "Please fill all the fields!")
     def passwordChecker(self):
         if self.Password != self.ConfirmPassword:
-            MessageBox(self, "error", "1- Password Mismatch!")
+            MessageBox(self, "error", "Password Mismatch!")
         if len(self.Password) < 8:
-            MessageBox(self, "error", "1- Password should be longer than 8 characters!")
+            MessageBox(self, "error", "Password should be longer than 8 characters!")
     def userNameChecker(self):
         return any(char.isdigit() for char in self.userName)
     def emailChecker(self):
@@ -525,9 +538,12 @@ class Register(ctk.CTk):
             self.CheckRadioCenter()
         #print(self.radioCenterCode, self.radioCenter)
         if self.TypeCombo.get() == "Specialist" or self.TypeCombo.get() == "Consultant":
-            self.uni = self.UniEntry.get()
-            self.IDbinary = self.db.convertToBinaryData(self.IDPath)
-            self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
+            if self.UniEntry.get() == "":
+                MessageBox(self, "error", "Please fill all the fields!")
+            else:
+                self.uni = self.UniEntry.get()
+                self.IDbinary = self.db.convertToBinaryData(self.IDPath)
+                self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
     def insertUserInfo(self):
         appearence = "System"
         res = self.db.Select("SELECT ID FROM users")
@@ -547,16 +563,6 @@ class Register(ctk.CTk):
             self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
             self.db.Insert("INSERT INTO doctordata VALUES (%s,%s,%s,%s,%s)",[newID, 0, self.uni,self.IDbinary, self.LicenseBinary])
             self.db.Commit()
-
-
-        
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
