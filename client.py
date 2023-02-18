@@ -18,7 +18,7 @@ class Client:
     # format for messages
     FORMAT = "utf-8"
     HOST = "127.0.0.1"
-    PORT = 4053
+    PORT = 4073
 
     # creating a socket for client
     # initializing

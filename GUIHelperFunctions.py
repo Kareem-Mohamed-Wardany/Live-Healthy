@@ -42,9 +42,10 @@ def center(win, w, h):
 # Class for scrollabe frame
 class ScrollableFrame(ctk.CTkFrame):
     def __init__(
-        self, container, bgcolor, height=200, width=200, scrollafter=5, *args, **kwargs
+        self, container, bgcolor, height=200, width=200, scrollafter=5, godown =True, *args, **kwargs
     ):
         self.ScrollAfter = scrollafter
+        self.godown = godown
         super().__init__(container, *args, **kwargs)
         self.canvas = ctk.CTkCanvas(
             self, height=height, width=width, background=bgcolor
@@ -76,6 +77,8 @@ class ScrollableFrame(ctk.CTkFrame):
             len(self.scrollable_frame.winfo_children()) > self.ScrollAfter
         ):  # show scrollbar when needed
             self.scrollbar.pack(side="right", fill="y")
+            if self.godown:
+                self.moveto(1)
         else:
             self.disable_scroll()
 

@@ -293,7 +293,7 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        # self.JoinChatServer(id)
+        self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -543,7 +543,7 @@ class App(ctk.CTk):
     def HandlePrescription(self, event, id):
         patient = User(id)
         path = f"Data\Prescriptions\{patient.userName}.pdf"
-        if self.ReportGenerated(id):
+        if not self.ReportGenerated(id):
             subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
         else:
             self.FillMedication(id)
@@ -640,28 +640,27 @@ class App(ctk.CTk):
             return MessageBox(
                 self.MedicineFrame, "error", "No Medicine to be added to Prescription"
             )
-        if type == "Show":
-            Medicines = []
-            MedicinesNotes = []
-            for pos, widget in enumerate(
-                self.MedicineFrame.scrollable_frame.winfo_children()
-            ):
-                if pos % 2 == 0:
-                    if len(widget.get()) == 0:
-                        return MessageBox(
-                            self, "error", "Medicine Name cannot be empty"
-                        )
-                    else:
-                        Medicines.append(widget.get())
+        Medicines = []
+        MedicinesNotes = []
+        for pos, widget in enumerate(
+            self.MedicineFrame.scrollable_frame.winfo_children()
+        ):
+            if pos % 2 == 0:
+                if len(widget.get()) == 0:
+                    return MessageBox(
+                        self, "error", "Medicine Name cannot be empty"
+                    )
                 else:
-                    if len(widget.get()) == 0:
-                        MedicinesNotes.append("")
-                    else:
-                        MedicinesNotes.append(widget.get())
-            self.user.MakePrescription(id, Medicines, MedicinesNotes)
+                    Medicines.append(widget.get())
+            else:
+                if len(widget.get()) == 0:
+                    MedicinesNotes.append("")
+                else:
+                    MedicinesNotes.append(widget.get())
+        self.user.MakePrescription(id, Medicines, MedicinesNotes)
+        if type == "Show":
             subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
         else:
-            self.user.SavePrescription(path, id)
             self.MedicineWindow.destroy()
             return MessageBox(self, "info", "Prescription Created")
 
@@ -697,7 +696,6 @@ class App(ctk.CTk):
             # write thread
             writeThread = threading.Thread(
                 target=self.Userclient.writeToServer,
-                args=(self.chatbox.get("1.0", "end-1c"),),
             )  # Send any message to the Patient
             writeThread.start()
         except Exception:
@@ -761,9 +759,9 @@ class App(ctk.CTk):
         blockFrame.place(anchor="nw", relx=x, rely=y)
 
         # save binary Data of image as an image named as PatientName.png
-        self.db.write_file(scan, name)
-
         scanImage = f"Data/PatientScans/{name}.png"
+
+        self.db.write_file(scan, scanImage)
 
         X_ray = ctk.CTkLabel(
             blockFrame,
@@ -821,6 +819,7 @@ class App(ctk.CTk):
         while self.LoaddedChat.qsize() > 0:
             msg = self.LoaddedChat.get()  # get chat data from the Queue
             self.ChatBlock(msg)  # add Chat to Chatbox
+            self.ChatFrame.ShowScrollbar()
 
     def AddTochatBox(self, id):
         if not self.CurrentChat.empty():  # check if CurrentChat is not empty
@@ -829,6 +828,7 @@ class App(ctk.CTk):
             self.SaveChat(id, self.ChatLOGS)  # update database with new chat data
             if msg != "":
                 self.ChatBlock(msg)  # add Chat to Chatbox
+            self.ChatFrame.ShowScrollbar()
 
         self.ChatFrame.after(
             1000, self.AddTochatBox, id
@@ -842,7 +842,7 @@ class App(ctk.CTk):
 
         m_label = tk.Label(
             m_frame,
-            wraplength=250,
+            wraplength=800,
             fg="black",
             bg="#c5c7c9",
             text=msg,
@@ -873,7 +873,7 @@ class App(ctk.CTk):
                     ),
                 )
             )
-            self.EndChat(id, "Close")
+            self.EndChat(id, "Done")
             res = self.user.updateBalance(
                 self, 100
             )  # add Credits to the doctor When he ends the chat
@@ -884,28 +884,16 @@ class App(ctk.CTk):
             MessageBox(self, "warning", "Report Should be Generated")
 
     def EndChat(self, id, EndType):
-        if EndType == "Close":
-            res1 = self.db.Update(
-                "UPDATE requests SET Request_Status= %s WHERE Patient_ID= %s",
-                ["Done", id],
-            )
-            res2 = self.db.Update(
-                "UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s", ["Done", id]
-            )
-        if EndType == "Report":
-            res1 = self.db.Update(
-                "UPDATE requests SET Request_Status= %s WHERE Patient_ID= %s",
-                ["Reported", id],
-            )
-            res2 = self.db.Update(
-                "UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s",
-                ["Reported", id],
-            )
+        EndDate = date.today() 
+        res = self.db.Select("SELECT Chat_Logs, StartDate FROM chatdata WHERE Patient_ID= %s",[id])
+        self.db.Insert("INSERT INTO oldchat (Patient_ID, Doc_ID, ChatLOGS, StartDate, EndDate, EndType) VALUES (%s, %s, %s, %s, %s, %s)",[id, self.user.userid, res[0][0], res[0][1], EndDate, EndType])
+        self.db.Delete("DELETE FROM chatdata WHERE Patient_ID= %s",[id])
+        self.db.Delete("DELETE FROM requests WHERE Patient_ID= %s",[id])
         self.db.Commit()
         self.LoadActiveChat()
 
     def ReportGenerated(self, id):
-        res = self.db.Select("SELECT Report FROM chatdata WHERE Patient_ID= %s", [id])[
+        res = self.db.Select("SELECT prescriptionPDF FROM prescriptions WHERE Patient_ID= %s", [id])[
             0
         ][0]
         return len(res) != 0
@@ -938,7 +926,6 @@ class App(ctk.CTk):
         # update button Balance
         if res != -1:
             self.UpdateBalanceButton("User Reported Refund added to your balance")
-
     # End of Active Chat Section
 
     # Load LoadWaitingPatients Section
@@ -962,7 +949,7 @@ class App(ctk.CTk):
         HeaderLabel.place(anchor="nw", relx=0.35, rely=0)
 
         res = self.db.Select(
-            "SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.Age, users.Vip_Level FROM requests,users WHERE requests.Patient_ID LIKE users.ID AND requests.Request_Status = %s ORDER BY users.Vip_Level DESC, DATE (requests.Request_Date) ASC",
+            "SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.Age, users.Vip_Level FROM users, requests where users.ID = requests.Patient_ID and requests.Request_Status = %s ORDER BY users.Vip_Level DESC, DATE (requests.Request_Date) ASC",
             ["waiting"],
         )
         # Scrollable frame that will hold all Available Patients with request status as waiting
@@ -1104,8 +1091,12 @@ class App(ctk.CTk):
             ["ongoing", id],
         )
         self.db.Insert(
-            "INSERT INTO chatdata (Patient_ID, Doc_ID, Chat_Status) Values (%s,%s,%s)",
-            [id, self.user.userid, "ongoing"],
+            "INSERT INTO chatdata (Patient_ID, Doc_ID, Chat_Status, StartDate) Values (%s,%s,%s,%s)",
+            [id, self.user.userid, "ongoing", date.today()],
+        )
+        self.db.Insert(
+            "INSERT INTO prescriptions (Patient_ID, Doc_ID) Values (%s,%s)",
+            [id, self.user.userid],
         )
         self.loadWaitingPatients()
         self.db.Commit()

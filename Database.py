@@ -34,6 +34,12 @@ class Database:
         mycursor = self.mydb.cursor()
         mycursor.execute(Query, Values)
 
+    def Delete(self, Query, Values=None):
+        if Values is None:
+            Values = []
+        mycursor = self.mydb.cursor()
+        mycursor.execute(Query, Values)
+
     def Commit(self):
         self.mydb.commit()
 
@@ -47,6 +53,6 @@ class Database:
 
     def write_file(self, data, filename):
         # Convert binary data to proper format and write it on Hard Disk
-        filename = f"Data/PatientScans/{filename}.png"
         with open(filename, "wb") as file:
             file.write(data)
+        file.close()

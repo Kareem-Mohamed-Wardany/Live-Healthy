@@ -29,9 +29,12 @@ mastercard = Image.open("asset\\mastercard.png")
 gold = Image.open("asset\\gold-medal.png")
 silver = Image.open("asset\\silver-medal.png")
 bronze = Image.open("asset\\bronze-medal.png")
+EndDate = Image.open("asset\\hourglass.png")
 
 # Generate Prescription for Patient
 GeneratePrescription = Image.open("asset\GenerateReport.png")
+Prescriptions = Image.open("asset\clipboard.png")
+pdflogo = Image.open("asset\pdf.png")
 
 AddIcon = Image.open("asset\\add.png")
 
@@ -51,4 +54,11 @@ predict_image = Image.open("asset\predict.png")
 
 # Purchase VIP
 PurchaseVIP = Image.open("asset\\vip.png")
+PurchaseVIPLogo = Image.open("asset\\vip1.png")
+
+Discount = Image.open("asset\\discount.png")
+FifteenPercent = Image.open("asset\\fifteen.png")
+FiftyPercent = Image.open("asset\\50.png")
+HundredPercent = Image.open("asset\\100.png")
+calendar = Image.open("asset\\calendar.png")
 

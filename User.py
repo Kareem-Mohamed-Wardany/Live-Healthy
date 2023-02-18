@@ -57,12 +57,13 @@ class User:
             self.userBalance,
             self.userPhone,
             self.userAge,
-            self.userVIPLevel,
-            self.userVIPEnd,
             self.userSystemApperanceMode,
             self.userGender,
+            self.userVIPLevel,
+            self.userVIPEnd
         ) = self.fillindata(res[0], [0])
 
+        
         if self.userType == "patient":  # check if the user is a patient
             healthStatus = self.db.Select(
                 "SELECT * FROM patienthealthstatus WHERE Patient_ID= %s", [self.userid]
@@ -230,12 +231,8 @@ class User:
             pdf.cell(180, 10, txt=MedicineComment[pos], ln=2, align="C")
         file = f"Data\Prescriptions\{patient.userName}.pdf"
         pdf.output(file)
-        # binaryFile = self.db.convertToBinaryData(file)
-        # self.db.Update("UPDATE chatdata SET Report= %s Where Patient_ID= %s",[binaryFile, patient.userid])
-        # self.db.Commit()
-    def SavePrescription(self, path, id):
-        binaryFile = self.db.convertToBinaryData(path)
-        self.db.Update("UPDATE chatdata SET Report= %s Where Patient_ID= %s",[binaryFile, id])
+        binaryFile = self.db.convertToBinaryData(file)
+        self.db.Update("UPDATE prescriptions SET prescriptionPDF= %s, prescriptionDate = %s Where Patient_ID= %s",[binaryFile, date.today(), patient.userid])
         self.db.Commit()
 
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#

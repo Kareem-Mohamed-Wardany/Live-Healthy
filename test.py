@@ -1,10 +1,11 @@
 from Database import *
+from datetime import date
 BloodTypes = ["O-","O+","B-","B+","A-","A+","AB-","AB+"]
 db = Database()
 
 import queue
 
-# binaryImage = db.convertToBinaryData("COVID-996.png")
+binaryImage = db.convertToBinaryData("Data\Prescriptions\Ali Abd El Rahman.pdf")
 
 # qu = queue.Queue()
 
@@ -22,16 +23,17 @@ import queue
 #         textChat += c[i]
 #     else:
 #         textChat += "&,&"+c[i] 
-# res = db.Update("UPDATE requests SET = %s, Prediction= %s WHERE Patient_ID= %s",[binaryImage,"Covid-19",7])
+res = db.Insert("INSERT INTO prescriptions (Patient_ID, prescriptionPDF, prescriptionDate, Doc_ID) VALUES (%s, %s, %s, %s)",[5,binaryImage,date.today(),2])
 
 
+# SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.Age, vipmembers.Vip_Level FROM vipmembers INNER JOIN users ON vipmembers.memberID = users.ID INNER JOIN requests ON  users.ID  = requests.Patient_ID ORDER BY vipmembers.Vip_Level DESC,  DATE (requests.Request_Date) ASC
 # print(textChat)
 
 # symp = "Fever, "+ "Cough, "+"difficulty breathing, "+"Fatigue, "+"Headache, "+"loss of taste and smell, " + "Sore throat"
 # # print(symp)
 
-res1 = db.Update("UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
-res2 = db.Update("UPDATE requests SET Request_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
+# res1 = db.Update("UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
+# res2 = db.Update("UPDATE requests SET Request_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
 db.Commit()
 
 

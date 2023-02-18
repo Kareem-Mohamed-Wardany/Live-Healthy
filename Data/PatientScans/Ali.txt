@@ -1,2 +1,0 @@
-Highest Class Percentage: COVID --> 100.0% 
-Second Class Percentage: Normal --> 60.03%
