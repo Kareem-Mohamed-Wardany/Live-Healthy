@@ -8,6 +8,7 @@ from datetime import date
 
 import customtkinter as ctk
 
+from UserFactory import *
 from client import *
 from Config import *
 from Database import *
@@ -24,7 +25,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Doctor
-    user = User("4")  # 2 Khaled Cons   4 Amira Spec
+    user = UserFactory.createUser(4, "doctor")  # 2 Khaled Cons   4 Amira Spec
 
     Created = [
         True,
@@ -318,7 +319,7 @@ class App(ctk.CTk):
         )  # Bind if doctor pressed the image text will
 
     def PatientData(self, master, id):
-        PatientData = User(id)  # Get the patient Data
+        PatientData = UserFactory.createUser(id, "patient")  # Get the patient Data
 
         if PatientData.userGender == "Male":
             Imagesrc = ctk.CTkImage(MaleImage, size=(100, 100))
@@ -341,7 +342,7 @@ class App(ctk.CTk):
         PAge = ctk.CTkLabel(
             Patientinfo,
             height=10,
-            text=PatientData.userAge,
+            text=PatientData.CalcAge(PatientData.userAge),
             font=ctk.CTkFont(size=14, weight="bold"),
         )
         PAge.grid(row=2, column=0)
@@ -355,7 +356,7 @@ class App(ctk.CTk):
         PBloodType.grid(row=3, column=0)
 
     def PatientHealthStatus(self, master, id):
-        PatientData = User(id)  # Get the patient Data
+        PatientData = UserFactory.createUser(id, "patient")  # Get the patient Data
 
         # Frame that holds all health Status of the patients as Checkbox if he has that status it will be checked
         HealthStatusFrame = ctk.CTkFrame(
@@ -464,7 +465,7 @@ class App(ctk.CTk):
             AllergiesBox.select()
 
     def PatientRequestData(self, master, id):
-        PatientData = User(id)  # Get the patient Data
+        PatientData = UserFactory.createUser(id, "patient")  # Get the patient Data
         res = self.db.Select(
             "SELECT Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time FROM requests WHERE Patient_ID= %s",
             [id],
@@ -513,7 +514,7 @@ class App(ctk.CTk):
         EndChat.bind("<Button-1>", lambda event: self.EndButtonEvent(event, id))
 
     def ReportPatient(self, master, id):
-        PatientData = User(id)  # Get the patient Data
+        PatientData = UserFactory.createUser(id, "patient")
         # Report Patient
         ReportPatient = ctk.CTkLabel(
             master,
@@ -541,7 +542,7 @@ class App(ctk.CTk):
         )
 
     def HandlePrescription(self, event, id):
-        patient = User(id)
+        patient = UserFactory.createUser(id, "patient")
         path = f"Data\Prescriptions\{patient.userName}.pdf"
         if not self.ReportGenerated(id):
             subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
@@ -549,7 +550,7 @@ class App(ctk.CTk):
             self.FillMedication(id)
 
     def FillMedication(self, id):
-        patient = User(id)
+        patient = UserFactory.createUser(id, "patient")
         self.MedicineWindow = ctk.CTkToplevel()
         title = f"Fill Medication for Prescription of {patient.userName}"
         self.MedicineWindow.title(title)
@@ -634,7 +635,7 @@ class App(ctk.CTk):
             self.MedicineFrame.moveto(0)
 
     def FinalizePrescription(self, id, type):
-        patient = User(id)
+        patient = UserFactory.createUser(id, "patient")
         path = f"Data\Prescriptions\{patient.userName}.pdf"
         if len(self.MedicineFrame.scrollable_frame.winfo_children()) == 0:
             return MessageBox(
@@ -949,7 +950,7 @@ class App(ctk.CTk):
         HeaderLabel.place(anchor="nw", relx=0.35, rely=0)
 
         res = self.db.Select(
-            "SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.Age, users.Vip_Level FROM users, requests where users.ID = requests.Patient_ID and requests.Request_Status = %s ORDER BY users.Vip_Level DESC, DATE (requests.Request_Date) ASC",
+            "SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.DateOfBirth, users.Vip_Level FROM users, requests where users.ID = requests.Patient_ID and requests.Request_Status = %s ORDER BY users.Vip_Level DESC, DATE (requests.Request_Date) ASC",
             ["waiting"],
         )
         # Scrollable frame that will hold all Available Patients with request status as waiting
@@ -1037,7 +1038,7 @@ class App(ctk.CTk):
 
             AgeLabel = ctk.CTkLabel(
                 patient_border,
-                text=Patient_Age,
+                text=self.user.CalcAge(Patient_Age),
                 bg_color="transparent",
                 fg_color="transparent",
                 width=100,
