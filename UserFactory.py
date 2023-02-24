@@ -1,6 +1,7 @@
 from Patient import *
 from Doctor import *
 from Radiologist import *
+from Administrator import *
 
 
 class UserFactory:
@@ -13,7 +14,6 @@ class UserFactory:
             return Doctor(id)
         elif Type.lower() == "radiologist":
             return Radiologist(id)
+        elif Type.lower() == "admin":
+            return Administrator(id)
 
-
-x = UserFactory.createUser(5, "Patient")
-print(x.userName)

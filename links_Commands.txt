@@ -27,3 +27,6 @@ pip3 install customtkinter or pip install customtkinter
 pip install opencv-python
 pip install tensorflow
 pip install tkcalendar
+pip install pillow
+pip install fpdf2
+pip install autopep8

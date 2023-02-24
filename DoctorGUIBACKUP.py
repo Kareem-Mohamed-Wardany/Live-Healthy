@@ -218,16 +218,16 @@ class App(ctk.CTk):
 
     def MyChats(self, res):
         # Create Scrollable Frame to hold all chats for Doctor
-        frame = ctk.CTkScrollableFrame(
+        frame = ScrollableFrame(
             self.Active_Chats_frame,
-            fg_color="gray30",
-            width=230,
-            height=self.winfo_height() - 20,
+            "gray30",
+            width=250,
+            height=self.winfo_height() - 10,
         )
         frame.grid(row=0, column=0, sticky="nsew")
         start_time = time.time()
         for pos, item in enumerate(res):
-            self.AddtoChatMenu(frame, item[0], pos)
+            self.AddtoChatMenu(frame.scrollable_frame, item[0], pos)
         print(f"--- {time.time() - start_time} seconds ---")
 
     def AddtoChatMenu(self, master, id, pos):
@@ -267,8 +267,8 @@ class App(ctk.CTk):
         )
         chatWindow.grid(row=0, column=4, sticky="NSEW")
 
-        self.ChatFrame = ctk.CTkScrollableFrame(
-            chatWindow, fg_color="gray50", width=550, height=385
+        self.ChatFrame = ScrollableFrame(
+            chatWindow, "gray40", width=550, height=400, scrollafter=8
         )
         self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
 
@@ -294,11 +294,12 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        self.JoinChatServer(id)
+        # self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
-            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25,fg_color="gray50")
+            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25
+        )
         self.chatbox.place(anchor="nw", relx=0.01, rely=0.57)
         self.chatbox.bind(
             "<Return>", self.sendMessage
@@ -570,11 +571,11 @@ class App(ctk.CTk):
         delete.place(anchor="nw", relx=0.95, rely=0.01)
         delete.bind("<Button-1>", self.DelMedications)
 
-        self.MedicineFrame = ctk.CTkScrollableFrame(
-            self.MedicineWindow, fg_color="gray40", width=690, height=300
+        self.MedicineFrame = ScrollableFrame(
+            self.MedicineWindow, "gray40", width=690, height=300, scrollafter=14
         )
         self.MedicineFrame.place(anchor="nw", relx=0.01, rely=0.1)
-        self.MedicineFrame
+        self.MedicineFrame.scrollable_frame
 
         Show = ctk.CTkButton(
             self.MedicineWindow,
@@ -809,6 +810,7 @@ class App(ctk.CTk):
         while self.LoaddedChat.qsize() > 0:
             msg = self.LoaddedChat.get()  # get chat data from the Queue
             self.ChatBlock(msg)  # add Chat to Chatbox
+            self.ChatFrame.ShowScrollbar()
 
     def AddTochatBox(self, id):
         if not self.CurrentChat.empty():  # check if CurrentChat is not empty
@@ -817,6 +819,7 @@ class App(ctk.CTk):
             self.SaveChat(id, self.ChatLOGS)  # update database with new chat data
             if msg != "":
                 self.ChatBlock(msg)  # add Chat to Chatbox
+            self.ChatFrame.ShowScrollbar()
 
         self.ChatFrame.after(
             1000, self.AddTochatBox, id
@@ -824,7 +827,7 @@ class App(ctk.CTk):
 
     def ChatBlock(self, msg):
         # Create Frame that will hold message of the user
-        m_frame = ctk.CTkFrame(self.ChatFrame, bg_color="#595656")
+        m_frame = ctk.CTkFrame(self.ChatFrame.scrollable_frame, bg_color="#595656")
         m_frame.pack(anchor="nw", pady=5)
         m_frame.columnconfigure(0, weight=1)
 
@@ -926,9 +929,10 @@ class App(ctk.CTk):
 
         res = self.user.LoadWaitingPatientRequests()
         # Scrollable frame that will hold all Available Patients with request status as waiting
-        AvailablePatientsFrame = ctk.CTkScrollableFrame(
-            self.PatientRequests_frame, fg_color="gray20", width=1050, height=640)
-        AvailablePatientsFrame.place(anchor="nw", relx=0.01, rely=0.08)
+        AvailablePatientsFrame = ScrollableFrame(
+            self.PatientRequests_frame, "gray20", width=1070, height=650, scrollafter=5
+        )
+        AvailablePatientsFrame.place(anchor="nw", relx=0, rely=0.08)
 
         for i in range(len(res)):
             (
@@ -940,7 +944,7 @@ class App(ctk.CTk):
                 Patient_VIP,
             ) = self.user.fillindata(res[i])
             patient_border = ctk.CTkFrame(
-                AvailablePatientsFrame,
+                AvailablePatientsFrame.scrollable_frame,
                 corner_radius=0,
                 fg_color="gray40",
                 width=1070,

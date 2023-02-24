@@ -1,4 +1,5 @@
 from tkinter import messagebox
+import tkinter as tk
 import customtkinter as ctk
 
 
@@ -25,7 +26,7 @@ def center(win, w, h):
     x = (ws/2) - (w/2)
     y = (hs/2) - (h/2)
     win.geometry('%dx%d+%d+%d' % (w, h, x, y))
-    win.iconbitmap("asset\TitleImage.ico")
+    win.iconbitmap(default="asset\TitleImage.ico",)
     # win.update_idletasks()
     # width = win.winfo_width()
     # frm_width = win.winfo_rootx() - win.winfo_x()

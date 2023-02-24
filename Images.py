@@ -7,6 +7,7 @@ logo = Image.open("asset\Logo.png")
 # Male and Female Images
 MaleImage = Image.open("asset\Male.png")
 FemaleImage = Image.open("asset\Female.png")
+AdministratorImage = Image.open("asset\\administrator.png")
 
 ChatMaleImage = Image.open("asset\ChatMale.png")
 ChatFemaleImage = Image.open("asset\ChatFemale.png")
@@ -18,14 +19,17 @@ Chat = Image.open("asset\Chat.png")
 coin = Image.open("asset\coin.png")
 
 # Money Images
+cashlvl1 = Image.open("asset\cashlvl1.png")
+cashlvl2 = Image.open("asset\cashlvl2.png")
 cashlvl3 = Image.open("asset\cashlvl3.png")
+dollar = Image.open("asset\dollar-symbol.png")
 
 # Credit Card Images
 americanexpress = Image.open("asset\\americanexpress.png")
 visa = Image.open("asset\\visa.png")
 mastercard = Image.open("asset\\mastercard.png")
 
-# VIP Images 
+# VIP Images
 gold = Image.open("asset\\gold-medal.png")
 silver = Image.open("asset\\silver-medal.png")
 bronze = Image.open("asset\\bronze-medal.png")
@@ -62,3 +66,8 @@ FiftyPercent = Image.open("asset\\50.png")
 HundredPercent = Image.open("asset\\100.png")
 calendar = Image.open("asset\\calendar.png")
 
+
+# Administrator Section
+VerifyDoctor = Image.open("asset\\VerifyDoctor.png")
+HandleReports = Image.open("asset\\HandleReports.png")
+Adminchat = Image.open("asset\\Adminchat.png")

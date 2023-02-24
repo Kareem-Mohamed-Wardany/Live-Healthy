@@ -1,3 +1,5 @@
+import subprocess
+
 from User import *
 
 class Doctor(User):
@@ -6,13 +8,15 @@ class Doctor(User):
 
     def __init__(self, id):
         super().__init__(id)
-        res= self.db.Select("SELECT * FROM doctordata WHERE Doctor_ID= %s",[self.userid])
+        res = self.db.Select(
+            "SELECT * FROM doctordata WHERE Doctor_ID= %s", [self.userid]
+        )
         (
             self.Verified,
             self.University,
             self.ID_Card,
             self.Prof_License,
-            ) = self.fillindata(res[0], [0])
+        ) = self.fillindata(res[0], [0])
 
     def SaveData(self):
         super().SaveData()
@@ -24,12 +28,25 @@ class Doctor(User):
                 self.University,
                 self.ID_Card,
                 self.Prof_License,
-                ]
+            ],
         )
 
     @classmethod
-    def CreateDoctor(cls, name, Mail, Password, Utype, Phone, Age, Gender, University, ID_Card, Prof_License, Verified = 0):
-        cls.userid = cls.GetMaxID(cls) + 1 
+    def CreateDoctor(
+        cls,
+        name,
+        Mail,
+        Password,
+        Utype,
+        Phone,
+        Age,
+        Gender,
+        University,
+        ID_Card,
+        Prof_License,
+        Verified=0,
+    ):
+        cls.userid = cls.GetMaxID(cls) + 1
         cls.userName = name
         cls.userMail = Mail
         cls.userPassword = Password
@@ -64,6 +81,14 @@ class Doctor(User):
             "SELECT Patient_ID FROM chatdata WHERE Chat_Status = %s and Doc_ID = %s",
             ["ongoing", self.userid],
         )
+
+    def HandlePrescription(self, event, id, FillMedication):
+        patient = User(id)
+        path = f"Data\Prescriptions\{patient.userName}.pdf"
+        if not self.PrescriptionGenerated(id):
+            subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
+        else:
+            FillMedication
 
     def MakePrescription(self, id, Medicine, MedicineComment):
         patient = User(id)
@@ -135,6 +160,40 @@ class Doctor(User):
         )
         self.db.Commit()
 
-# u = Patient("ali@gmail.com","123")
-# u = Patient.CreatePatient("ali","ali", "123", "patinet","123123",date.today(),"Male")
-# print(u.Heart_Diseases)
+    def PrescriptionGenerated(self, id):
+        res = self.db.Select(
+            "SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",
+            [id, self.userid],
+        )[0][0]
+        return len(res) != 0
+
+    def EndChat(self, id, EndType):
+        EndDate = date.today() 
+        res = self.db.Select("SELECT Chat_Logs, StartDate FROM chatdata WHERE Patient_ID= %s",[id])
+        self.db.Insert("INSERT INTO oldchat (Patient_ID, Doc_ID, ChatLOGS, StartDate, EndDate, EndType) VALUES (%s, %s, %s, %s, %s, %s)",[id, self.userid, res[0][0], res[0][1], EndDate, EndType])
+        self.db.Delete("DELETE FROM chatdata WHERE Patient_ID= %s",[id])
+        self.db.Delete("DELETE FROM requests WHERE Patient_ID= %s",[id])
+        self.db.Commit()
+
+    def LoadWaitingPatientRequests(self):
+        return self.db.Select(
+            "SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.DateOfBirth, users.Vip_Level FROM users, requests where users.ID = requests.Patient_ID and requests.Request_Status = %s ORDER BY users.Vip_Level DESC, DATE (requests.Request_Date) ASC",
+            ["waiting"],
+        )
+
+    def AssignMePatient(self, id):
+        # UPDATE requests SET Request_Status = "waiting"
+        self.db.Update(
+            "UPDATE requests SET Request_Status = %s WHERE Patient_ID= %s",
+            ["ongoing", id],
+        )
+        self.db.Insert(
+            "INSERT INTO chatdata (Patient_ID, Doc_ID, Chat_Status, StartDate) Values (%s,%s,%s,%s)",
+            [id, self.userid, "ongoing", date.today()],
+        )
+        self.db.Insert(
+            "INSERT INTO prescriptions (Patient_ID, Doc_ID) Values (%s,%s)",
+            [id, self.userid],
+        )
+        self.db.Commit()
+

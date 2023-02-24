@@ -1,21 +1,22 @@
 import contextlib
+import os
+import queue
+import subprocess
+import time
 import tkinter as tk
 from datetime import date, timedelta
-import queue
-import time
-import subprocess
-import os
-import customtkinter as ctk
-# from Model import *
+from tkinter import filedialog
+from tkinter.ttk import *
 
-from Images import *
+import customtkinter as ctk
+
+from client import *
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
+from Images import *
 from User import *
-from client import *
-from tkinter.ttk import *
-from tkinter import filedialog
+from UserFactory import *
 
 
 class App(ctk.CTk):
@@ -26,7 +27,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = User("5")  
+    user = UserFactory.createUser("7", "patient")  
 
     Created = [
         True,
@@ -150,7 +151,7 @@ class App(ctk.CTk):
 
         self.PatientAge_label = ctk.CTkLabel(
             self.LeftSideBar_frame,
-            text=self.user.userAge,
+            text=self.user.CalcAge(self.user.userAge),
             width=100,
             height=20,
             compound="left",
@@ -203,7 +204,7 @@ class App(ctk.CTk):
                 width=100,
                 height=40,
                 # bottom, center, left, none, right, or top
-                compound="top",
+                compound="left",
                 font=ctk.CTkFont(size=15, weight="bold"),
             )
             self.VIP_end.grid(row=4, column=0)
@@ -303,37 +304,37 @@ class App(ctk.CTk):
         with contextlib.suppress(Exception):
             for widget in self.Predict_Scan_frame.winfo_children():
                 widget.destroy()
-        Infotext = self.ChatCreditsInfo("")
+        Infotext, self.Price = self.user.PriceInfo("")
         MessageBox(self.Predict_Scan_frame,"info",Infotext)
+
         self.ScanPathEntry = ctk.CTkEntry(self.Predict_Scan_frame, width=700, state="disabled")
         self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
-        self.ScanPathEntry2 = ctk.CTkEntry(self.Predict_Scan_frame, width=400, state="disabled")
-        self.ScanPathEntry2.place(anchor="nw", relx=0.05, rely=0.15)
-        self.ScanPathEntry3 = ctk.CTkEntry(self.Predict_Scan_frame, width=400, state="disabled")
-        self.ScanPathEntry3.place(anchor="nw", relx=0.05, rely=0.25)
+        
         ImportScanButton = ctk.CTkButton(self.Predict_Scan_frame,text="Import Scan", command=self.ImportScan)
         ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
-        ImportScanButton2 = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", command=self.SavePrediction)
-        ImportScanButton2.place(anchor="nw", relx=0.05, rely=0.35)
         
     def ImportScan(self):
         if self.ScanPathEntry.get() != "":
             self.ScanPathEntry.configure(state="normal")
             self.ScanPathEntry.delete(0, tk.END)
-        self.ScanPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
+
+        self.ScanPath = filedialog.askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
         self.ScanPathEntry.configure(state="normal")
+
         self.ScanPathEntry.insert("end", self.ScanPath) 
         self.ScanPathEntry.configure(state="disabled")
+
         ScanImage = ctk.CTkLabel(self.Predict_Scan_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
         ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
+
+        self.ClassOne = ctk.CTkLabel(self.Predict_Scan_frame, width=400, text="", font=ctk.CTkFont(size=16))
+        self.ClassOne.place(anchor="nw", relx=0.05, rely=0.15)
+
+        self.ClassTwo = ctk.CTkLabel(self.Predict_Scan_frame, width=400, text="", font=ctk.CTkFont(size=15))
+        self.ClassTwo.place(anchor="nw", relx=0.05, rely=0.2)
+
         if self.user.userVIPLevel < 3:
-            if self.user.userVIPLevel == 1:
-                value = -50
-            elif self.user.userVIPLevel == 2:
-                value = -25
-            elif self.user.userVIPLevel == 0:
-                value = -75
-            res = self.user.updateBalance(self.Predict_Scan_frame, value)
+            res = self.user.updateBalance(self.Predict_Scan_frame, self.Price)
             if res != -1:
                 self.Predict()
                 self.Credits_button = ctk.CTkButton(
@@ -353,42 +354,15 @@ class App(ctk.CTk):
         else:
             self.Predict()
 
+        SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", command= lambda: self.user.SavePrediction(self.ScanPath))
+        SavePredictionButton.place(anchor="nw", relx=0.15, rely=0.26)
+
     def Predict(self):
-        m = ResNetModel()
-        prediction = m.PredictScan(self.ScanPath)
-        self.max1 = 0
-        self.max2 = 0
-        self.p1=""
-        self.p2=""
-        for i in prediction:
-            value = float(i[1].split("%")[0])
-            if value > self.max1 or value > self.max2:
-                if self.max1 < self.max2:
-                    self.max1 = value
-                    self.p1 = i[0]
-                else:
-                    self.max2 = value
-                    self.p2 = i[0]
-        Label1 = f"{self.p1} ➜ {self.max1}%"
-        Label2 = f"{self.p2} ➜ {self.max2}%"
-        if self.ScanPathEntry2.get() != "" or self.ScanPathEntry3.get() !="":
-            self.ScanPathEntry2.configure(state="normal")
-            self.ScanPathEntry2.delete(0, tk.END)
-            self.ScanPathEntry3.configure(state="normal")
-            self.ScanPathEntry3.delete(0, tk.END)
+        Label1 , Label2 =  self.user.PredictMyScan(self.ScanPath, "Two")
         self.pr1 = f"Highest Class Percentage: {Label1}"
         self.pr2 = f"Second Class Percentage: {Label2}"
-        self.ScanPathEntry2.configure(state="normal")
-        self.ScanPathEntry2.insert("end", self.pr1) 
-        self.ScanPathEntry3.configure(state="normal")
-        self.ScanPathEntry3.insert("end", self.pr2)
-        
-    def SavePrediction(self):
-        newpath = self.ScanPath.split(".")[0]
-        newpath = f"{newpath}.txt"
-        with open(newpath, "w") as f:
-            f.write(f"Highest Class Percentage: {self.p1} --> {self.max1}% \n")
-            f.write(f"Second Class Percentage: {self.p2} --> {self.max2}%")
+        self.ClassOne.configure(text=self.pr1)
+        self.ClassTwo.configure(text=self.pr2)
 
     def select_frame_by_name(self, name):
         # set button color for selected button
@@ -412,9 +386,9 @@ class App(ctk.CTk):
             if name == "All My Prescriptions"
             else "transparent"
         )
-        # self.Credits_button.configure(
-        #     fg_color=("gray75", "gray25") if name == "Credits" else "transparent"
-        # )
+        self.Credits_button.configure(
+            fg_color=("gray75", "gray25") if name == "Credits" else "transparent"
+        )
 
         # show selected frame
         if name == "Predict_Scan":
@@ -441,13 +415,11 @@ class App(ctk.CTk):
             with contextlib.suppress(Exception):
                 self.Prescriptions_frame.grid_forget()
 
-
-
-        # if name == "Credits":
-        #     self.credits_frame.grid(row=0, column=1, sticky="nsew")
-        # else:
-        #     with contextlib.suppress(Exception):
-        #         self.credits_frame.grid_forget()
+        if name == "Credits":
+            self.credits_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            with contextlib.suppress(Exception):
+                self.credits_frame.grid_forget()
 
     def Predict_Scan_button_event(self):
         self.LoadPredictScanFrame()
@@ -463,9 +435,7 @@ class App(ctk.CTk):
 
     def Purchase_VIP(self):
         if self.Created[2]:
-            self.PurchaseVIP_frame = ctk.CTkFrame(
-                self, corner_radius=0, fg_color="transparent", height= self.winfo_height(), width= self.winfo_width()
-            )
+            self.PurchaseVIP_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
             self.Created[2] = False
         with contextlib.suppress(Exception):
             for widget in self.PurchaseVIP_frame.winfo_children():
@@ -493,7 +463,7 @@ class App(ctk.CTk):
         Coinlogo.place(anchor="nw", relx=0.25, rely=0.65)
 
 
-        subscribeButton = ctk.CTkButton(Bronzeframe,text="Subscribe", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.Subscribe("bronze"))
+        subscribeButton = ctk.CTkButton(Bronzeframe,text="Subscribe", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.user.Subscribe("bronze",self.PurchaseVIP_frame,self.LeftSideBar))
         subscribeButton.place(anchor="nw", relx=0.225, rely=0.82)
 
     def AddSilverlevel(self, frame):
@@ -513,7 +483,7 @@ class App(ctk.CTk):
         Coinlogo.place(anchor="nw", relx=0.25, rely=0.65)
 
 
-        subscribeButton = ctk.CTkButton(silverFrame,text="Subscribe", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.Subscribe("silver"))
+        subscribeButton = ctk.CTkButton(silverFrame,text="Subscribe", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.user.Subscribe("silver",self.PurchaseVIP_frame,self.LeftSideBar))
         subscribeButton.place(anchor="nw", relx=0.225, rely=0.82)
 
     def AddGoldlevel(self, frame):
@@ -533,43 +503,214 @@ class App(ctk.CTk):
         Coinlogo.place(anchor="nw", relx=0.25, rely=0.65)
 
 
-        subscribeButton = ctk.CTkButton(Goldframe,text="Subscribe", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.Subscribe("gold"))
+        subscribeButton = ctk.CTkButton(Goldframe,text="Subscribe", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.user.Subscribe("gold",self.PurchaseVIP_frame,self.LeftSideBar))
         subscribeButton.place(anchor="nw", relx=0.225, rely=0.82)   
 
-    def Subscribe(self, button):
-        if button == "bronze":
-            level = 1
-            value = -100
-        elif button == "silver":
-            level = 2
-            value = -190
-        elif button == "gold":  
-            level = 3
-            value = -350
-        res = self.user.updateBalance(self.PurchaseVIP_frame, value)
-        if res != -1:
-            if self.user.userVIPEnd == date(2001,1,1) or self.user.userVIPEnd < date.today():
-                self.user.userVIPEnd = date.today() + timedelta(days=30)
-            else:
-                self.user.userVIPEnd += timedelta(days=30)
-            self.user.userVIPLevel = level
-            self.db.Update("UPDATE users SET Vip_Level= %s, Vip_End_Date= %s WHERE ID = %s",[self.user.userVIPLevel, self.user.userVIPEnd, self.user.userid])
-            self.db.Commit()
-            self.LeftSideBar()
-            MessageBox(self.PurchaseVIP_frame,"info","Purchase Complete")
-
     def Credits_button_event(self):
-        # self.loadCreditWithdraw()
+        self.loadCreditRecharge()
         self.select_frame_by_name("Credits")
+
+    def loadCreditRecharge(self):
+        # Prevent Error for stucking in this frame and can not enter other Frames
+        if self.Created[4]:
+            self.credits_frame = ctk.CTkFrame(
+                self, corner_radius=0, fg_color="transparent"
+            )
+            self.Created[4] = False
+
+        # Remove card type|Specific amount entry in each start for frame as user may nav to other Frames and want to go back to this frame
+        self.delType()
+        # self.RemoveAmount("")
+
+        # Credit Card Section
+        self.CreditCardBlock()
+
+        # Recharge Section
+        self.RechargeBlock()
+
+    def delType(self):
+        # Try to handle error if any type was not shown so it will throw an error
+        with contextlib.suppress(NameError, AttributeError):
+            self.Americanlabel.destroy()
+        with contextlib.suppress(NameError, AttributeError):
+            self.Visalabel.destroy()
+        with contextlib.suppress(NameError, AttributeError):
+            self.Masterlabel.destroy()
+
+    def CreditCardBlock(self):
+        self.CardChecked = False
+        self.InformationLabel = ctk.CTkLabel(
+            self.credits_frame,
+            text="Credit Card Information",
+            width=60,
+            font=ctk.CTkFont(size=20, weight="bold"),
+        )
+        self.InformationLabel.place(anchor="nw", relx=0.37, rely=0.05)
+
+        self.CardNumber = ctk.CTkEntry(
+            self.credits_frame,
+            placeholder_text="Credit Card Number",
+            width=160,
+            font=ctk.CTkFont(size=14),
+        )  # 5471462613718519
+        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.15)
+        self.CardNumber.bind(
+            "<Leave>", self.CardNumberValidation
+        )  # Handle all functions will be applied for card number + validation
+
+        self.CVV = ctk.CTkEntry(
+            self.credits_frame,
+            show="*",
+            placeholder_text="CVV",
+            width=42,
+            font=ctk.CTkFont(size=14),
+        )
+        self.CVV.place(anchor="nw", relx=0.35, rely=0.15)
+        self.CVV.bind("<Leave>", self.HandleCVV)
+
+        self.ExpireMonth = ctk.CTkComboBox(
+            self.credits_frame,
+            width=60,
+            values=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+        )
+        self.ExpireMonth.place(anchor="nw", relx=0.55, rely=0.15)
+
+        self.slashLabel = ctk.CTkLabel(
+            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14)
+        )
+        self.slashLabel.place(anchor="nw", relx=0.615, rely=0.15)
+
+        self.ExpireYear = ctk.CTkComboBox(
+            self.credits_frame,
+            width=60,
+            values=["21", "22", "23", "24", "25", "26", "27"],
+        )
+        self.ExpireYear.place(anchor="nw", relx=0.64, rely=0.15)
+
+        self.CheckCard = ctk.CTkButton(
+            self.credits_frame,
+            text="Check Card Expiration",
+            anchor="w",
+            fg_color="gray50",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            command=self.CheckCard_button_event,
+        )
+        self.CheckCard.place(anchor="nw", relx=0.74, rely=0.15)
+
+    def CardNumberValidation(self, event):
+        if (
+            len(self.CardNumber.get()) != 16 or self.CardNumber.get().isalpha()
+        ):  # 5471462613718519
+            self.CardChecked = False
+            return MessageBox(self.credits_frame, "warning", "Credit Card is not 16 digit")
+        else:
+            self.FormateCreditCard()
+            self.CreditCardType()
+            self.CardChecked = True
+
+    def CreditCardType(self):
+        # ---------------
+        # American Express cards always begin with the number 3, more specifically 34 or 37.
+        # Visa cards begin with the number 4.
+        # Mastercards start with the number 5
+        # Test Cases 4471462613718519 , 3471462613718519 , 5471462613718519
+        if len(self.CardNumber.get()) != 0:  # check if Card Number is not Empty
+            # load card Types Images into its label
+            string = self.CardNumber.get()
+            if int(string[0]) == 3:
+                self.Americanlabel = ctk.CTkLabel(
+                    self,
+                    text="",
+                    image=ctk.CTkImage(americanexpress, size=(25, 25)),
+                )
+                self.Americanlabel.place(anchor="nw", relx=0.318, rely=0.25)
+            elif int(string[0]) == 4:
+                self.Visalabel = ctk.CTkLabel(
+                    self.credits_frame,
+                    text="",
+                    image=ctk.CTkImage(visa, size=(25, 25)),
+                )
+                self.Visalabel.place(anchor="nw", relx=0.2, rely=0.25)
+            elif int(string[0]) == 5:
+                self.Masterlabel = ctk.CTkLabel(
+                    self.credits_frame,
+                    text="",
+                    image=ctk.CTkImage(mastercard, size=(25, 25)),
+                )
+                self.Masterlabel.place(anchor="nw", relx=0.2, rely=0.25)
+
+    def FormateCreditCard(self):
+
+        if len(self.CardNumber.get()) != 0:  # check if Card Number is not Empty
+            # load card Types Images into its label
+            string = self.CardNumber.get()
+            x = " ".join(
+                string[i : i + 4] for i in range(0, len(string), 4)
+            )  # 3471462613718519 -> 3471 4626 1371 8519
+            self.CardNumber.delete(
+                "0", tk.END
+            )  # Delete old card Number 3471462613718519
+            self.CardNumber.insert(
+                "end", x
+            )  # Set Card Number IN GUI 3471 4626 1371 8519
+
+    def HandleCVV(self, event):
+        if len(self.CVV.get()) != 3 or self.CVV.get().isalpha():
+            self.CardChecked = False
+            MessageBox(self.credits_frame, "warning", "CVV is not 3 digit")
+        else:
+            self.CardChecked = True
+
+    def CheckCard_button_event(self):
+        if len(self.CVV.get()) != 3 or len(self.CardNumber.get()) != 16:
+            self.CardChecked = False
+            return MessageBox(self.credits_frame, "error", "No Credit Card details found")
+        Year = f"20{self.ExpireYear.get()}"
+        if int(Year) < date.today().year:
+            self.CardChecked = False
+            return MessageBox(self.credits_frame, "error", "Credit Card Expired")
+        if (
+            int(self.ExpireMonth.get()) < date.today().month
+            and int(Year) == date.today().year
+        ):
+            self.CardChecked = False
+            return MessageBox(self.credits_frame, "error", "Credit Card Expired")
+        else:
+            self.CardChecked = True
+
+    def RechargeBlock(self):
+        self.PurchaseLabel = ctk.CTkLabel(
+            self.credits_frame,
+            text="Purchase Credits",
+            width=60,
+            font=ctk.CTkFont(size=20, weight="bold"),
+        )
+        self.PurchaseLabel.place(anchor="nw", relx=0.37, rely=0.28)
+        
+        self.AddPlan(0.06, 0.35, cashlvl1, "100", "7", "1")
+        self.AddPlan(0.36, 0.35, cashlvl2, "200", "12", "2")
+        self.AddPlan(0.66, 0.35, cashlvl3, "400", "20", "3")
+
+    def AddPlan(self, x, y, pic, coins, pri, level):
+        Plan = ctk.CTkFrame(self.credits_frame, corner_radius=10, fg_color="#C0C0C0",height= 450, width=230)
+        Plan.place(anchor="nw", relx=x, rely=y)
+
+        MoneyImage = ctk.CTkLabel(Plan,text="",image=ctk.CTkImage(pic,size=(75,75)))
+        MoneyImage.place(anchor="nw", relx=0.325, rely=0.01)
+
+        Credits = ctk.CTkLabel(Plan,text=coins, image=ctk.CTkImage(coin,size=(60,60)),compound="left",text_color="#00246B", font= ctk.CTkFont(size=15, weight="bold"))
+        Credits.place(anchor="nw", relx=0.3, rely=0.27)
+
+        price = ctk.CTkLabel(Plan,text=pri, image=ctk.CTkImage(dollar,size=(60,60)),compound="left",text_color="#00246B", font= ctk.CTkFont(size=15, weight="bold"))
+        price.place(anchor="nw", relx=0.3, rely=0.47)
+
+        PurchaseButton = ctk.CTkButton(Plan,text="Purchase", fg_color="#f3ca20", text_color="#000000", hover_color="#e1e1bd",font=ctk.CTkFont(size=14, weight="bold"), command= lambda: self.user.Purchase(level, Plan, self.LeftSideBar, self.CardChecked))
+        PurchaseButton.place(anchor="nw", relx=0.2, rely=0.82) 
 
     def change_appearance_mode(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
-        self.user.userSystemApperanceMode = new_appearance_mode
-        self.db.Update(
-            "UPDATE users SET Apperance_Mode = %s WHERE ID= %s",
-            [new_appearance_mode, self.user.userid],
-        )
-        self.db.Commit()
+        self.user.SetApperanceMode(new_appearance_mode)
 
     def ChatWithDoctor(self):  # Fix the box colors, turn them all Textbox instead of Entry
         if self.Created[1]:
@@ -581,7 +722,7 @@ class App(ctk.CTk):
             for widget in self.ChatWithDoctor_frame.winfo_children():
                 widget.destroy()
 
-        if not self.user.checkRequest(): # Check if the Patient already has a request
+        if self.user.checkRequest(): # Check if the Patient already has a request
             res = self.db.Select("SELECT Request_Status FROM requests WHERE Patient_ID= %s", [self.user.userid])[0][0]
             if res == "waiting":
                 return MessageBox(self.ChatWithDoctor_frame,"info", "Waiting for a doctor to respond")
@@ -589,13 +730,13 @@ class App(ctk.CTk):
             self.openChat()
 
         else:
-            Infotext = self.ChatCreditsInfo("Chat")
+            Infotext, self.Price = self.user.PriceInfo("Chat")
             MessageBox(self.ChatWithDoctor_frame,"info",Infotext)
 
             self.ScanPathTextbox = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=700, state = "disabled", height=10)
             self.ScanPathTextbox.place(anchor="nw", relx=0.05, rely=0.05)
 
-            ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.ImportScan2)
+            ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", command=self.RequestScan)
             ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
 
             Sym = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Symptoms*",font= ctk.CTkFont(size=16))
@@ -625,22 +766,15 @@ class App(ctk.CTk):
             FillRequestButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Fill Request",width=15, command=self.FillRequest)
             FillRequestButton.place(anchor="nw", relx=0.72, rely=0.85)
 
-    def ImportScan2(self): 
+    def RequestScan(self): 
         if self.ScanPathTextbox.get("end") != "":
             self.ScanPathTextbox.configure(state="normal")
             self.ScanPathTextbox.delete(0, tk.END)
-        self.ScanPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
+        self.ScanPath = filedialog.askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
         self.ScanPathTextbox.configure(state="normal")
         self.ScanPathTextbox.insert("end", self.ScanPath) 
         self.ScanPathTextbox.configure(state="disabled")
-        m = ResNetModel()
-        prediction = m.PredictScan(self.ScanPath)
-        max = 0
-        for i in prediction:
-            value = float(i[1].split("%")[0])
-            if value > max:
-                max = value
-                self.prediction= i[0]
+        self.prediction= self.user.PredictMyScan(self.ScanPath, "One")
 
     def FillRequest(self):
         if self.symptoms.get("1.0", "end-1c") == "":
@@ -664,15 +798,9 @@ class App(ctk.CTk):
             extraInfo = self.extraInfo.get("1.0", "end-1c")
 
         if self.user.userVIPLevel < 3:
-            if self.user.userVIPLevel == 1:
-                value = -100
-            elif self.user.userVIPLevel == 2:
-                value = -50
-            elif self.user.userVIPLevel == 0:
-                value = -150
-            res = self.user.updateBalance(self.ChatWithDoctor_frame, value)
+            res = self.user.updateBalance(self.ChatWithDoctor_frame, self.Price)
             if res != -1:
-                self.user.addRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
+                self.user.CreateRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
                 self.Credits_button = ctk.CTkButton(
                     self.LeftSideBar_frame,
                     corner_radius=0,
@@ -689,30 +817,9 @@ class App(ctk.CTk):
                 self.Credits_button.grid(row=10, column=0, sticky="ew")
                 
         else:
-            self.user.addRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
+            self.user.CreateRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
         self.ChatWithDoctor()
         return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
-
-    def ChatCreditsInfo(self, ContextType):
-        if ContextType =="Chat":
-            if self.user.userVIPLevel == 1:
-                Infotext = "You are going to pay 100 credit to chat with our doctors"
-            elif self.user.userVIPLevel == 2:
-                Infotext = "You are going to pay 50 credit to chat with our doctors"
-            elif self.user.userVIPLevel == 3:
-                Infotext = "Chat with our doctors is Free"
-            else:
-                Infotext = "You are going to pay 150 credit to chat with our doctors"
-        else:
-            if self.user.userVIPLevel == 1:
-                Infotext = "You are going to pay 50 credit to predict your X-ray Scan"
-            elif self.user.userVIPLevel == 2:
-                Infotext = "You are going to pay 25 credit to predict your X-ray Scan"
-            elif self.user.userVIPLevel == 3:
-                Infotext = "X-ray Scan prediction is Free"
-            else:
-                Infotext = "You are going to pay 75 credit to predict your X-ray Scan"
-        return Infotext
 
     # Chat Section
     def openChat(self):
@@ -747,7 +854,7 @@ class App(ctk.CTk):
         # self.JoinChatServer()
 
     def DoctorData(self, master):
-        DoctorData = User(self.DoctorID)  # Get the patient Data
+        DoctorData = UserFactory.createUser(self.DoctorID,"doctor")  # Get the patient Data
 
         if DoctorData.userGender == "Male":
             Imagesrc = ctk.CTkImage(MaleImage, size=(200, 200))
@@ -785,21 +892,8 @@ class App(ctk.CTk):
         )
         GenerateReport.place(anchor="nw", relx=0.83, rely=0.92)
         GenerateReport.bind(
-            "<Button-1>", lambda event: self.HandlePrescription(event)
+            "<Button-1>", lambda event: self.user.ShowPrescription(event, self.DoctorID, self.ChatWithDoctor_frame)
         )
-
-    def HandlePrescription(self, event):
-        path = f"Data\Prescriptions\{self.user.userName}.pdf"
-        if not self.PrescriptionGenerated():
-            return MessageBox(self.ChatWithDoctor_frame, "info", "Prescription is not created yet")
-        self.db.write_file(self.Prescription, path)
-        subprocess.Popen([path], shell=True)  # Show the Prescription for the patient
-
-    def PrescriptionGenerated(self):
-        self.Prescription = self.db.Select("SELECT prescriptionPDF FROM prescriptions WHERE Patient_ID= %s", [self.user.userid])[
-            0
-        ][0]
-        return len(self.Prescription) != 0
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -945,7 +1039,7 @@ class App(ctk.CTk):
         Title.place(anchor="nw", relx=0.35, rely=0.01)
         MainWindow = ScrollableFrame(self.Prescriptions_frame, "gray30",width=1065,height=600,godown=False)
         MainWindow.place(anchor="nw", relx=0, rely=0.1)
-        res = self.db.Select("SELECT Doc_ID, prescriptionDate, prescriptionPDF FROM prescriptions WHERE Patient_ID = %s ORDER BY prescriptionDate DESC",[self.user.userid]) 
+        res = self.user.MyPrescriptions()
         for pos, i in enumerate(res):
             self.PrescriptionEntry(MainWindow.scrollable_frame, pos, i[0], i[1], i[2])
 
@@ -953,7 +1047,7 @@ class App(ctk.CTk):
         Frame = ctk.CTkFrame(master, corner_radius=0,fg_color="gray40", width=1065,height=100)
         Frame.grid(row=pos, column=0, pady = 5)
 
-        doctor = User(id)
+        doctor = UserFactory.createUser(id,"doctor")
 
         doctorNameLabel = ctk.CTkLabel(Frame, text=f"Dr. {doctor.userName}", font= ctk.CTkFont(size=20,weight="bold"))
         doctorNameLabel.place(anchor="nw", relx=0.05, rely=0.4)
@@ -966,15 +1060,7 @@ class App(ctk.CTk):
 
         PDFLabel = ctk.CTkLabel(Frame, text="Download", font= ctk.CTkFont(size=20,weight="bold"), image= ctk.CTkImage(pdflogo,size=(50,50)),compound="left")
         PDFLabel.place(anchor="nw", relx=0.8, rely=0.3)
-        PDFLabel.bind("<Button-1>", lambda event: self.DownloadPrescription(event, id, presDate, presPDF))
-
-    def DownloadPrescription(self, event, id, presDate, presPDF):
-        SavePath = filedialog.askdirectory(title="Select Where to Download Prescription")
-        FullPathName = f"{SavePath}/Prescription_{presDate}.pdf"
-        self.db.write_file(presPDF, FullPathName)
-        subprocess.Popen([FullPathName], shell=True)  # Show the Prescription for the patient
-        return MessageBox(self.Prescriptions_frame,"info","Prescription saved successfully")
-
+        PDFLabel.bind("<Button-1>", lambda event: self.user.DownloadPrescription(event, presDate, presPDF, self.Prescriptions_frame))
 
 
         

@@ -47,7 +47,7 @@ class User:
 
     @classmethod
     def CreateUser(cls, name, Mail, Password, Utype, Phone, Age, Gender):
-       
+
         cls.userid = cls.GetMaxID(cls) + 1 
         cls.userName = name
         cls.userMail = Mail
@@ -73,6 +73,8 @@ class User:
         cls.userType = res[0][1]
         return cls.userid, cls.userType
 
+    def Logout(self):
+        pass
 
     def SaveData(self):
         self.db.Insert(
@@ -116,5 +118,12 @@ class User:
             [self.userBalance, self.userid],
         )
         self.db.Commit()
-        
+
+    def SetApperanceMode(self, mode):
+        self.userSystemApperanceMode = mode
+        self.db.Update(
+            "UPDATE users SET Apperance_Mode = %s WHERE ID= %s",
+            [mode, self.userid],
+        )
+        self.db.Commit()
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#
