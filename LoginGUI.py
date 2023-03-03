@@ -31,7 +31,7 @@ class Login(ctk.CTk):
             height=710,
         )
         self.backgroundFrame.place(anchor="nw", relx=0.01, rely=0.011)
-        bgImage = ctk.CTkLabel(self.backgroundFrame,text="",image=ctk.CTkImage(Image.open("login.jpg"),size=(1255,710)))
+        bgImage = ctk.CTkLabel(self.backgroundFrame,text="",image=ctk.CTkImage(Image.open("asset/login.jpg"),size=(1255,710)))
         bgImage.place(anchor="nw", relx=0, rely=0)
         self.subbg = ctk.CTkFrame(
             self.backgroundFrame,
@@ -40,7 +40,9 @@ class Login(ctk.CTk):
             height=694,
         )
         self.subbg.place(anchor="nw", relx=0.008, rely=0.01)
-        bgImage2 = ctk.CTkLabel(self.subbg,text="",image=ctk.CTkImage(Image.open("login2.jpg"),size=(1230,694)))
+        logoImage = ctk.CTkLabel(self,text="",image=ctk.CTkImage(Image.open("asset/Logo.png"),size=(80,80)))
+        logoImage.place(anchor="nw", relx=0.021, rely=0.025)
+        bgImage2 = ctk.CTkLabel(self.subbg,text="",image=ctk.CTkImage(Image.open("asset/login2.jpg"),size=(1230,694)))
         bgImage2.place(anchor="nw", relx=0, rely=0)
         self.loginFrame = ctk.CTkFrame(
             self.subbg,
