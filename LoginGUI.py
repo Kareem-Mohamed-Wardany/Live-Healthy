@@ -44,7 +44,7 @@ class Login(ctk.CTk):
         bgImage2.place(anchor="nw", relx=0, rely=0)
         self.loginFrame = ctk.CTkFrame(
             self.subbg,
-            fg_color="#F0F0F0",
+            fg_color="#FFFAFA",
             width=1230,
             height=693,
         )
@@ -101,6 +101,8 @@ class Login(ctk.CTk):
         text_color="black",
         width=490,
         height=45,
+        bg_color="transparent",
+        show="*"
         )
         self.passwordEntry.place(anchor="nw",relx=0.061,rely=0.65)
         forgotpassLabel = ctk.CTkLabel(
@@ -110,7 +112,7 @@ class Login(ctk.CTk):
             width=100,
             height=25,
             font=ctk.CTkFont(size=15,family="Aerial 18",underline=True),
-            cursor= "hand2"
+            cursor= "hand2",
         )
         forgotpassLabel.place(anchor="nw", relx=0.065, rely=0.725)
 

@@ -141,7 +141,8 @@ class Register(ctk.CTk):
         mainFrame,
         placeholder_text="Input Your Password...",
         width=300,
-        height=35
+        height=35,
+        show="*"
         )
         # n, ne, e, se, s, sw, w, nw, or center
         self.PassEntry.place(anchor="nw",relx=0.015,rely=0.43)
@@ -157,7 +158,8 @@ class Register(ctk.CTk):
         mainFrame,
         placeholder_text="Confirm Your Password...",
         width=300,
-        height=35
+        height=35,
+        show="*"
         )
         # n, ne, e, se, s, sw, w, nw, or center
         self.ConfirmPassEntry.place(anchor="nw",relx=0.55,rely=0.43)
