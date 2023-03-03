@@ -41,7 +41,7 @@ class Login(ctk.CTk):
         )
         self.subbg.place(anchor="nw", relx=0.008, rely=0.01)
         logoImage = ctk.CTkLabel(self,text="",image=ctk.CTkImage(Image.open("asset/Logo.png"),size=(80,80)))
-        logoImage.place(anchor="nw", relx=0.021, rely=0.025)
+        logoImage.place(anchor="nw", relx=0.018, rely=0.020)
         bgImage2 = ctk.CTkLabel(self.subbg,text="",image=ctk.CTkImage(Image.open("asset/login2.jpg"),size=(1230,694)))
         bgImage2.place(anchor="nw", relx=0, rely=0)
         self.loginFrame = ctk.CTkFrame(
