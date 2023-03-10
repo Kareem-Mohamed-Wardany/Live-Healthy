@@ -6,6 +6,7 @@ import time
 import tkinter as tk
 from datetime import date, timedelta
 from tkinter import filedialog
+import shutil
 from tkinter.ttk import *
 
 import customtkinter as ctk
@@ -27,7 +28,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = UserFactory.createUser("7", "patient")  
+    user = UserFactory.createUser("5", "patient")  
 
     Created = [
         True,
@@ -61,6 +62,7 @@ class App(ctk.CTk):
             self.configDict.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
+        self.protocol('WM_DELETE_WINDOW', self.exit_function)
 
         self.grid_rowconfigure(0, weight=1)  # let the left sidebar take all the space
         self.grid_columnconfigure(1, weight=1)
@@ -719,6 +721,7 @@ class App(ctk.CTk):
             )
             self.Created[1] = False
         with contextlib.suppress(Exception):
+            os.mkdir("Data/Prescriptions/")
             for widget in self.ChatWithDoctor_frame.winfo_children():
                 widget.destroy()
 
@@ -835,8 +838,8 @@ class App(ctk.CTk):
         )
         chatWindow.place(anchor="nw",relx = 0.01,rely = 0.01)
 
-        self.ChatFrame = ScrollableFrame(
-            chatWindow, "gray40", width=700, height=500, scrollafter=8
+        self.ChatFrame = ctk.CTkScrollableFrame(
+            chatWindow, fg_color="gray30", width=700, height=500
         )
         self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
         # Doctor Data
@@ -897,9 +900,9 @@ class App(ctk.CTk):
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
-            master, font=ctk.CTkFont(size=14, weight="bold"), width=650, height=25
+            master, font=ctk.CTkFont(size=14, weight="bold"), width=675, height=25,fg_color="gray30"
         )
-        self.chatbox.place(anchor="nw", relx=0.01, rely=0.71)
+        self.chatbox.place(anchor="nw", relx=0.01, rely=0.72)
         self.chatbox.bind(
             "<Return>", self.sendMessage
         )  # Enter Button will send the message
@@ -912,7 +915,7 @@ class App(ctk.CTk):
         SendIcon = ctk.CTkLabel(
             master, text="", image=sendimage, bg_color="transparent"
         )
-        SendIcon.place(anchor="nw", relx=0.68, rely=0.71)
+        SendIcon.place(anchor="nw", relx=0.7, rely=0.72)
         SendIcon.bind(
             "<Button-1>", self.sendMessage
         )  # Bind if doctor pressed the image text will
@@ -979,7 +982,6 @@ class App(ctk.CTk):
         while self.LoaddedChat.qsize() > 0:
             msg = self.LoaddedChat.get()  # get chat data from the Queue
             self.ChatBlock(msg)  # add Chat to Chatbox
-            self.ChatFrame.ShowScrollbar()
 
     def AddTochatBox(self):
         if not self.CurrentChat.empty():  # check if CurrentChat is not empty
@@ -988,24 +990,21 @@ class App(ctk.CTk):
             self.SaveChat(self.ChatLOGS)  # update database with new chat data
             if msg != "":
                 self.ChatBlock(msg)  # add Chat to Chatbox
-            self.ChatFrame.ShowScrollbar()
 
         self.ChatFrame.after(
             1000, self.AddTochatBox)  # Repeat the function after 1000 ms
 
     def ChatBlock(self, msg):
         # Create Frame that will hold message of the user
-        m_frame = ctk.CTkFrame(self.ChatFrame.scrollable_frame, bg_color="#595656")
+        m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
         m_frame.pack(anchor="nw", pady=5)
         m_frame.columnconfigure(0, weight=1)
 
-        m_label = tk.Label(
+        m_label = ctk.CTkLabel(#bg="#c5c7c9",
             m_frame,
             wraplength=800,
-            fg="black",
-            bg="#c5c7c9",
             text=msg,
-            font="lucida 14 bold",
+            font=ctk.CTkFont("lucida",size=14,weight="bold"),
             justify="left",
             anchor="w",
         )
@@ -1037,11 +1036,11 @@ class App(ctk.CTk):
                 widget.destroy()
         Title = ctk.CTkLabel(self.Prescriptions_frame,text="All My Prescriptions",font= ctk.CTkFont(size=25,weight="bold"))
         Title.place(anchor="nw", relx=0.35, rely=0.01)
-        MainWindow = ScrollableFrame(self.Prescriptions_frame, "gray30",width=1065,height=600,godown=False)
-        MainWindow.place(anchor="nw", relx=0, rely=0.1)
+        MainWindow = ctk.CTkScrollableFrame(self.Prescriptions_frame, fg_color="gray30",width=1040,height=600)
+        MainWindow.place(anchor="nw", relx=0.01, rely=0.1)
         res = self.user.MyPrescriptions()
         for pos, i in enumerate(res):
-            self.PrescriptionEntry(MainWindow.scrollable_frame, pos, i[0], i[1], i[2])
+            self.PrescriptionEntry(MainWindow, pos, i[0], i[1], i[2])
 
     def PrescriptionEntry(self, master, pos, id, presDate, presPDF):
         Frame = ctk.CTkFrame(master, corner_radius=0,fg_color="gray40", width=1065,height=100)
@@ -1062,8 +1061,12 @@ class App(ctk.CTk):
         PDFLabel.place(anchor="nw", relx=0.8, rely=0.3)
         PDFLabel.bind("<Button-1>", lambda event: self.user.DownloadPrescription(event, presDate, presPDF, self.Prescriptions_frame))
 
+    def exit_function(self):
+        with contextlib.suppress(Exception):
+            shutil.rmtree("Data/Prescriptions/")
+            self.Userclient.end()
+        self.destroy()
 
-        
 if __name__ == "__main__":
     app = App()
     app.mainloop()

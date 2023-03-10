@@ -2,6 +2,7 @@ import contextlib
 import os
 import queue
 import subprocess
+import shutil
 import time
 import tkinter as tk
 from datetime import date
@@ -57,6 +58,7 @@ class App(ctk.CTk):
             self.config.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
+        self.protocol('WM_DELETE_WINDOW', self.exit_function)
 
         self.grid_rowconfigure(0, weight=1)  # let the left sidebar take all the space
         self.grid_columnconfigure(1, weight=1)
@@ -258,6 +260,8 @@ class App(ctk.CTk):
         # Chat window that will contain ChatFrame that show the chat for the doctor and chatbox where the doctor type in his chat
         # also send icon that will show the text in chatbox on ChatFrame for both patient and doctor
         with contextlib.suppress(Exception):
+            os.mkdir("Data/PatientScans/")
+            os.mkdir("Data/Prescriptions/")
             for widget in chatWindow.winfo_children():
                 widget.destroy()
             self.Userclient.end()
@@ -824,17 +828,15 @@ class App(ctk.CTk):
 
     def ChatBlock(self, msg):
         # Create Frame that will hold message of the user
-        m_frame = ctk.CTkFrame(self.ChatFrame, bg_color="#595656")
+        m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
         m_frame.pack(anchor="nw", pady=5)
         m_frame.columnconfigure(0, weight=1)
 
-        m_label = tk.Label(
+        m_label = ctk.CTkLabel(#bg="#c5c7c9",
             m_frame,
             wraplength=800,
-            fg="black",
-            bg="#c5c7c9",
             text=msg,
-            font="lucida 14 bold",
+            font=ctk.CTkFont("lucida",size=14,weight="bold"),
             justify="left",
             anchor="w",
         )
@@ -852,15 +854,6 @@ class App(ctk.CTk):
 
     def EndButtonEvent(self, event, id):
         if self.user.PrescriptionGenerated(id):
-            list(
-                map(
-                    os.unlink,
-                    (
-                        os.path.join("Data/PatientScans/", f)
-                        for f in os.listdir("Data/PatientScans/")
-                    ),
-                )
-            )
             self.user.EndChat(id, "Done")
             self.LoadActiveChat()
             res = self.user.updateBalance(
@@ -1409,6 +1402,14 @@ class App(ctk.CTk):
     def change_appearance_mode(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
         self.user.SetApperanceMode(new_appearance_mode)
+
+    def exit_function(self):
+        with contextlib.suppress(Exception):
+            shutil.rmtree("Data/PatientScans/")
+            shutil.rmtree("Data/Prescriptions/")
+            self.Userclient.end()
+        self.destroy()
+
 
 
 if __name__ == "__main__":

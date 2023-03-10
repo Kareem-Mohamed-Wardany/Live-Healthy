@@ -5,6 +5,7 @@ import queue
 import time
 import os
 import customtkinter as ctk
+import shutil
 # from Model import *
 
 from Images import *
@@ -57,6 +58,7 @@ class App(ctk.CTk):
             self.config.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
+        self.protocol('WM_DELETE_WINDOW', self.exit_function)
 
         # let the left sidebar take all the space
         self.grid_rowconfigure(0, weight=1)
@@ -136,7 +138,7 @@ class App(ctk.CTk):
             hover_color=("gray70", "gray30"),
             image=Verify_Doctors_image,
             anchor="w",
-            # command=self.Credits_button_event,
+            command=self.Verify_Doctors_button_event,
         )
         self.Verify_Doctors_button.grid(row=3, column=0, sticky="ew")
         # create Apperance Mode to what currently the GUI running with
@@ -158,6 +160,10 @@ class App(ctk.CTk):
             fg_color=(
                 "gray75", "gray25") if name == "Handle_Reports" else "transparent"
         )
+        self.Verify_Doctors_button.configure(
+            fg_color=(
+                "gray75", "gray25") if name == "Verify_Doctors" else "transparent"
+        )
 
         # show selected frame
         if name == "Handle_Reports":
@@ -165,6 +171,12 @@ class App(ctk.CTk):
         else:
             with contextlib.suppress(Exception):
                 self.Handle_Reports_frame.grid_forget()
+
+        if name == "Verify_Doctors":
+            self.Verify_Doctors_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            with contextlib.suppress(Exception):
+                self.Verify_Doctors_frame.grid_forget()
 
     def LoadHandleReportsFrame(self):
         if self.Created[0]:
@@ -252,24 +264,121 @@ class App(ctk.CTk):
         PermaButton = ctk.CTkButton(ChatWindow, text="Permanent Suspension",fg_color="#ff0000", command= lambda:self.user.ConfirmSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
         PermaButton.place(anchor="nw", relx=0.75, rely=0.85)
 
-
     def Handle_Reports_button_event(self):
         self.LoadHandleReportsFrame()
         self.select_frame_by_name("Handle_Reports")
 
-    # def PatientRequests_button_event(self):
-    #     # self.loadWaitingPatients()
-    #     self.select_frame_by_name("PatientRequests")
+    def Verify_Doctors_button_event(self):
+        self.LoadVerifyDoctorsFrame()
+        self.select_frame_by_name("Verify_Doctors")
 
-    # def Credits_button_event(self):
-    #     # self.loadCreditWithdraw()
-    #     self.select_frame_by_name("Credits")
+    def LoadVerifyDoctorsFrame(self):
+        if self.Created[1]:
+            self.Verify_Doctors_frame = ctk.CTkFrame(
+                self, corner_radius=0, fg_color="transparent"
+            )
+            self.Created[1] = False
+        with contextlib.suppress(Exception):
+            os.mkdir("Data/images/") 
+            for widget in self.Verify_Doctors_frame.winfo_children():
+                widget.destroy()
+
+        Title = ctk.CTkLabel(self.Verify_Doctors_frame, text="Unverified Doctors",
+                             font=ctk.CTkFont(size=20, weight="bold"))
+        Title.place(anchor="nw", relx=0.4, rely=0.02)
+
+        Doctors_frame = ctk.CTkScrollableFrame(self.Verify_Doctors_frame, fg_color="gray30", width=1050,height=600)
+        Doctors_frame.place(anchor="nw", relx=0.01, rely=0.1)
+
+        DoctorNameLabel = ctk.CTkLabel(Doctors_frame, text="Doctor Name",
+                                       font=ctk.CTkFont(size=17, weight="bold"), width=200)
+        DoctorNameLabel.grid(row=0, column=0,pady=10)
+
+        UniversityLabel = ctk.CTkLabel(Doctors_frame, text="University Name",
+                                       font=ctk.CTkFont(size=17, weight="bold"), width=200)
+        UniversityLabel.grid(row=0, column=1,pady=10)
+
+        IDCardLabel = ctk.CTkLabel(Doctors_frame, text="ID Card",
+                                       font=ctk.CTkFont(size=17, weight="bold"), width=200)
+        IDCardLabel.grid(row=0, column=2,pady=10)
+
+        ProfLicLabel = ctk.CTkLabel(Doctors_frame, text="Profession License",
+                                       font=ctk.CTkFont(size=17, weight="bold"), width=200)
+        ProfLicLabel.grid(row=0, column=3,pady=10)
+        res = self.user.getUnverifiedDoctors()
+        for pos, i in enumerate(res):
+            # doctordata.Doctor_ID, users.Name, doctordata.University, doctordata.ID_Card, doctordata.Prof_License
+            DName = ctk.CTkLabel(Doctors_frame, text=f"Dr. {i[1]}", wraplength=180,
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+            DName.grid(row=pos+1, column=0,pady=10)
+
+            UniversityName = ctk.CTkLabel(Doctors_frame, text=f"{i[2]}", wraplength=180,
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+            UniversityName.grid(row=pos+1, column=1,pady=10)
+
+
+            self.db.write_file(i[3],f"Data/images/ID_Card_{i[1]}.png")
+            img = Image.open(f"Data/images/ID_Card_{i[1]}.png")
+
+            IDCard = ctk.CTkLabel(Doctors_frame, text="", wraplength=180,image= ctk.CTkImage(img,size=(150,50)),
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+            IDCard.grid(row=pos+1, column=2,pady=10)
+            IDCard.bind("<Button-1>", lambda event, name = i[1], im = img, type="ID Card": self.Zoom(event, name, im, type))
+
+
+
+            self.db.write_file(i[4],f"Data/images/Prof_lic_{i[1]}.png")
+            img2 = Image.open(f"Data/images/Prof_lic_{i[1]}.png")
+
+            Prof_lic = ctk.CTkLabel(Doctors_frame, text="", wraplength=180,image= ctk.CTkImage(img2,size=(150,50)),
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+            Prof_lic.grid(row=pos+1, column=3,pady=10)
+            Prof_lic.bind("<Button-1>", lambda event, name = i[1], im = img2, type="Profession License": self.Zoom(event, name, im, type))
+
+
+            verfiy = ctk.CTkLabel(Doctors_frame, text="", width=100,image= ctk.CTkImage(Verify,size=(50,50)),
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+            verfiy.grid(row=pos+1, column=4,pady=10)
+            # master, id, update
+            verfiy.bind("<Button-1>", lambda event, id = i[0]: self.user.VerifyDoctor(event, self.Verify_Doctors_frame, id, self.LoadVerifyDoctorsFrame))
+
+            ban = ctk.CTkLabel(Doctors_frame, text="", width=100,image= ctk.CTkImage(Ban,size=(50,50)),
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+            ban.grid(row=pos+1, column=5,pady=10)
+            ban.bind("<Button-1>", lambda event, id = i[0]: self.user.BanDoctor(event, self.Verify_Doctors_frame, id, self.LoadVerifyDoctorsFrame))
+
+    def Zoom(self, event, name, img, type):
+        ZoomWindow = ctk.CTkToplevel()
+        title = f"{type} For {name}"
+        ZoomWindow.title(title)
+        center(ZoomWindow, 600, 400)  # Open the window in the center of the Screen
+        ZoomWindow.attributes('-topmost', 'true',)
+        ZoomWindow.resizable(False, False)
+        imgLabel = ctk.CTkLabel(ZoomWindow, text="",image=ctk.CTkImage(img,size=(600,400)))
+        imgLabel.grid(row=0,column=0)
 
     def change_appearance_mode(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
         self.user.SetApperanceMode(new_appearance_mode)
 
+    def exit_function(self):
+        try:
+            shutil.rmtree("Data/images/")
+        except OSError as e:
+            pass
+        self.destroy()
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
+# Create Directory
+# try: 
+#     os.mkdir(path) 
+# except OSError as error: 
+#     print(error)  
+# delete directory
+# try:
+#     os.rmdir(dir_path)
+# except OSError as e:
+#     print("Error: %s : %s" % (dir_path, e.strerror))
