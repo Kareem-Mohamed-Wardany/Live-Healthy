@@ -221,7 +221,7 @@ class Register(ctk.CTk):
         if Utype=="Patient":
             self.patient()
             self.Registerbutton()
-        elif Utype=="Consultant" or Utype=="Specialist":
+        elif Utype in ["Consultant", "Specialist"]:
             self.doctor()
             self.Registerbutton()
         elif Utype=="Radiologist":
@@ -499,10 +499,7 @@ class Register(ctk.CTk):
             or self.Gender == 0
         )
     def emptyUserTypeFields(self):
-        if (
-            self.TypeCombo.get() == "Specialist"
-            or self.TypeCombo.get() == "Consultant"
-        ) and (
+        if self.TypeCombo.get() in ["Specialist", "Consultant"] and (
             len(self.IDPath) == 0
             or len(self.LicensePath) == 0
             or len(self.uni) == 0
@@ -539,30 +536,29 @@ class Register(ctk.CTk):
             self.radioCenterCode = self.RadioCenterCodeEntry.get()
             self.CheckRadioCenter()
         #print(self.radioCenterCode, self.radioCenter)
-        if self.TypeCombo.get() == "Specialist" or self.TypeCombo.get() == "Consultant":
+        if self.TypeCombo.get() in ["Specialist", "Consultant"]:
             if self.UniEntry.get() == "":
                 return MessageBox(self, "error", "Please fill all the fields!")
-            else:
-                self.uni = self.UniEntry.get()
-                self.IDbinary = self.db.convertToBinaryData(self.IDPath)
-                self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
+            self.uni = self.UniEntry.get()
+            self.IDbinary = self.db.convertToBinaryData(self.IDPath)
+            self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
     def insertUserInfo(self):
         appearence = "System"
         res = self.db.Select("SELECT ID FROM users")
         IDs = [i[0] for i in res]
         newID = len(IDs)
         if self.TypeCombo.get() == "Patient":
-            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
+            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
             self.db.Insert("INSERT INTO patienthealthstatus VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.heart, self.diabetes, self.cancer,self.obesity,self.smoker,self.hypertension,self.allergies,self.Blood])
             self.db.Commit()
         if self.TypeCombo.get() == "Radiologist":
-            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
+            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
             res = self.db.Select("SELECT ID FROM radiologycenters where Name=%s",[self.radioCenter])
             centerID = res[0][0]
             self.db.Insert("INSERT INTO radiologists VALUES (%s,%s)",[newID,centerID])
             self.db.Commit()
-        if  self.TypeCombo.get() == "Consultant" or self.TypeCombo.get() == "Specialist":
-            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, Age, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
+        if self.TypeCombo.get() in ["Consultant", "Specialist"]:
+            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
             self.db.Insert("INSERT INTO doctordata VALUES (%s,%s,%s,%s,%s)",[newID, 0, self.uni,self.IDbinary, self.LicenseBinary])
             self.db.Commit()
 

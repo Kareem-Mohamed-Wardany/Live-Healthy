@@ -96,7 +96,7 @@ class Doctor(User):
             "SELECT X_ray_scan, Prediction FROM requests WHERE Patient_ID= %s",
             [id],
         )
-        self.db.write_file(res[0][0], patient.userName)
+        # self.db.write_file(res[0][0], patient.userName)
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Times", size=15)
@@ -119,7 +119,7 @@ class Doctor(User):
         pdf.set_xy(10, 70)
         pdf.cell(200, 10, txt=Name, ln=1, align="L")
 
-        Age = f"Age: {str(patient.userAge)}"
+        Age = f"Age: {str(patient.CalcAge(patient.userAge))}"
         pdf.set_xy(10, 80)
         pdf.cell(200, 10, txt=Age, ln=2, align="L")
 
@@ -161,10 +161,7 @@ class Doctor(User):
         self.db.Commit()
 
     def PrescriptionGenerated(self, id):
-        res = self.db.Select(
-            "SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",
-            [id, self.userid],
-        )[0][0]
+        res = self.db.Select("SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",[id, self.userid])
         return len(res) != 0
 
     def EndChat(self, id, EndType):

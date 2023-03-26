@@ -227,10 +227,11 @@ class App(ctk.CTk):
             height=self.winfo_height() - 20,
         )
         frame.grid(row=0, column=0, sticky="nsew")
-        start_time = time.time()
+        if len(res)==0:
+            NoData= ctk.CTkLabel(frame, text="No Patients Found!" , width=220, height=self.winfo_height() - 150)
+            NoData.grid(row=0, column=0, pady=6)
         for pos, item in enumerate(res):
             self.AddtoChatMenu(frame, item[0], pos)
-        print(f"--- {time.time() - start_time} seconds ---")
 
     def AddtoChatMenu(self, master, id, pos):
         output = self.db.Select("SELECT Name, Gender FROM users WHERE ID=%s", [id])
@@ -298,7 +299,7 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        # self.JoinChatServer(id)
+        self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -578,7 +579,6 @@ class App(ctk.CTk):
             self.MedicineWindow, fg_color="gray40", width=690, height=300
         )
         self.MedicineFrame.place(anchor="nw", relx=0.01, rely=0.1)
-        self.MedicineFrame
 
         Show = ctk.CTkButton(
             self.MedicineWindow,
@@ -602,7 +602,7 @@ class App(ctk.CTk):
 
     def AddNewMedication(self, event):
         MedicinEntry = ctk.CTkEntry(
-            self.MedicineFrame.scrollable_frame,
+            self.MedicineFrame,
             placeholder_text="Enter Medicine Name",
             width=300,
             height=40,
@@ -610,7 +610,7 @@ class App(ctk.CTk):
         MedicinEntry.grid(row=self.loc, column=0)
 
         MedicinEntry = ctk.CTkEntry(
-            self.MedicineFrame.scrollable_frame,
+            self.MedicineFrame,
             placeholder_text="Enter Medicine Note",
             width=300,
             height=40,
@@ -621,22 +621,20 @@ class App(ctk.CTk):
     def DelMedications(self, event):
         with contextlib.suppress(Exception):
             self.loc = 0
-            for widget in self.MedicineFrame.scrollable_frame.winfo_children():
+            for widget in self.MedicineFrame.winfo_children():
                 widget.destroy()
-            self.MedicineFrame.disable_scroll()
-            self.MedicineFrame.moveto(0)
 
     def FinalizePrescription(self, id, type):
         patient = UserFactory.createUser(id, "patient")
         path = f"Data\Prescriptions\{patient.userName}.pdf"
-        if len(self.MedicineFrame.scrollable_frame.winfo_children()) == 0:
+        if len(self.MedicineFrame.winfo_children()) == 0:
             return MessageBox(
                 self.MedicineFrame, "error", "No Medicine to be added to Prescription"
             )
         Medicines = []
         MedicinesNotes = []
         for pos, widget in enumerate(
-            self.MedicineFrame.scrollable_frame.winfo_children()
+            self.MedicineFrame.winfo_children()
         ):
             if pos % 2 == 0:
                 if len(widget.get()) == 0:
@@ -692,7 +690,7 @@ class App(ctk.CTk):
             )  # Send any message to the Patient
             writeThread.start()
         except Exception:
-            print("Chat Server is offline")
+            messagebox.showerror("Error","Problem With Chat Server")
 
     def LoadChatData(self, Patientid):
         # Load the chat of Patient with id
@@ -868,7 +866,7 @@ class App(ctk.CTk):
     def ReportReasonBlock(self, event, name, id):
         # Create New Window
         ReportWindow = ctk.CTkToplevel()
-        center(ReportWindow)  # Open the window in the center of the Screen
+        center(ReportWindow, 720, 400)  # Open the window in the center of the Screen
         title = f"Report {name}"
         ReportWindow.title(title)
         ReportWindow.geometry("400x200")
@@ -922,6 +920,9 @@ class App(ctk.CTk):
         AvailablePatientsFrame = ctk.CTkScrollableFrame(
             self.PatientRequests_frame, fg_color="gray20", width=1050, height=640)
         AvailablePatientsFrame.place(anchor="nw", relx=0.01, rely=0.08)
+        if len(res)==0:
+            Nodata = ctk.CTkLabel( AvailablePatientsFrame, text="No Patients Found!", width=1050, height=600, font=ctk.CTkFont(size=15, weight="bold"))
+            Nodata.grid(row=0, column=0, pady=6)
 
         for i in range(len(res)):
             (
