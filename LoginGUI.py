@@ -11,9 +11,9 @@ from GUIHelperFunctions import *
 from Images import *
 from User import *
 from RegisterGUI import *
-from PatientGUI import *
-from Patient import *
-from RadiologistGUI import *
+#from PatientGUI import *
+#from Patient import *
+#from RadiologistGUI import *
 
 class Login(ctk.CTk):
     # load Config dict
@@ -162,6 +162,7 @@ class Login(ctk.CTk):
             if UserInfo[1] == "patient":
                 patient = App()
                 patient.mainloop()
+                ## 
            # if UserInfo[1] == "Radiologist":
     def Goto_Register(self):
         self.withdraw()
