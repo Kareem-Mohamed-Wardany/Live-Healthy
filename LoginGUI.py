@@ -9,7 +9,13 @@ from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from Images import *
-
+from User import *
+from RegisterGUI import *
+#from PatientGUI import *
+#from Patient import *
+#from RadiologistGUI import *
+import mailtrap as mt
+import smtplib
 
 class Login(ctk.CTk):
     # load Config dict
@@ -21,7 +27,7 @@ class Login(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.WindowSettings()
-        self.background()
+        self.login_gui()
         # Enter all your buttons,Entries here
 
     def WindowSettings(self):
@@ -37,7 +43,7 @@ class Login(ctk.CTk):
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
 
-    def background(self):
+    def login_gui(self):
         self.backgroundFrame = ctk.CTkFrame(
             self,
             fg_color="#F0F0F0",
@@ -133,7 +139,65 @@ class Login(ctk.CTk):
             font=ctk.CTkFont(size=15, family="Aerial 18", underline=True),
             cursor="hand2",
         )
+        forgotpassLabel.bind('<Button-1>', self.forgot_password)
         forgotpassLabel.place(anchor="nw", relx=0.065, rely=0.725)
+        self.LoginButton = ctk.CTkButton(self.loginFrame,text="Login", width= 170, height=50,corner_radius=30,font=ctk.CTkFont(size=18, family="Aerial 18",weight='bold'), command=self.login_verify)
+        self.LoginButton.place(anchor="nw", relx=0.061, rely=0.8)
+        AskAccountLabel = ctk.CTkLabel(
+            self.loginFrame,
+            text="Don't you have an account?",
+            text_color="#808080",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=20, family="Times New Roman")
+        )
+        AskAccountLabel.place(anchor="nw", relx=0.21, rely=0.02)
+        self.SignUpButton = ctk.CTkButton(self.loginFrame,text="SIGN UP", width= 40, height=30,corner_radius=30,font=ctk.CTkFont(size=15, family="Aerial 18"),fg_color="#808080", command=self.Goto_Register)
+        self.SignUpButton.place(anchor="nw", relx=0.4, rely=0.018)
+    def login_verify(self):
+        username = self.usernameEntry.get()
+        password = self.passwordEntry.get()
+        if len(username) == 0 or len(password) == 0:
+            return messagebox.showerror("Empty fields","Please fill in all fields")
+        UserInfo = User.Login(username, password)
+        # if UserInfo != "ok":
+        #     self.withdraw()
+        #     if UserInfo[1] == "patient":
+        #         patient = App()
+        #         patient.mainloop()
+                ## 
+    def forgot_password(self,event):
+        sender = "livehealthy171@gmail.com"
+        receiver = "kareemwarday111@gmail.com"
+
+        message = f"""\
+        Subject: Hi Mailtrap
+        To: {receiver}
+        From: {sender}
+
+        This is a test e-mail message."""
+
+        with smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525) as server:
+            server.login("6790dd6fd1f9f0", "6e0b062c5b47ad")
+            server.sendmail(sender, receiver, message)
+
+
+
+
+           # if UserInfo[1] == "Radiologist":
+    def Goto_Register(self):
+        self.withdraw()
+        reg = Register()
+        reg.resizable(False, False)  # Disable resize for GUI
+        center(reg, 1280, 720)  # center window in your screen
+        reg.mainloop()
+
+
+            
+        
+
+        
+
 
 
 if __name__ == "__main__":
