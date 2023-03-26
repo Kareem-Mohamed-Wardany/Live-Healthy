@@ -164,8 +164,14 @@ class Login(ctk.CTk):
         self.password = self.passwordEntry.get()
         if len(self.username) == 0 or len(self.password) == 0:
             return messagebox.showerror("Empty fields","Please fill in all fields")
-        self.Moveto = True
-        self.destroy()
+        userinfo = User.Login(self.username, self.password)
+        if userinfo != "ok":
+            if userinfo[1] in ["Specialist","Consultant"]:
+                res = self.db.Select("SELECT Verified FROM doctordata WHERE Doctor_ID=%s",[userinfo[0]])[0][0]
+                if res == 0:
+                    return messagebox.showerror("Error","Please wait until you are verified")
+            self.Moveto = True
+            self.destroy()
 
     
 

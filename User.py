@@ -65,7 +65,7 @@ class User:
     @classmethod
     def Login(cls, email, password):
         res = cls.db.Select(
-            "SELECT ID, Account_Type FROM users WHERE Mail= %s AND Password=%s", [email, password]
+            "SELECT ID, Account_Type FROM users WHERE Mail LIKE %s AND Password=%s", [email, password]
         )
         if len(res) == 0:
             return messagebox.showerror("User not found","Please Enter a valid email address and password")

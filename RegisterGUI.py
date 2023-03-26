@@ -12,6 +12,7 @@ from PIL import Image
 import re
 from datetime import datetime
 
+# from Runner import *
 
 
 class Register(ctk.CTk):
@@ -478,6 +479,7 @@ class Register(ctk.CTk):
         self.fetchUserTypeData()
         self.emptyUserTypeFields()
         self.insertUserInfo()
+
         return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self)
 
     def gender(self):
