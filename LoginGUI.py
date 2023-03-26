@@ -134,6 +134,24 @@ class Login(ctk.CTk):
             cursor="hand2",
         )
         forgotpassLabel.place(anchor="nw", relx=0.065, rely=0.725)
+        self.LoginButton = ctk.CTkButton(self.loginFrame,text="Login", width= 170, height=50,corner_radius=30,font=ctk.CTkFont(size=18, family="Aerial 18",weight='bold'), command=self.login_verify)
+        self.LoginButton.place(anchor="nw", relx=0.061, rely=0.8)
+        AskAccountLabel = ctk.CTkLabel(
+            self.loginFrame,
+            text="Don't you have an account?",
+            text_color="#808080",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=20, family="Times New Roman")
+        )
+        AskAccountLabel.place(anchor="nw", relx=0.21, rely=0.02)
+        self.SignUpButton = ctk.CTkButton(self.loginFrame,text="SIGN UP", width= 40, height=30,corner_radius=30,font=ctk.CTkFont(size=15, family="Aerial 18"),fg_color="#808080")
+        self.SignUpButton.place(anchor="nw", relx=0.4, rely=0.018)
+    def login_verify(self):
+        username = self.usernameEntry.get()
+        password = self.passwordEntry.get()
+        
+
 
 
 if __name__ == "__main__":
