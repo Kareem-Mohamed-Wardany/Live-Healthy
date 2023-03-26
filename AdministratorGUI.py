@@ -1,25 +1,28 @@
 import contextlib
+import os
+import queue
+import shutil
+import time
 import tkinter as tk
 from datetime import date
-import queue
-import time
-import os
-import customtkinter as ctk
-import shutil
-# from Model import *
+from tkinter.ttk import *
 
-from Images import *
+import customtkinter as ctk
+
+from client import *
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
+from Images import *
 from UserFactory import *
-from client import *
-from tkinter.ttk import *
+
+# from Model import *
+
 # importing askopenfile function
 # from class filedialo
 
 
-class App(ctk.CTk):
+class AdminGUI(ctk.CTk):
     # load Config dict
     config = SystemConfig()
 
@@ -27,7 +30,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = UserFactory.createUser(0,"admin")
+    
 
     Created = [
         True,
@@ -36,8 +39,9 @@ class App(ctk.CTk):
         True,
     ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
 
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
+        self.user = UserFactory.createUser(id,"admin")
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -369,5 +373,5 @@ class App(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = App()
+    app = AdminGUI()
     app.mainloop()

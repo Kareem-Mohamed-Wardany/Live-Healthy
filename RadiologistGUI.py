@@ -20,15 +20,14 @@ from User import *
 from UserFactory import *
 
 
-class App(ctk.CTk):
+class RadioloGUI(ctk.CTk):
     # load Config dict
-    config = SystemConfig()
+    configfile = SystemConfig()
 
     # connect to DB
     db = Database()
 
     # Define the Patient
-    user = UserFactory.createUser("3", "radiologist")  
 
     Created = [
         True,
@@ -37,8 +36,9 @@ class App(ctk.CTk):
         True,
     ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
 
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
+        self.user = UserFactory.createUser(id, "radiologist")
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -57,8 +57,8 @@ class App(ctk.CTk):
         # set Dimension of GUI
         center(
             self,
-            self.config.get("FramesSizeWidth"),
-            self.config.get("FramesSizeHeight"),
+            self.configfile.get("FramesSizeWidth"),
+            self.configfile.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
 
@@ -68,37 +68,41 @@ class App(ctk.CTk):
 
     def LeftSideBar(self):
         # load images
-        self.Male_image = ctk.CTkImage(
-            MaleImage,
-            size=(self.config.get("UserImageSize"),
-                  self.config.get("UserImageSize")),
-        )
-        self.Female_image = ctk.CTkImage(
-            FemaleImage,
-            size=(self.config.get("UserImageSize"),
-                  self.config.get("UserImageSize")),
-        )
+        # self.Male_image = ctk.CTkImage(
+        #     MaleImage,
+        #     size=(self.configfile.get("UserImageSize"),
+        #           self.configfile.get("UserImageSize")),
+        # )
+        # self.Female_image = ctk.CTkImage(
+        #     FemaleImage,
+        #     size=(self.configfile.get("UserImageSize"),
+        #           self.configfile.get("UserImageSize")),
+        # )
         self.Predict_scan_image = ctk.CTkImage(
             predict_image,
             size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
             ),
         )
-        
 
         # create LeftSideBar frame
         self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0)
         self.LeftSideBar_frame.grid(row=0, column=0, sticky="nsew")
         # self.LeftSideBar_frame.grid_rowconfigure(3, weight=1)  # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
-        self.LeftSideBar_frame.grid_rowconfigure(5, weight=1)  # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
+        # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
+        self.LeftSideBar_frame.grid_rowconfigure(5, weight=1)
 
         if (
             self.user.userGender == "Male"
         ):  # check if the user is a Male to add Male image for him
             self.Image_label = ctk.CTkLabel(
                 self.LeftSideBar_frame,
-                image=self.Male_image,
+                image=ctk.CTkImage(
+                    MaleImage,
+                    size=(self.configfile.get("UserImageSize"),
+                          self.configfile.get("UserImageSize")),
+                ),
                 text="",
                 width=100,
                 height=50,
@@ -108,7 +112,11 @@ class App(ctk.CTk):
         else:  # check if the user is a Female to add Male image for him
             self.Image_label = ctk.CTkLabel(
                 self.LeftSideBar_frame,
-                image=self.Female_image,
+                image=ctk.CTkImage(
+                    FemaleImage,
+                    size=(self.configfile.get("UserImageSize"),
+                          self.configfile.get("UserImageSize")),
+                ),
                 text="",
                 width=100,
                 height=50,
@@ -190,28 +198,36 @@ class App(ctk.CTk):
         self.ScanPathEntry.insert("end", self.ScansFolderPath)
         self.ScanPathEntry.configure(state="disabled")
 
-        MessageBox(self.Predict_Scan_frame,"info","Don't Panic!")
+        MessageBox(self.Predict_Scan_frame, "info", "Don't Panic!")
         output = self.user.PredictScanFolder(self.ScansFolderPath)
 
-        ScrollableFrame = ctk.CTkScrollableFrame(self.Predict_Scan_frame, width=550)
+        ScrollableFrame = ctk.CTkScrollableFrame(
+            self.Predict_Scan_frame, width=550)
         ScrollableFrame.place(anchor="nw", relx=0.05, rely=0.2)
 
-        Name = ctk.CTkLabel(ScrollableFrame, text="Image Name", font=ctk.CTkFont(size=15), width=275)
+        Name = ctk.CTkLabel(ScrollableFrame, text="Image Name",
+                            font=ctk.CTkFont(size=15), width=275)
         Name.grid(row=0, column=0)
-        Name = ctk.CTkLabel(ScrollableFrame, text="Prediction", font=ctk.CTkFont(size=15), width=275)
+        Name = ctk.CTkLabel(ScrollableFrame, text="Prediction",
+                            font=ctk.CTkFont(size=15), width=275)
         Name.grid(row=0, column=1)
 
         for pos, i in enumerate(output):
-            ImageName = ctk.CTkLabel(ScrollableFrame, text=i[0], font=ctk.CTkFont(size=15), width=275)
+            ImageName = ctk.CTkLabel(
+                ScrollableFrame, text=i[0], font=ctk.CTkFont(size=15), width=275)
             ImageName.grid(row=pos+1, column=0)
-            ImageName.bind("<Button-1>", lambda event, imageName=i[0] :self.ShowImage(event, imageName))
+            ImageName.bind("<Button-1>", lambda event,
+                           imageName=i[0]: self.ShowImage(event, imageName))
 
-            Prediction = ctk.CTkLabel(ScrollableFrame, text=i[1], font=ctk.CTkFont(size=15), width=275)
+            Prediction = ctk.CTkLabel(
+                ScrollableFrame, text=i[1], font=ctk.CTkFont(size=15), width=275)
             Prediction.grid(row=pos+1, column=1)
-            Prediction.bind("<Button-1>", lambda event, imageName=i[0] :self.ShowImage(event, imageName))
+            Prediction.bind("<Button-1>", lambda event,
+                            imageName=i[0]: self.ShowImage(event, imageName))
 
         self.user.createcsv(self.ScansFolderPath, output)
-        MessageBox(self.Predict_Scan_frame,"info","Predictions File Created successfully")
+        MessageBox(self.Predict_Scan_frame, "info",
+                   "Predictions File Created successfully")
 
     def GetFullPath(self, Name):
         for i in os.listdir(self.ScansFolderPath):
@@ -221,7 +237,8 @@ class App(ctk.CTk):
     def ShowImage(self, event, Name):
         FullPath = self.GetFullPath(Name)
 
-        image = ctk.CTkLabel(self.Predict_Scan_frame,text="",image=ctk.CTkImage(Image.open(FullPath),size=(300,300)))
+        image = ctk.CTkLabel(self.Predict_Scan_frame, text="", image=ctk.CTkImage(
+            Image.open(FullPath), size=(300, 300)))
         image.place(anchor="nw", relx=0.7, rely=0.2)
 
     def select_frame_by_name(self, name):
@@ -252,6 +269,6 @@ class App(ctk.CTk):
         self.db.Commit()
 
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+# if __name__ == "__main__":
+#     app = RadiologistGUI(3)
+#     app.mainloop()

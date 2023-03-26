@@ -23,15 +23,30 @@ class Register(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        Title = "Register"
-        self.title(Title)
+        self.WindowSettings()
         # set Dimension of GUI
-        self.geometry(self.config.get("FramesSize"))
         self.mainTitle()
         self.mainRegister()
         self.patient()
         self.Registerbutton()
+
+        
         # Enter all your buttons,Entries here
+    def WindowSettings(self):
+        # let title be 'Welcome Specialist|Consultant UserName'
+        Title = "Register"
+        self.title(Title)
+
+        # set Dimension of GUI
+        center(
+            self,
+            self.config.get("FramesSizeWidth"),
+            self.config.get("FramesSizeHeight"),
+        )  # Get Frame size from config File and center the window
+        self.resizable(False, False)
+
+
+
     def mainTitle(self):
         infoFrame = ctk.CTkFrame(
             self,
@@ -561,11 +576,3 @@ class Register(ctk.CTk):
             self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
             self.db.Insert("INSERT INTO doctordata VALUES (%s,%s,%s,%s,%s)",[newID, 0, self.uni,self.IDbinary, self.LicenseBinary])
             self.db.Commit()
-
-
-if __name__ == "__main__":
-    app = Register()
-    app.resizable(False, False)  # Disable resize for GUI
-    center(app, 1280, 720)  # center window in your screen
-    app.mainloop()
-

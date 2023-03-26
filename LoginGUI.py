@@ -11,15 +11,19 @@ from GUIHelperFunctions import *
 from Images import *
 from User import *
 from RegisterGUI import *
-#from PatientGUI import *
-#from Patient import *
-#from RadiologistGUI import *
-import mailtrap as mt
+from PatientGUI import *
+from RadiologistGUI import *
+from AdministratorGUI import *
+from DoctorGUI import *
 import smtplib
+import ssl
+from email.message import EmailMessage
 
 class Login(ctk.CTk):
     # load Config dict
     config = SystemConfig()
+    MovetoReg = False
+    Moveto = False
 
     # connect to DB
     db = Database()
@@ -154,52 +158,53 @@ class Login(ctk.CTk):
         AskAccountLabel.place(anchor="nw", relx=0.21, rely=0.02)
         self.SignUpButton = ctk.CTkButton(self.loginFrame,text="SIGN UP", width= 40, height=30,corner_radius=30,font=ctk.CTkFont(size=15, family="Aerial 18"),fg_color="#808080", command=self.Goto_Register)
         self.SignUpButton.place(anchor="nw", relx=0.4, rely=0.018)
+
     def login_verify(self):
-        username = self.usernameEntry.get()
-        password = self.passwordEntry.get()
-        if len(username) == 0 or len(password) == 0:
+        self.username = self.usernameEntry.get()
+        self.password = self.passwordEntry.get()
+        if len(self.username) == 0 or len(self.password) == 0:
             return messagebox.showerror("Empty fields","Please fill in all fields")
-        UserInfo = User.Login(username, password)
-        # if UserInfo != "ok":
-        #     self.withdraw()
-        #     if UserInfo[1] == "patient":
-        #         patient = App()
-        #         patient.mainloop()
-                ## 
-    def forgot_password(self,event):
-        sender = "livehealthy171@gmail.com"
-        receiver = "kareemwarday111@gmail.com"
+        self.Moveto = True
+        self.destroy()
 
-        message = f"""\
-        Subject: Hi Mailtrap
-        To: {receiver}
-        From: {sender}
+    
 
-        This is a test e-mail message."""
+    def forgot_password(self, event):
+        mail = self.usernameEntry.get()
+        if len(mail) == 0:
+            return messagebox.showerror("Empty Mail","Please fill in mail field")
 
-        with smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525) as server:
-            server.login("6790dd6fd1f9f0", "6e0b062c5b47ad")
-            server.sendmail(sender, receiver, message)
+        password = self.db.Select("SELECT Password FROM users WHERE Mail LIKE %s",[mail])
+        if len(password) == 0:
+            return messagebox.showerror("Error","Please Enter a valid Email")
+        password = password[0][0]
+
+        # Define email sender and receiver
+        email_sender = 'livehealthy171@gmail.com'
+        email_password = 'gowdfobqansntowb'
+        email_receiver = mail
+
+        # Set the subject and body of the email
+        subject = 'Your Account Password'
+        body = f"Here is your account password: {password}"
+
+        em = EmailMessage()
+        em['From'] = email_sender
+        em['To'] = email_receiver
+        em['Subject'] = subject
+        em.set_content(body)
+
+        # Add SSL (layer of security)
+        context = ssl.create_default_context()
+
+        # Log in and send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.sendmail(email_sender, email_receiver, em.as_string())
+        messagebox.showinfo("Success", "Email Sent")
 
 
-
-
-           # if UserInfo[1] == "Radiologist":
     def Goto_Register(self):
-        self.withdraw()
-        reg = Register()
-        reg.resizable(False, False)  # Disable resize for GUI
-        center(reg, 1280, 720)  # center window in your screen
-        reg.mainloop()
-
-
-            
+        self.MovetoReg = True
+        self.destroy()
         
-
-        
-
-
-
-if __name__ == "__main__":
-    app = Login()
-    app.mainloop()

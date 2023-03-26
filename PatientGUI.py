@@ -1,12 +1,12 @@
 import contextlib
 import os
 import queue
+import shutil
 import subprocess
 import time
 import tkinter as tk
 from datetime import date, timedelta
 from tkinter import filedialog
-import shutil
 from tkinter.ttk import *
 
 import customtkinter as ctk
@@ -20,7 +20,7 @@ from User import *
 from UserFactory import *
 
 
-class App(ctk.CTk):
+class PatGUI(ctk.CTk):
     # load Config dict
     configDict = SystemConfig()
 
@@ -28,7 +28,6 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = UserFactory.createUser("5", "patient")  
 
     Created = [
         True,
@@ -38,8 +37,9 @@ class App(ctk.CTk):
         True,
     ]  # Predict X-ray frame, Chat With doctor frame, vipPurchase Frame, Prescriptions Frame , credits PREVENTS duplications
 
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
+        self.user = UserFactory.createUser(id, "patient")  
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -1067,6 +1067,6 @@ class App(ctk.CTk):
             self.Userclient.end()
         self.destroy()
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+# if __name__ == "__main__":
+#     app = PatientGUI()
+#     app.mainloop()

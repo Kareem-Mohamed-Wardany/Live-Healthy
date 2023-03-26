@@ -1,8 +1,8 @@
 import contextlib
 import os
 import queue
-import subprocess
 import shutil
+import subprocess
 import time
 import tkinter as tk
 from datetime import date
@@ -18,7 +18,7 @@ from User import *
 from UserFactory import *
 
 
-class App(ctk.CTk):
+class DocGUI(ctk.CTk):
     # load Config dict
     config = SystemConfig()
 
@@ -26,7 +26,6 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Doctor
-    user = UserFactory.createUser(4, "doctor")  # 2 Khaled Cons   4 Amira Spec
 
     Created = [
         True,
@@ -35,8 +34,9 @@ class App(ctk.CTk):
         True,
     ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
 
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
+        self.user = UserFactory.createUser(id, "doctor")  # 2 Khaled Cons   4 Amira Spec
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -1413,6 +1413,6 @@ class App(ctk.CTk):
 
 
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+# if __name__ == "__main__":
+#     app = DoctorGUI()
+#     app.mainloop()
