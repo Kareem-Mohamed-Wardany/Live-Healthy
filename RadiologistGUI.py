@@ -1,25 +1,23 @@
 import contextlib
-import tkinter as tk
-from datetime import date
+import os
 import queue
 import time
-import os
+import tkinter as tk
+from datetime import date
+from tkinter import filedialog
+from tkinter.filedialog import askopenfilename
+from tkinter.ttk import *
+from zipfile import ZipFile
+
 import customtkinter as ctk
 
-
-from UserFactory import *
-from Images import *
+from client import *
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
+from Images import *
 from User import *
-from client import *
-from tkinter.ttk import *
-# importing askopenfile function
-# from class filedialog
-from tkinter.filedialog import askopenfilename
-from tkinter import filedialog
-from zipfile import ZipFile
+from UserFactory import *
 
 
 class App(ctk.CTk):

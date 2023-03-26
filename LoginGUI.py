@@ -1,14 +1,14 @@
+import re
 import tkinter as tk
 from tkinter import *
 
 import customtkinter as ctk
+from PIL import Image, ImageTk
 
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from Images import *
-from PIL import ImageTk, Image
-import re
 
 
 class Login(ctk.CTk):

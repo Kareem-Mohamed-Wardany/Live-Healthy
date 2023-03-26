@@ -1,9 +1,11 @@
-from PIL import Image
-import os, os.path
-from User import *
-from Model import *
 import csv
+import os
+import os.path
 
+from PIL import Image
+
+from Model import *
+from User import *
 
 
 class Radiologist(User):
