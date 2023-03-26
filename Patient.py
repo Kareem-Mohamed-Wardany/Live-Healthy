@@ -2,7 +2,7 @@ from User import *
 import subprocess
 from tkinter import filedialog
 from datetime import date, timedelta
-# from Model import *
+from Model import *
 
 class Patient(User):
 

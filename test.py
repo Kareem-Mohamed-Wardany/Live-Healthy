@@ -2,53 +2,12 @@ import queue
 from Database import *
 from datetime import timedelta, date
 BloodTypes = ["O-", "O+", "B-", "B+", "A-", "A+", "AB-", "AB+"]
-db = Database()
+from textblob import TextBlob
 
+def autocorrect(text):
+    blob = TextBlob(text)
+    return str(blob.correct())
 
-# def GetDiscount(value, percentage):
-#         return int(value - (value * (percentage/100)))
-
-# print(GetDiscount(75,50))
-
-binaryImageID = db.convertToBinaryData("ID.png")
-binaryImageProf = db.convertToBinaryData("Prof_License.png")
-
-# # qu = queue.Queue()
-
-# # qu.put("Ali: Hello Doctor")
-# # qu.put("Amira: Hello Ali, How are you")
-# # qu.put("Ali: Feeling ill")
-
-# # print(qu.queue)
-# # c = list(qu.queue)
-
-
-# # textChat =""
-# # for i in range(len(c)):
-# #     if i == 0:
-# #         textChat += c[i]
-# #     else:
-# #         textChat += "&,&"+c[i]
-
-# res = db.Insert("INSERT INTO reports (Issuer_ID, Reporter_ID, Reason, ReportDate) VALUES (%s, %s, %s, %s)", [
-#                 6, 2, "Test Report",date.today()])
-
-
-# # SELECT requests.Patient_ID, requests.Request_Date, users.Name, users.Gender, users.Age, vipmembers.Vip_Level FROM vipmembers INNER JOIN users ON vipmembers.memberID = users.ID INNER JOIN requests ON  users.ID  = requests.Patient_ID ORDER BY vipmembers.Vip_Level DESC,  DATE (requests.Request_Date) ASC
-# # print(textChat)
-
-# # symp = "Fever, "+ "Cough, "+"difficulty breathing, "+"Fatigue, "+"Headache, "+"loss of taste and smell, " + "Sore throat"
-# # # print(symp)
-
-# EndDate = date.today() - timedelta(days=10000)
-# print(EndDate)
-res = db.Update("UPDATE doctordata SET Verified= %s, ID_Card= %s, Prof_License= %s WHERE Doctor_ID= %s",[0,binaryImageID,binaryImageProf,2])
-# # res1 = db.Update("UPDATE chatdata SET Chat_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
-# # res2 = db.Update("UPDATE requests SET Request_Status= %s WHERE Patient_ID= %s",["ongoing", 5])
-db.Commit()
-
-
-# # db.write_file(binaryImage,"test12.pdf")
-
-
-# # print(binaryImage)
+text = "Thiis sentnce has mani speling errirs."
+corrected_text = autocorrect(text)
+print(corrected_text)

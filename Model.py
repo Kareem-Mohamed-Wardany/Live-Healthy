@@ -77,13 +77,6 @@ class ResNetModel:
                     mode="CONSTANT",
                 )
             )(x_skip)
-        elif match_filter_size and config.get("shortcut_type") == "projection":
-            x_skip = Conv2D(
-                number_of_filters,
-                kernel_size=(1, 1),
-                kernel_initializer=initializer,
-                strides=(2, 2),
-            )(x_skip)
 
         # Add the skip connection to the regular mapping
         x = Add()([x, x_skip])

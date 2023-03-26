@@ -73,7 +73,6 @@ class ImageProcessing:
         # Fibrosis = 4
         # Tuberculosis = 5
         # set label for each disease to labels in previous lines
-        print(filename, imagename)
         label = "None"
         if "PNEUMONIA" in filename:  # check if folder name contains PNEUMONIA
             if "bacteria" in imagename:  # check if image name contains bacteria

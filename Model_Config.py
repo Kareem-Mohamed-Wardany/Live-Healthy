@@ -21,7 +21,7 @@ def model_configuration():
     n = 3
     init_fm_dim = 16
 
-    shortcut_type = "identity"  # or: projection
+    shortcut_type = "identity"
 
     # Number of steps per epoch is dependent on batch size
     maximum_number_iterations = 64000  # per the He et al. paper

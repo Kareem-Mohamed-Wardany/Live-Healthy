@@ -371,14 +371,3 @@ class App(ctk.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
-# Create Directory
-# try: 
-#     os.mkdir(path) 
-# except OSError as error: 
-#     print(error)  
-# delete directory
-# try:
-#     os.rmdir(dir_path)
-# except OSError as e:
-#     print("Error: %s : %s" % (dir_path, e.strerror))

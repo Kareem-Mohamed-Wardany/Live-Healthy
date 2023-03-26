@@ -29,7 +29,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = User("3")  
+    user = User("3")
 
     Created = [
         True,
@@ -63,18 +63,21 @@ class App(ctk.CTk):
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
 
-        self.grid_rowconfigure(0, weight=1)  # let the left sidebar take all the space
+        # let the left sidebar take all the space
+        self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
     def LeftSideBar(self):
         # load images
         self.Male_image = ctk.CTkImage(
             MaleImage,
-            size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
+            size=(self.config.get("UserImageSize"),
+                  self.config.get("UserImageSize")),
         )
         self.Female_image = ctk.CTkImage(
             FemaleImage,
-            size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
+            size=(self.config.get("UserImageSize"),
+                  self.config.get("UserImageSize")),
         )
         self.Predict_scan_image = ctk.CTkImage(
             predict_image,
@@ -154,7 +157,7 @@ class App(ctk.CTk):
             font=ctk.CTkFont(size=15, weight="bold"),
         )
         self.PatientAge_label.grid(row=2, column=0)
-        
+
         self.VIP_level = ctk.CTkLabel(
             self.LeftSideBar_frame,
             text=self.user.userVIPLevel,
@@ -187,9 +190,8 @@ class App(ctk.CTk):
             image=self.Predict_scan_image,
             anchor="w",
             command=self.Predict_Scan_button_event,
-        )  
+        )
         self.Predict_Scan_button.grid(row=5, column=0, sticky="ew")
-
 
         self.Credits_button = ctk.CTkButton(
             self.LeftSideBar_frame,
@@ -215,8 +217,8 @@ class App(ctk.CTk):
         self.appearance_mode_menu = ctk.CTkOptionMenu(
             self.LeftSideBar_frame, values=v, command=self.change_appearance_mode
         )
-        self.appearance_mode_menu.grid(row=10, column=0, padx=20, pady=20, sticky="s")
-
+        self.appearance_mode_menu.grid(
+            row=10, column=0, padx=20, pady=20, sticky="s")
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
@@ -227,32 +229,29 @@ class App(ctk.CTk):
         with contextlib.suppress(Exception):
             for widget in self.Predict_Scan_frame.winfo_children():
                 widget.destroy()
-        self.ScanPathEntry = ctk.CTkEntry(self.Predict_Scan_frame, width=700, state="disabled")
+        self.ScanPathEntry = ctk.CTkEntry(
+            self.Predict_Scan_frame, width=700, state="disabled")
         self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
-        ImportScanButton = ctk.CTkButton(self.Predict_Scan_frame,text="Import Folder", command=self.ImportScanFolder)
+        ImportScanButton = ctk.CTkButton(
+            self.Predict_Scan_frame, text="Import Folder", command=self.ImportScanFolder)
         ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
 
     def ImportScanFolder(self):
         if self.ScanPathEntry.get() != "":
             self.ScanPathEntry.configure(state="normal")
             self.ScanPathEntry.delete(0, tk.END)
-        self.ScansFolderPath= filedialog.askdirectory()
-        print(self.ScansFolderPath)
-        print(self.ScansFolderPath)
-        print(self.ScansFolderPath)
-        print(self.ScansFolderPath)
+        self.ScansFolderPath = filedialog.askdirectory()
         print(self.ScansFolderPath)
         self.ScanPathEntry.configure(state="normal")
-        self.ScanPathEntry.insert("end", self.ScansFolderPath) 
+        self.ScanPathEntry.insert("end", self.ScansFolderPath)
         self.ScanPathEntry.configure(state="disabled")
-
 
     def select_frame_by_name(self, name):
         # set button color for selected button
         self.Predict_Scan_button.configure(
-            fg_color=("gray75", "gray25") if name == "Predict_Scan" else "transparent"
+            fg_color=(
+                "gray75", "gray25") if name == "Predict_Scan" else "transparent"
         )
-
 
         # show selected frame
         if name == "Predict_Scan":

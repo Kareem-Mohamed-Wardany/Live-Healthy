@@ -43,8 +43,6 @@ class Database:
     def Commit(self):
         self.mydb.commit()
 
-    # Check link for more info https://pynative.com/python-mysql-blob-insert-retrieve-file-image-as-a-blob-in-mysql/
-
     def convertToBinaryData(self, filename):
         # Convert digital data to binary format
         with open(filename, "rb") as file:
