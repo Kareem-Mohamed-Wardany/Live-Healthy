@@ -210,7 +210,7 @@ class ResNetModel:
             self.evaluate_model(trained_resnet, x_test, y_test)
         return trained_resnet
 
-    def PredictScan(self, Scanpath):
+    def PredictScan(self, Scanpath, OneValue = False):
         IP = ImageProcessing()
         if os.path.exists("Data/ResNet.h5"):
             trained_resnet = load_model("Data/ResNet.h5")
@@ -231,4 +231,16 @@ class ResNetModel:
         for i in range(len(x[0])):
             normalized = (x[0][i] - min(x[0])) / (max(x[0]) - min(x[0]))
             percentage_list.append("{0:.2%}".format(normalized))
-        return list(zip(classes, percentage_list))
+            li = list(zip(classes, percentage_list))
+
+        if not OneValue:
+            return li
+        
+        max1 = 0
+        for i in li:
+            value = float(i[1].split("%")[0])
+            if value > max1:
+                max1 = value
+                res= i[0]
+        return res
+    

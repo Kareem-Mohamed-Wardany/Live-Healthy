@@ -1,4 +1,10 @@
+from PIL import Image
+import os, os.path
 from User import *
+from Model import *
+import csv
+
+
 
 class Radiologist(User):
 
@@ -35,4 +41,27 @@ class Radiologist(User):
         cls.userVIPEnd = date(2001, 1, 1)
         cls.CenterName = CenterName
         return cls
+    
+
+    def PredictScanFolder(self, FolderPath):
+        output = []
+        m = ResNetModel()
+        valid_images = [".jpg",".gif",".png",".tga"]
+        for f in os.listdir(FolderPath):
+            ext = os.path.splitext(f)[1]
+            if ext.lower() not in valid_images:
+                continue
+            FullPath = os.path.join(FolderPath,f)
+            print(FullPath)
+            imageName= os.path.splitext(f)[0]
+            output.append((imageName, m.PredictScan(FullPath,True)))
+
+        return output
+
+    # Generate Excel file
+    def createcsv(self, Path, out):
+        loc = f"{Path}/Predictions.csv"
+        with open(loc, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(out)
 

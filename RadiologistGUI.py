@@ -5,8 +5,9 @@ import queue
 import time
 import os
 import customtkinter as ctk
-from Model import *
 
+
+from UserFactory import *
 from Images import *
 from Config import *
 from Database import *
@@ -29,7 +30,7 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Patient
-    user = User("3")
+    user = UserFactory.createUser("3", "radiologist")  
 
     Created = [
         True,
@@ -86,34 +87,13 @@ class App(ctk.CTk):
                 self.config.get("ButtonIconsSize"),
             ),
         )
-        self.chat_image = ctk.CTkImage(
-            Chat,
-            size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
-            ),
-        )
-        self.PurchaseVIP = ctk.CTkImage(
-            PurchaseVIP,
-            size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
-            ),
-        )
-        self.coin_image = ctk.CTkImage(
-            coin,
-            size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
-            ),
-        )
+        
 
         # create LeftSideBar frame
         self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0)
         self.LeftSideBar_frame.grid(row=0, column=0, sticky="nsew")
-        self.LeftSideBar_frame.grid_rowconfigure(
-            8, weight=1
-        )  # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
+        # self.LeftSideBar_frame.grid_rowconfigure(3, weight=1)  # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
+        self.LeftSideBar_frame.grid_rowconfigure(5, weight=1)  # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
 
         if (
             self.user.userGender == "Male"
@@ -138,7 +118,8 @@ class App(ctk.CTk):
                 font=ctk.CTkFont(size=30, weight="bold"),
             )
         self.Image_label.grid(row=0, column=0, padx=20, pady=20)
-        self.PatientName_label = ctk.CTkLabel(
+
+        self.RadiologistName_label = ctk.CTkLabel(
             self.LeftSideBar_frame,
             text=self.user.userName,
             width=100,
@@ -146,37 +127,17 @@ class App(ctk.CTk):
             compound="left",
             font=ctk.CTkFont(size=15, weight="bold"),
         )
-        self.PatientName_label.grid(row=1, column=0)
+        self.RadiologistName_label.grid(row=1, column=0)
 
-        self.PatientAge_label = ctk.CTkLabel(
+        self.RadiologyCenterName_label = ctk.CTkLabel(
             self.LeftSideBar_frame,
-            text=self.user.userAge,
+            text=self.user.CenterName,
             width=100,
             height=20,
             compound="left",
             font=ctk.CTkFont(size=15, weight="bold"),
         )
-        self.PatientAge_label.grid(row=2, column=0)
-
-        self.VIP_level = ctk.CTkLabel(
-            self.LeftSideBar_frame,
-            text=self.user.userVIPLevel,
-            width=100,
-            height=20,
-            compound="left",
-            font=ctk.CTkFont(size=15, weight="bold"),
-        )
-        self.VIP_level.grid(row=3, column=0)
-
-        self.VIP_end = ctk.CTkLabel(
-            self.LeftSideBar_frame,
-            text=self.user.userVIPEnd,
-            width=100,
-            height=20,
-            compound="left",
-            font=ctk.CTkFont(size=15, weight="bold"),
-        )
-        self.VIP_end.grid(row=4, column=0)
+        self.RadiologyCenterName_label.grid(row=2, column=0)
 
         self.Predict_Scan_button = ctk.CTkButton(
             self.LeftSideBar_frame,
@@ -191,22 +152,8 @@ class App(ctk.CTk):
             anchor="w",
             command=self.Predict_Scan_button_event,
         )
-        self.Predict_Scan_button.grid(row=5, column=0, sticky="ew")
+        self.Predict_Scan_button.grid(row=4, column=0, sticky="ew")
 
-        self.Credits_button = ctk.CTkButton(
-            self.LeftSideBar_frame,
-            corner_radius=0,
-            height=40,
-            border_spacing=10,
-            text=self.user.userBalance,
-            fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
-            image=self.coin_image,
-            anchor="w",
-            command=self.Credits_button_event,
-        )
-        self.Credits_button.grid(row=9, column=0, sticky="ew")
         # create Apperance Mode to what currently the GUI running with
         if self.user.userSystemApperanceMode == "Dark":
             v = ["Dark", "Light", "System"]
@@ -218,7 +165,7 @@ class App(ctk.CTk):
             self.LeftSideBar_frame, values=v, command=self.change_appearance_mode
         )
         self.appearance_mode_menu.grid(
-            row=10, column=0, padx=20, pady=20, sticky="s")
+            row=6, column=0, padx=20, pady=20, sticky="s")
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
@@ -241,10 +188,43 @@ class App(ctk.CTk):
             self.ScanPathEntry.configure(state="normal")
             self.ScanPathEntry.delete(0, tk.END)
         self.ScansFolderPath = filedialog.askdirectory()
-        print(self.ScansFolderPath)
         self.ScanPathEntry.configure(state="normal")
         self.ScanPathEntry.insert("end", self.ScansFolderPath)
         self.ScanPathEntry.configure(state="disabled")
+
+        MessageBox(self.Predict_Scan_frame,"info","Don't Panic!")
+        output = self.user.PredictScanFolder(self.ScansFolderPath)
+
+        ScrollableFrame = ctk.CTkScrollableFrame(self.Predict_Scan_frame, width=550)
+        ScrollableFrame.place(anchor="nw", relx=0.05, rely=0.2)
+
+        Name = ctk.CTkLabel(ScrollableFrame, text="Image Name", font=ctk.CTkFont(size=15), width=275)
+        Name.grid(row=0, column=0)
+        Name = ctk.CTkLabel(ScrollableFrame, text="Prediction", font=ctk.CTkFont(size=15), width=275)
+        Name.grid(row=0, column=1)
+
+        for pos, i in enumerate(output):
+            ImageName = ctk.CTkLabel(ScrollableFrame, text=i[0], font=ctk.CTkFont(size=15), width=275)
+            ImageName.grid(row=pos+1, column=0)
+            ImageName.bind("<Button-1>", lambda event, imageName=i[0] :self.ShowImage(event, imageName))
+
+            Prediction = ctk.CTkLabel(ScrollableFrame, text=i[1], font=ctk.CTkFont(size=15), width=275)
+            Prediction.grid(row=pos+1, column=1)
+            Prediction.bind("<Button-1>", lambda event, imageName=i[0] :self.ShowImage(event, imageName))
+
+        self.user.createcsv(self.ScansFolderPath, output)
+        MessageBox(self.Predict_Scan_frame,"info","Predictions File Created successfully")
+
+    def GetFullPath(self, Name):
+        for i in os.listdir(self.ScansFolderPath):
+            if Name in i:
+                return os.path.join(self.ScansFolderPath, i)
+
+    def ShowImage(self, event, Name):
+        FullPath = self.GetFullPath(Name)
+
+        image = ctk.CTkLabel(self.Predict_Scan_frame,text="",image=ctk.CTkImage(Image.open(FullPath),size=(300,300)))
+        image.place(anchor="nw", relx=0.7, rely=0.2)
 
     def select_frame_by_name(self, name):
         # set button color for selected button
@@ -260,29 +240,9 @@ class App(ctk.CTk):
             with contextlib.suppress(Exception):
                 self.Predict_Scan_frame.grid_forget()
 
-        # if name == "PatientRequests":
-        #     self.PatientRequests_frame.grid(row=0, column=1, sticky="nsew")
-        # else:
-        #     with contextlib.suppress(Exception):
-        #         self.PatientRequests_frame.grid_forget()
-
-        # if name == "Credits":
-        #     self.credits_frame.grid(row=0, column=1, sticky="nsew")
-        # else:
-        #     with contextlib.suppress(Exception):
-        #         self.credits_frame.grid_forget()
-
     def Predict_Scan_button_event(self):
         self.LoadPredictScanFrame()
         self.select_frame_by_name("Predict_Scan")
-
-    def PatientRequests_button_event(self):
-        # self.loadWaitingPatients()
-        self.select_frame_by_name("PatientRequests")
-
-    def Credits_button_event(self):
-        # self.loadCreditWithdraw()
-        self.select_frame_by_name("Credits")
 
     def change_appearance_mode(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
