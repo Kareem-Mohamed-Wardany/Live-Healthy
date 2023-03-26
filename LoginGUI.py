@@ -14,6 +14,8 @@ from RegisterGUI import *
 #from PatientGUI import *
 #from Patient import *
 #from RadiologistGUI import *
+import mailtrap as mt
+import smtplib
 
 class Login(ctk.CTk):
     # load Config dict
@@ -137,6 +139,7 @@ class Login(ctk.CTk):
             font=ctk.CTkFont(size=15, family="Aerial 18", underline=True),
             cursor="hand2",
         )
+        forgotpassLabel.bind('<Button-1>', self.forgot_password)
         forgotpassLabel.place(anchor="nw", relx=0.065, rely=0.725)
         self.LoginButton = ctk.CTkButton(self.loginFrame,text="Login", width= 170, height=50,corner_radius=30,font=ctk.CTkFont(size=18, family="Aerial 18",weight='bold'), command=self.login_verify)
         self.LoginButton.place(anchor="nw", relx=0.061, rely=0.8)
@@ -157,12 +160,30 @@ class Login(ctk.CTk):
         if len(username) == 0 or len(password) == 0:
             return messagebox.showerror("Empty fields","Please fill in all fields")
         UserInfo = User.Login(username, password)
-        if UserInfo != "ok":
-            self.withdraw()
-            if UserInfo[1] == "patient":
-                patient = App()
-                patient.mainloop()
+        # if UserInfo != "ok":
+        #     self.withdraw()
+        #     if UserInfo[1] == "patient":
+        #         patient = App()
+        #         patient.mainloop()
                 ## 
+    def forgot_password(self,event):
+        sender = "livehealthy171@gmail.com"
+        receiver = "kareemwarday111@gmail.com"
+
+        message = f"""\
+        Subject: Hi Mailtrap
+        To: {receiver}
+        From: {sender}
+
+        This is a test e-mail message."""
+
+        with smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525) as server:
+            server.login("6790dd6fd1f9f0", "6e0b062c5b47ad")
+            server.sendmail(sender, receiver, message)
+
+
+
+
            # if UserInfo[1] == "Radiologist":
     def Goto_Register(self):
         self.withdraw()
