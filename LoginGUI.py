@@ -6,6 +6,7 @@ import customtkinter as ctk
 from Config import *
 from Database import *
 from GUIHelperFunctions import *
+from Images import *
 from PIL import ImageTk, Image
 import re
 
@@ -19,12 +20,22 @@ class Login(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        Title = "Login"
-        self.title(Title)
-        # set Dimension of GUI
-        self.geometry(self.config.get("FramesSize"))
+        self.WindowSettings()
         self.background()
         # Enter all your buttons,Entries here
+
+    def WindowSettings(self):
+        # let title be 'Welcome Specialist|Consultant UserName'
+        Title = "Login"
+        self.title(Title)
+
+        # set Dimension of GUI
+        center(
+            self,
+            self.config.get("FramesSizeWidth"),
+            self.config.get("FramesSizeHeight"),
+        )  # Get Frame size from config File and center the window
+        self.resizable(False, False)
 
     def background(self):
         self.backgroundFrame = ctk.CTkFrame(
@@ -34,8 +45,7 @@ class Login(ctk.CTk):
             height=710,
         )
         self.backgroundFrame.place(anchor="nw", relx=0.01, rely=0.011)
-        bgImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(
-            Image.open("asset/login.jpg"), size=(1255, 710)))
+        bgImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(LoginBG, size=(1255, 710)))
         bgImage.place(anchor="nw", relx=0, rely=0)
         self.subbg = ctk.CTkFrame(
             self.backgroundFrame,
@@ -45,10 +55,10 @@ class Login(ctk.CTk):
         )
         self.subbg.place(anchor="nw", relx=0.008, rely=0.01)
         logoImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(
-            Image.open("asset/Logo.png"), size=(80, 80)), bg_color="transparent")
+            logo, size=(80, 80)), bg_color='transparent')
         logoImage.place(anchor="nw", relx=0.018, rely=0.020)
         bgImage2 = ctk.CTkLabel(self.subbg, text="", image=ctk.CTkImage(
-            Image.open("asset/login2.jpg"), size=(1230, 694)))
+            LoginBG2, size=(1230, 694)))
         bgImage2.place(anchor="nw", relx=0, rely=0)
         self.loginFrame = ctk.CTkFrame(
             self.subbg,
@@ -128,6 +138,4 @@ class Login(ctk.CTk):
 
 if __name__ == "__main__":
     app = Login()
-    app.resizable(False, False)  # Disable resize for GUI
-    center(app, 1280, 720)  # center window in your screen
     app.mainloop()
