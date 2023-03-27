@@ -7,6 +7,9 @@ logo = Image.open("asset\Logo.png")
 LoginBG = Image.open("asset/login.jpg")
 LoginBG2 = Image.open("asset/login2.jpg")
 
+RegisterBG = Image.open("asset/RegBG.jpg")
+# RegisterBG2 = Image.open("asset/login2.jpg")
+
 
 # Male and Female Images
 MaleImage = Image.open("asset\Male.png")
