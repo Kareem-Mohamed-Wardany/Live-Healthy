@@ -1,29 +1,32 @@
 import re
+import smtplib
+import ssl
 import tkinter as tk
+from email.message import EmailMessage
 from tkinter import *
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
+from AdministratorGUI import *
 from Config import *
 from Database import *
+from DoctorGUI import *
+from Error import *
 from GUIHelperFunctions import *
 from Images import *
-from User import *
-from RegisterGUI import *
 from PatientGUI import *
 from RadiologistGUI import *
-from AdministratorGUI import *
-from DoctorGUI import *
-import smtplib
-import ssl
-from email.message import EmailMessage
+from RegisterGUI import *
+from User import *
+
 
 class Login(ctk.CTk):
     # load Config dict
     config = SystemConfig()
     MovetoReg = False
     Moveto = False
+    systemError = SystemErrors()
 
     # connect to DB
     db = Database()
@@ -35,7 +38,6 @@ class Login(ctk.CTk):
         # Enter all your buttons,Entries here
 
     def WindowSettings(self):
-        # let title be 'Welcome Specialist|Consultant UserName'
         Title = "Login"
         self.title(Title)
 
@@ -65,7 +67,7 @@ class Login(ctk.CTk):
         )
         self.subbg.place(anchor="nw", relx=0.008, rely=0.01)
         logoImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(
-            logo, size=(80, 80)), bg_color='transparent')
+            logo, size=(65, 65)), bg_color='#f0fafb', fg_color="#f0fafb")
         logoImage.place(anchor="nw", relx=0.018, rely=0.020)
         bgImage2 = ctk.CTkLabel(self.subbg, text="", image=ctk.CTkImage(
             LoginBG2, size=(1230, 694)))
@@ -83,8 +85,7 @@ class Login(ctk.CTk):
             text_color="#000000",
             width=100,
             height=25,
-            font=ctk.CTkFont(size=40, weight='bold',
-                             slant='italic', family="Times New Roman")
+            font=ctk.CTkFont(size=40, weight='bold', slant='italic', family="Times New Roman")
         )
         welcomeLabel.place(anchor="nw", relx=0.06, rely=0.2)
         loginLabel = ctk.CTkLabel(
@@ -96,16 +97,16 @@ class Login(ctk.CTk):
             font=ctk.CTkFont(size=20, family="Times New Roman")
         )
         loginLabel.place(anchor="nw", relx=0.061, rely=0.268)
-        usernameLabel = ctk.CTkLabel(
+        emailLabel = ctk.CTkLabel(
             self.loginFrame,
-            text="Username:",
+            text="Email:",
             text_color="#000000",
             width=100,
             height=25,
             font=ctk.CTkFont(size=20, weight="bold", family="Times New Roman")
         )
-        usernameLabel.place(anchor="nw", relx=0.061, rely=0.4)
-        self.usernameEntry = ctk.CTkEntry(
+        emailLabel.place(anchor="nw", relx=0.061, rely=0.4)
+        self.emailEntry = ctk.CTkEntry(
             self.loginFrame,
             placeholder_text="Your email...",
             fg_color="white",
@@ -113,7 +114,7 @@ class Login(ctk.CTk):
             width=490,
             height=45,
         )
-        self.usernameEntry.place(anchor="nw", relx=0.061, rely=0.46)
+        self.emailEntry.place(anchor="nw", relx=0.061, rely=0.46)
         passwordLabel = ctk.CTkLabel(
             self.loginFrame,
             text="Password:",
@@ -160,29 +161,29 @@ class Login(ctk.CTk):
         self.SignUpButton.place(anchor="nw", relx=0.4, rely=0.018)
 
     def login_verify(self):
-        self.username = self.usernameEntry.get()
+        self.email = self.emailEntry.get()
         self.password = self.passwordEntry.get()
-        if len(self.username) == 0 or len(self.password) == 0:
-            return messagebox.showerror("Empty fields","Please fill in all fields")
-        userinfo = User.Login(self.username, self.password)
+        if len(self.email) == 0 or len(self.password) == 0:
+            return messagebox.showerror("Error", self.systemError.get(1), icon="error", parent=self.loginFrame)
+        userinfo = User.Login(self.email, self.password)
         if userinfo != "ok":
             if userinfo[1] in ["Specialist","Consultant"]:
                 res = self.db.Select("SELECT Verified FROM doctordata WHERE Doctor_ID=%s",[userinfo[0]])[0][0]
                 if res == 0:
-                    return messagebox.showerror("Error","Please wait until you are verified")
+                    return messagebox.showerror("Error", self.systemError.get(15), icon="error", parent=self.loginFrame)
             self.Moveto = True
             self.destroy()
 
     
 
     def forgot_password(self, event):
-        mail = self.usernameEntry.get()
+        mail = self.emailEntry.get()
         if len(mail) == 0:
-            return messagebox.showerror("Empty Mail","Please fill in mail field")
+            return messagebox.showerror("Error", self.systemError.get(14), icon="error", parent=self.loginFrame)
 
         password = self.db.Select("SELECT Password FROM users WHERE Mail LIKE %s",[mail])
         if len(password) == 0:
-            return messagebox.showerror("Error","Please Enter a valid Email")
+            return messagebox.showerror("Error", self.systemError.get(3), icon="error", parent=self.loginFrame)
         password = password[0][0]
 
         # Define email sender and receiver

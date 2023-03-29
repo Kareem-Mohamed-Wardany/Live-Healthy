@@ -10,6 +10,9 @@ from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from tkinter.filedialog import askopenfilename
+from Patient import *
+from Doctor import *
+from Radiologist import *
 from PIL import Image
 import re
 from datetime import datetime
@@ -23,7 +26,6 @@ class Register(ctk.CTk):
     # load Config dict
     config = SystemConfig()
     systemError = SystemErrors()
-    Valid = True
 
     # connect to DB
     db = Database()
@@ -31,7 +33,7 @@ class Register(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.WindowSettings()
-        self.login_gui()
+        self.Register_gui()
         # set Dimension of GUI
         self.mainTitle()
         self.mainRegister()
@@ -55,7 +57,7 @@ class Register(ctk.CTk):
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
 
-    def login_gui(self):
+    def Register_gui(self):
         self.backgroundFrame = ctk.CTkFrame(
             self,
             width=1280,
@@ -253,7 +255,7 @@ class Register(ctk.CTk):
         )
         GenderLabel.place(anchor="nw",relx=0.55, rely=0.52)
 
-        self.GenderVar = tk.IntVar(value = 0)
+        self.GenderVar = tk.IntVar(value = -1)
         MaleRadio = ctk.CTkRadioButton(
             mainFrame,
             text="Male",
@@ -501,15 +503,17 @@ class Register(ctk.CTk):
         )
         self.UniEntry.place(anchor="nw",relx=0.2,rely=0.4)
 
+    IDPath = ""
     def ImportID(self):
         self.IDPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        ScanImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(350,197)))
-        ScanImage.place(anchor="nw", relx=0, rely=0)
+        IDImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(350,100)))
+        IDImage.place(anchor="nw", relx=0, rely=0)
 
+    LicensePath = ""
     def ImportLicense(self):
         self.LicensePath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        ScanImage = ctk.CTkLabel(self.ImageFrame2,text="",image=ctk.CTkImage(Image.open(self.LicensePath),size=(350,197)))
-        ScanImage.place(anchor="nw", relx=0, rely=0)
+        LicenseImage = ctk.CTkLabel(self.ImageFrame2,text="",image=ctk.CTkImage(Image.open(self.LicensePath),size=(350,100)))
+        LicenseImage.place(anchor="nw", relx=0, rely=0)
 
     def radiologist(self):
         self.HoldFrame()
@@ -584,31 +588,81 @@ class Register(ctk.CTk):
         self.Password = self.PassEntry.get()
         self.ConfirmPassword = self.ConfirmPassEntry.get()
         self.DoB = datetime.strptime(self.cal.get_date(), '%m/%d/%y').date()
-        self.Gender = self.gender()
+        self.Gender = self.GenderVar.get()
         self.UsType = self.TypeCombo.get()
-        self.dataValidator()
+        CheckData = self.dataValidator()
         
-        if self.Valid:
-            self.fetchUserTypeData()
-            self.emptyUserTypeFields()
+        if CheckData != -1:
+            return messagebox.showerror("Error", self.systemError.get(CheckData), icon="error", parent=self.backgroundFrame)
+        else:
             self.insertUserInfo()
-            return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self)
+            
 
-    def gender(self):
-        return "Male" if self.GenderVar.get() == 1 else "Female"
 
-    def dataValidator(self):
-        if self.emptyMainFields():
-            self.Valid = False
-            return MessageBox(self, "error", "Please fill all the fields!")
-        if self.userNameChecker():
-            self.Valid = False
-            return MessageBox(self, "error", "Names can't include numbers!")
-        self.passwordChecker()
+    def dataValidator(self):  
+        EmptyFields = self.emptyMainFields()
+        if EmptyFields != -1:
+            return EmptyFields
+        
+        ValidName = self.userNameChecker()
+        
+        if ValidName != -1:
+            return ValidName
+        
         if self.emailChecker():
-            self.Valid = False
-            return MessageBox(self, "error", "Invalid email address!")
-        self.phoneChecker()    
+            return 3
+        
+        PasswordValid = self.passwordChecker()
+        if PasswordValid != -1:
+            return PasswordValid
+        
+        PhoneValid = self.phoneChecker()
+        if PhoneValid != -1:
+            return PhoneValid
+        
+        genvalid = self.genderValid()
+        if genvalid != -1:
+            return genvalid
+        
+        AllVaild = self.fetchUserTypeData()
+        if AllVaild != -1:
+            return AllVaild
+        
+        return -1
+
+    def emptyMainFields(self):
+        if self.firstEntry.get() == "" or self.SecondEntry.get() == "" or self.Phone == "" or self.Email == "" or self.Password == "" or self.ConfirmPassword == "" or self.Gender == 0:
+            return 1
+        else:
+            return -1
+
+    def userNameChecker(self):
+        pattern = re.compile("^[a-zA-Z ]*$")
+        if pattern.fullmatch(self.userName) is not None:
+            return -1
+        else:
+            return 2
+    
+    def emailChecker(self):
+        pat = "^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
+        return not re.match(pat,self.Email)
+    
+    def passwordChecker(self):
+        if self.Password != self.ConfirmPassword:
+            return 6
+        elif len(self.Password) < 8:
+            return 7
+        else:
+            return -1
+    
+    def phoneChecker(self):
+        if (not self.Phone.isnumeric()) or (len(self.Phone) < 11 or len(self.Phone) > 15):
+            return 8
+        else:
+            return -1
+
+    def genderValid(self):
+        return 9 if self.GenderVar.get() == -1 else -1
 
     def CheckRadioCenter(self):
         res = self.db.Select("SELECT Registercode, Center_Limit FROM radiologycenters WHERE Name=%s",[self.radioCenter])
@@ -620,54 +674,14 @@ class Register(ctk.CTk):
             self.db.Commit()
         if limit == 0:
             self.Valid = False
-            return MessageBox(self, "error", "Your radiology center has reached its maximum amount of users!")
+            return 4
         if self.radioCenterCode != code:
             self.Valid = False
-            return MessageBox(self, "error", "Invalid radiology center code!")
+            return 5
+        return -1
 
-    def emptyMainFields(self):
-        return (
-            self.firstEntry.get() == ""
-            or self.SecondEntry.get() == ""
-            or self.Phone == ""
-            or self.Email == ""
-            or self.Password == ""
-            or self.ConfirmPassword == ""
-            or self.Gender == 0
-        )
-
-    def emptyUserTypeFields(self):
-        if self.TypeCombo.get() in ["Specialist", "Consultant"] and (
-            len(self.IDPath) == 0
-            or len(self.LicensePath) == 0
-            or len(self.uni) == 0
-        ):
-            return MessageBox(self, "error", "Please fill all the fields!")
-
-    def passwordChecker(self):
-        if self.Password != self.ConfirmPassword:
-            self.Valid = False
-            return MessageBox(self, "error", "Password Mismatch!")
-        if len(self.Password) < 8:
-            self.Valid = False
-            return MessageBox(self, "error", "Password should be longer than 8 characters!")
-    
-    def userNameChecker(self):
-        return any(char.isdigit() for char in self.userName)
-    
-    def emailChecker(self):
-        pat = "^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
-        return not re.match(pat,self.Email)
-    
-    def phoneChecker(self):
-        if not self.Phone.isnumeric():
-            self.Valid = False
-            return MessageBox(self, "error", "Invalid phone number!")
-        if len(self.Phone) < 11 or len(self.Phone) > 15:
-            self.Valid = False
-            return MessageBox(self, "error", "Invalid phone number!")
-    
     def fetchUserTypeData(self):
+        # Function that fetches the user type data in SecondFrame
         if self.TypeCombo.get() == "Patient":
             self.heart = self.Heart.get()
             self.diabetes = self.Diabetes.get()
@@ -677,41 +691,41 @@ class Register(ctk.CTk):
             self.hypertension = self.Hypertension.get()
             self.allergies = self.Allergies.get()
             self.Blood = self.BloodTypeCombo.get()
-        #print(self.heart, self.diabetes, self.hypertension, self.allergies, self.cancer, self.obesity, self.smoker, self.Blood)
+
         if self.TypeCombo.get() == "Radiologist":
             self.radioCenter = self.RadioCenterCombo.get()
             self.radioCenterCode = self.RadioCenterCodeEntry.get()
-            self.CheckRadioCenter()
-        #print(self.radioCenterCode, self.radioCenter)
+            RadiologyCenterVaild = self.CheckRadioCenter()
+            if RadiologyCenterVaild != -1:
+                return RadiologyCenterVaild
+
         if self.TypeCombo.get() in ["Specialist", "Consultant"]:
-            if self.UniEntry.get() == "":
-                self.Valid = False
-                return MessageBox(self, "error", "Please fill all the fields!")
+            if len(self.IDPath) == 0 and len(self.LicensePath) == 0: 
+                return 13
+            if len(self.IDPath) == 0:
+                return 11
+            if len(self.LicensePath) == 0:
+                return 12
+                
+            if self.UniEntry.get() == "" :
+                return 10
             self.uni = self.UniEntry.get()
             self.IDbinary = self.db.convertToBinaryData(self.IDPath)
             self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
-    
+        return -1
+
     def insertUserInfo(self):
-        appearence = "System"
-        res = self.db.Select("SELECT ID FROM users")
-        IDs = [i[0] for i in res]
-        newID = len(IDs)
-        if self.TypeCombo.get() == "Patient":
-            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
-            self.db.Insert("INSERT INTO patienthealthstatus VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.heart, self.diabetes, self.cancer,self.obesity,self.smoker,self.hypertension,self.allergies,self.Blood])
-            self.db.Commit()
-        if self.TypeCombo.get() == "Radiologist":
-            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
-            res = self.db.Select("SELECT ID FROM radiologycenters where Name=%s",[self.radioCenter])
-            centerID = res[0][0]
-            self.db.Insert("INSERT INTO radiologists VALUES (%s,%s)",[newID,centerID])
-            self.db.Commit()
-        if self.TypeCombo.get() in ["Consultant", "Specialist"]:
-            self.db.Insert("INSERT INTO users (ID, Name, Mail, Password, Account_Type, Phone, DateOfBirth, 	Apperance_Mode, Gender) VALUES (%s, %s, %s, %s, %s, %s,%s, %s,%s)",[newID, self.userName, self.Email, self.Password, self.TypeCombo.get(),self.Phone,self.DoB,appearence,self.Gender])
-            self.db.Insert("INSERT INTO doctordata VALUES (%s,%s,%s,%s,%s)",[newID, 0, self.uni,self.IDbinary, self.LicenseBinary])
-            self.db.Commit()
-
-
+        # Function That calls abstract method to insert user info into database 
+        if self.UsType == "Patient":
+            patient = Patient.CreatePatient(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.heart, self.diabetes, self.cancer, self.obesity, self.smoker, self.hypertension, self.allergies, self.Blood)
+            patient.SaveData()
+        if self.UsType == "Radiologist":
+            radiologist = Radiologist.CreateRadiologist(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.radioCenter)
+            radiologist.SaveData()
+        if self.UsType in ["Consultant", "Specialist"]:
+            doctor = Doctor.CreateDoctor(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.uni, self.IDbinary, self.LicenseBinary)
+            doctor.SaveData()
+        return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
 
 if __name__ == "__main__":
     app = Register()

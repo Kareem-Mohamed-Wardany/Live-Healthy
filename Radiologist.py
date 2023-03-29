@@ -37,7 +37,7 @@ class Radiologist(User):
         cls.userPhone = Phone
         cls.userAge = Age
         cls.userGender = Gender
-        cls.userSystemApperanceMode = "Light"
+        cls.userSystemApperanceMode = "System"
         cls.userBalance = 0
         cls.userVIPLevel = 0
         cls.userVIPEnd = date(2001, 1, 1)
