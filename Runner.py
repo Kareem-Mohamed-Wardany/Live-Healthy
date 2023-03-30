@@ -21,7 +21,7 @@ def Run():
 
 
     if app.Moveto:
-        userinfo = User.Login(app.username, app.password)
+        userinfo = User.Login(app.email, app.password)
         MoveTo(userinfo)
 
     if app.MovetoReg:

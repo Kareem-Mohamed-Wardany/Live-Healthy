@@ -1,6 +1,7 @@
 import contextlib
 import os
 import queue
+import shutil
 import subprocess
 import time
 import tkinter as tk
@@ -17,7 +18,7 @@ from User import *
 from UserFactory import *
 
 
-class App(ctk.CTk):
+class DocGUI(ctk.CTk):
     # load Config dict
     config = SystemConfig()
 
@@ -25,7 +26,6 @@ class App(ctk.CTk):
     db = Database()
 
     # Define the Doctor
-    user = UserFactory.createUser(4, "doctor")  # 2 Khaled Cons   4 Amira Spec
 
     Created = [
         True,
@@ -34,8 +34,9 @@ class App(ctk.CTk):
         True,
     ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
 
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
+        self.user = UserFactory.createUser(id, "doctor")  # 2 Khaled Cons   4 Amira Spec
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -57,6 +58,7 @@ class App(ctk.CTk):
             self.config.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
+        self.protocol('WM_DELETE_WINDOW', self.exit_function)
 
         self.grid_rowconfigure(0, weight=1)  # let the left sidebar take all the space
         self.grid_columnconfigure(1, weight=1)
@@ -218,17 +220,18 @@ class App(ctk.CTk):
 
     def MyChats(self, res):
         # Create Scrollable Frame to hold all chats for Doctor
-        frame = ScrollableFrame(
+        frame = ctk.CTkScrollableFrame(
             self.Active_Chats_frame,
-            "gray30",
-            width=250,
-            height=self.winfo_height() - 10,
+            fg_color="gray30",
+            width=230,
+            height=self.winfo_height() - 20,
         )
         frame.grid(row=0, column=0, sticky="nsew")
-        start_time = time.time()
+        if len(res)==0:
+            NoData= ctk.CTkLabel(frame, text="No Patients Found!" , width=220, height=self.winfo_height() - 150)
+            NoData.grid(row=0, column=0, pady=6)
         for pos, item in enumerate(res):
-            self.AddtoChatMenu(frame.scrollable_frame, item[0], pos)
-        print(f"--- {time.time() - start_time} seconds ---")
+            self.AddtoChatMenu(frame, item[0], pos)
 
     def AddtoChatMenu(self, master, id, pos):
         output = self.db.Select("SELECT Name, Gender FROM users WHERE ID=%s", [id])
@@ -258,6 +261,8 @@ class App(ctk.CTk):
         # Chat window that will contain ChatFrame that show the chat for the doctor and chatbox where the doctor type in his chat
         # also send icon that will show the text in chatbox on ChatFrame for both patient and doctor
         with contextlib.suppress(Exception):
+            os.mkdir("Data/PatientScans/")
+            os.mkdir("Data/Prescriptions/")
             for widget in chatWindow.winfo_children():
                 widget.destroy()
             self.Userclient.end()
@@ -267,8 +272,8 @@ class App(ctk.CTk):
         )
         chatWindow.grid(row=0, column=4, sticky="NSEW")
 
-        self.ChatFrame = ScrollableFrame(
-            chatWindow, "gray40", width=550, height=400, scrollafter=8
+        self.ChatFrame = ctk.CTkScrollableFrame(
+            chatWindow, fg_color="gray50", width=550, height=385
         )
         self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
 
@@ -294,12 +299,11 @@ class App(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        # self.JoinChatServer(id)
+        self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
-            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25
-        )
+            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25,fg_color="gray50")
         self.chatbox.place(anchor="nw", relx=0.01, rely=0.57)
         self.chatbox.bind(
             "<Return>", self.sendMessage
@@ -571,11 +575,10 @@ class App(ctk.CTk):
         delete.place(anchor="nw", relx=0.95, rely=0.01)
         delete.bind("<Button-1>", self.DelMedications)
 
-        self.MedicineFrame = ScrollableFrame(
-            self.MedicineWindow, "gray40", width=690, height=300, scrollafter=14
+        self.MedicineFrame = ctk.CTkScrollableFrame(
+            self.MedicineWindow, fg_color="gray40", width=690, height=300
         )
         self.MedicineFrame.place(anchor="nw", relx=0.01, rely=0.1)
-        self.MedicineFrame.scrollable_frame
 
         Show = ctk.CTkButton(
             self.MedicineWindow,
@@ -599,7 +602,7 @@ class App(ctk.CTk):
 
     def AddNewMedication(self, event):
         MedicinEntry = ctk.CTkEntry(
-            self.MedicineFrame.scrollable_frame,
+            self.MedicineFrame,
             placeholder_text="Enter Medicine Name",
             width=300,
             height=40,
@@ -607,7 +610,7 @@ class App(ctk.CTk):
         MedicinEntry.grid(row=self.loc, column=0)
 
         MedicinEntry = ctk.CTkEntry(
-            self.MedicineFrame.scrollable_frame,
+            self.MedicineFrame,
             placeholder_text="Enter Medicine Note",
             width=300,
             height=40,
@@ -618,22 +621,20 @@ class App(ctk.CTk):
     def DelMedications(self, event):
         with contextlib.suppress(Exception):
             self.loc = 0
-            for widget in self.MedicineFrame.scrollable_frame.winfo_children():
+            for widget in self.MedicineFrame.winfo_children():
                 widget.destroy()
-            self.MedicineFrame.disable_scroll()
-            self.MedicineFrame.moveto(0)
 
     def FinalizePrescription(self, id, type):
         patient = UserFactory.createUser(id, "patient")
         path = f"Data\Prescriptions\{patient.userName}.pdf"
-        if len(self.MedicineFrame.scrollable_frame.winfo_children()) == 0:
+        if len(self.MedicineFrame.winfo_children()) == 0:
             return MessageBox(
                 self.MedicineFrame, "error", "No Medicine to be added to Prescription"
             )
         Medicines = []
         MedicinesNotes = []
         for pos, widget in enumerate(
-            self.MedicineFrame.scrollable_frame.winfo_children()
+            self.MedicineFrame.winfo_children()
         ):
             if pos % 2 == 0:
                 if len(widget.get()) == 0:
@@ -689,7 +690,7 @@ class App(ctk.CTk):
             )  # Send any message to the Patient
             writeThread.start()
         except Exception:
-            print("Chat Server is offline")
+            messagebox.showerror("Error","Problem With Chat Server")
 
     def LoadChatData(self, Patientid):
         # Load the chat of Patient with id
@@ -810,7 +811,6 @@ class App(ctk.CTk):
         while self.LoaddedChat.qsize() > 0:
             msg = self.LoaddedChat.get()  # get chat data from the Queue
             self.ChatBlock(msg)  # add Chat to Chatbox
-            self.ChatFrame.ShowScrollbar()
 
     def AddTochatBox(self, id):
         if not self.CurrentChat.empty():  # check if CurrentChat is not empty
@@ -819,7 +819,6 @@ class App(ctk.CTk):
             self.SaveChat(id, self.ChatLOGS)  # update database with new chat data
             if msg != "":
                 self.ChatBlock(msg)  # add Chat to Chatbox
-            self.ChatFrame.ShowScrollbar()
 
         self.ChatFrame.after(
             1000, self.AddTochatBox, id
@@ -827,17 +826,15 @@ class App(ctk.CTk):
 
     def ChatBlock(self, msg):
         # Create Frame that will hold message of the user
-        m_frame = ctk.CTkFrame(self.ChatFrame.scrollable_frame, bg_color="#595656")
+        m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
         m_frame.pack(anchor="nw", pady=5)
         m_frame.columnconfigure(0, weight=1)
 
-        m_label = tk.Label(
+        m_label = ctk.CTkLabel(#bg="#c5c7c9",
             m_frame,
             wraplength=800,
-            fg="black",
-            bg="#c5c7c9",
             text=msg,
-            font="lucida 14 bold",
+            font=ctk.CTkFont("lucida",size=14,weight="bold"),
             justify="left",
             anchor="w",
         )
@@ -855,15 +852,6 @@ class App(ctk.CTk):
 
     def EndButtonEvent(self, event, id):
         if self.user.PrescriptionGenerated(id):
-            list(
-                map(
-                    os.unlink,
-                    (
-                        os.path.join("Data/PatientScans/", f)
-                        for f in os.listdir("Data/PatientScans/")
-                    ),
-                )
-            )
             self.user.EndChat(id, "Done")
             self.LoadActiveChat()
             res = self.user.updateBalance(
@@ -878,7 +866,7 @@ class App(ctk.CTk):
     def ReportReasonBlock(self, event, name, id):
         # Create New Window
         ReportWindow = ctk.CTkToplevel()
-        center(ReportWindow)  # Open the window in the center of the Screen
+        center(ReportWindow, 720, 400)  # Open the window in the center of the Screen
         title = f"Report {name}"
         ReportWindow.title(title)
         ReportWindow.geometry("400x200")
@@ -929,10 +917,12 @@ class App(ctk.CTk):
 
         res = self.user.LoadWaitingPatientRequests()
         # Scrollable frame that will hold all Available Patients with request status as waiting
-        AvailablePatientsFrame = ScrollableFrame(
-            self.PatientRequests_frame, "gray20", width=1070, height=650, scrollafter=5
-        )
-        AvailablePatientsFrame.place(anchor="nw", relx=0, rely=0.08)
+        AvailablePatientsFrame = ctk.CTkScrollableFrame(
+            self.PatientRequests_frame, fg_color="gray20", width=1050, height=640)
+        AvailablePatientsFrame.place(anchor="nw", relx=0.01, rely=0.08)
+        if len(res)==0:
+            Nodata = ctk.CTkLabel( AvailablePatientsFrame, text="No Patients Found!", width=1050, height=600, font=ctk.CTkFont(size=15, weight="bold"))
+            Nodata.grid(row=0, column=0, pady=6)
 
         for i in range(len(res)):
             (
@@ -944,7 +934,7 @@ class App(ctk.CTk):
                 Patient_VIP,
             ) = self.user.fillindata(res[i])
             patient_border = ctk.CTkFrame(
-                AvailablePatientsFrame.scrollable_frame,
+                AvailablePatientsFrame,
                 corner_radius=0,
                 fg_color="gray40",
                 width=1070,
@@ -1414,7 +1404,15 @@ class App(ctk.CTk):
         ctk.set_appearance_mode(new_appearance_mode)
         self.user.SetApperanceMode(new_appearance_mode)
 
+    def exit_function(self):
+        with contextlib.suppress(Exception):
+            shutil.rmtree("Data/PatientScans/")
+            shutil.rmtree("Data/Prescriptions/")
+            self.Userclient.end()
+        self.destroy()
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+
+
+# if __name__ == "__main__":
+#     app = DoctorGUI()
+#     app.mainloop()

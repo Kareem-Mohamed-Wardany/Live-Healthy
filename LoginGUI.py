@@ -166,6 +166,9 @@ class Login(ctk.CTk):
         if len(self.email) == 0 or len(self.password) == 0:
             return messagebox.showerror("Error", self.systemError.get(1), icon="error", parent=self.loginFrame)
         userinfo = User.Login(self.email, self.password)
+        suspended = self.suspended(userinfo[0])
+        if suspended != -1:
+            return messagebox.showerror("Error", self.systemError.get(suspended), icon="error", parent=self.loginFrame)
         if userinfo != "ok":
             if userinfo[1] in ["Specialist","Consultant"]:
                 res = self.db.Select("SELECT Verified FROM doctordata WHERE Doctor_ID=%s",[userinfo[0]])[0][0]
@@ -210,6 +213,10 @@ class Login(ctk.CTk):
             smtp.sendmail(email_sender, email_receiver, em.as_string())
         messagebox.showinfo("Success", "Email Sent")
 
+
+    def suspended(self, id):
+        res = self.db.Select("SELECT COUNT(*) FROM suspended WHERE User_ID = %s",[id])[0][0]
+        return 26 if res == 1 else -1
 
     def Goto_Register(self):
         self.MovetoReg = True

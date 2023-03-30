@@ -18,11 +18,13 @@ from GUIHelperFunctions import *
 from Images import *
 from User import *
 from UserFactory import *
+from Error import *
 
 
 class PatGUI(ctk.CTk):
     # load Config dict
     configfile = SystemConfig()
+    systemError = SystemErrors()
 
     # connect to DB
     db = Database()
@@ -586,7 +588,7 @@ class PatGUI(ctk.CTk):
         self.ExpireMonth.place(anchor="nw", relx=0.55, rely=0.15)
 
         self.slashLabel = ctk.CTkLabel(
-            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14)
+            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14),text_color=self.configfile.get("TextColor")
         )
         self.slashLabel.place(anchor="nw", relx=0.615, rely=0.15)
 
@@ -679,17 +681,17 @@ class PatGUI(ctk.CTk):
     def CheckCard_button_event(self):
         if len(self.CVV.get()) != 3 or len(self.CardNumber.get()) != 16:
             self.CardChecked = False
-            return MessageBox(self.credits_frame, "error", "No Credit Card details found")
+            return messagebox.showerror("Error", self.systemError.get(25), icon="error", parent=self.LeftSideBar_frame)
         Year = f"20{self.ExpireYear.get()}"
         if int(Year) < date.today().year:
             self.CardChecked = False
-            return MessageBox(self.credits_frame, "error", "Credit Card Expired")
+            return messagebox.showerror("Error", self.systemError.get(16), icon="error", parent=self.LeftSideBar_frame)
         if (
             int(self.ExpireMonth.get()) < date.today().month
             and int(Year) == date.today().year
         ):
             self.CardChecked = False
-            return MessageBox(self.credits_frame, "error", "Credit Card Expired")
+            return messagebox.showerror("Error", self.systemError.get(16), icon="error", parent=self.LeftSideBar_frame)
         else:
             self.CardChecked = True
 
@@ -735,6 +737,7 @@ class PatGUI(ctk.CTk):
             self.Created[1] = False
         with contextlib.suppress(Exception):
             os.mkdir("Data/Prescriptions/")
+        with contextlib.suppress(Exception):
             for widget in self.ChatWithDoctor_frame.winfo_children():
                 widget.destroy()
 
@@ -804,13 +807,13 @@ class PatGUI(ctk.CTk):
 
     def FillRequest(self):
         if self.symptoms.get("1.0", "end-1c") == "":
-            return MessageBox(self.ChatWithDoctor_frame, "error","Symptoms can not be empty")
+            return messagebox.showerror("Error", self.systemError.get(22), icon="error", parent=self.LeftSideBar_frame)
 
         if self.illnessTime.get("1.0", "end-1c") == "":
-            return MessageBox(self.ChatWithDoctor_frame, "error","Illness Time can not be empty")
+            return messagebox.showerror("Error", self.systemError.get(23), icon="error", parent=self.LeftSideBar_frame)
 
         if self.medications.get("1.0", "end-1c") == "":
-            return MessageBox(self.ChatWithDoctor_frame, "error","Medications can not be empty")
+            return messagebox.showerror("Error", self.systemError.get(24), icon="error", parent=self.LeftSideBar_frame)
 
         symptoms = self.symptoms.get("1.0", "end-1c")
 
@@ -834,8 +837,8 @@ class PatGUI(ctk.CTk):
                     border_spacing=10,
                     text=self.user.userBalance,
                     fg_color="transparent",
-                    text_color=("gray10", "gray90"),
-                    hover_color=("gray70", "gray30"),
+                    text_color=self.configfile.get("TextColor"),
+                    hover_color=self.configfile.get("BackgroundColor"),
                     image=self.coin_image,
                     anchor="w",
                     command=self.Credits_button_event,
@@ -844,7 +847,6 @@ class PatGUI(ctk.CTk):
                 
         else:
             self.user.CreateRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
-        self.ChatWithDoctor()
         return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
 
     # Chat Section

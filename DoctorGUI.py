@@ -16,11 +16,13 @@ from GUIHelperFunctions import *
 from Images import *
 from User import *
 from UserFactory import *
+from Error import *
 
 
 class DocGUI(ctk.CTk):
     # load Config dict
-    config = SystemConfig()
+    configfile = SystemConfig()
+    systemError = SystemErrors()
 
     # connect to DB
     db = Database()
@@ -50,12 +52,14 @@ class DocGUI(ctk.CTk):
         # let title be 'Welcome Specialist|Consultant UserName'
         Title = f"Welcome {self.user.userType} {self.user.userName}"
         self.title(Title)
+        self.configure(bg_color=self.configfile.get("BackgroundColor"))
+        self.configure(fg_color=self.configfile.get("BackgroundColor"))
 
         # set Dimension of GUI
         center(
             self,
-            self.config.get("FramesSizeWidth"),
-            self.config.get("FramesSizeHeight"),
+            self.configfile.get("FramesSizeWidth"),
+            self.configfile.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
         self.protocol('WM_DELETE_WINDOW', self.exit_function)
@@ -67,36 +71,36 @@ class DocGUI(ctk.CTk):
         # load images
         self.Male_image = ctk.CTkImage(
             MaleImage,
-            size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
+            size=(self.configfile.get("UserImageSize"), self.configfile.get("UserImageSize")),
         )
         self.Female_image = ctk.CTkImage(
             FemaleImage,
-            size=(self.config.get("UserImageSize"), self.config.get("UserImageSize")),
+            size=(self.configfile.get("UserImageSize"), self.configfile.get("UserImageSize")),
         )
         self.Active_chats_image = ctk.CTkImage(
             ActiveChats,
             size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
             ),
         )
         self.chat_image = ctk.CTkImage(
             Chat,
             size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
             ),
         )
         self.coin_image = ctk.CTkImage(
             coin,
             size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
             ),
         )
 
         # create LeftSideBar frame
-        self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=self.configfile.get("FrameColor"))
         self.LeftSideBar_frame.grid(row=0, column=0, sticky="nsew")
         self.LeftSideBar_frame.grid_rowconfigure(
             5, weight=1
@@ -128,6 +132,7 @@ class DocGUI(ctk.CTk):
         self.DoctorName_label = ctk.CTkLabel(
             self.LeftSideBar_frame,
             text=self.user.userName,
+            text_color=self.configfile.get("TextColor"),
             width=100,
             height=20,
             compound="left",
@@ -138,6 +143,7 @@ class DocGUI(ctk.CTk):
         self.DoctorJob_label = ctk.CTkLabel(
             self.LeftSideBar_frame,
             text=self.user.userType,
+            text_color=self.configfile.get("TextColor"),
             width=100,
             height=20,
             compound="left",
@@ -152,8 +158,8 @@ class DocGUI(ctk.CTk):
             border_spacing=10,
             text="Active Chats",
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
             image=self.Active_chats_image,
             anchor="w",
             command=self.Active_Chats_button_event,
@@ -167,8 +173,8 @@ class DocGUI(ctk.CTk):
             border_spacing=10,
             text="Patients Requests",
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
             image=self.chat_image,
             anchor="w",
             command=self.PatientRequests_button_event,
@@ -182,8 +188,8 @@ class DocGUI(ctk.CTk):
             border_spacing=10,
             text=self.user.userBalance,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
             image=self.coin_image,
             anchor="w",
             command=self.Credits_button_event,
@@ -222,13 +228,16 @@ class DocGUI(ctk.CTk):
         # Create Scrollable Frame to hold all chats for Doctor
         frame = ctk.CTkScrollableFrame(
             self.Active_Chats_frame,
-            fg_color="gray30",
+            corner_radius=0,
+            fg_color=self.configfile.get("FrameColor"),
             width=230,
+            scrollbar_button_color=self.configfile.get("FrameColor"), 
+            scrollbar_button_hover_color=self.configfile.get("TextColor"),
             height=self.winfo_height() - 20,
         )
-        frame.grid(row=0, column=0, sticky="nsew")
+        frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         if len(res)==0:
-            NoData= ctk.CTkLabel(frame, text="No Patients Found!" , width=220, height=self.winfo_height() - 150)
+            NoData= ctk.CTkLabel(frame, text="No Patients Found!" , width=220, height=self.winfo_height() - 150, text_color=self.configfile.get("TextColor"))
             NoData.grid(row=0, column=0, pady=6)
         for pos, item in enumerate(res):
             self.AddtoChatMenu(frame, item[0], pos)
@@ -249,8 +258,8 @@ class DocGUI(ctk.CTk):
             text=Name,
             width=250,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray20", "gray60"),
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("FrameColor"),
             image=Imagesrc,
             anchor="w",
             command=lambda m=id: self.openChat(m),
@@ -273,9 +282,9 @@ class DocGUI(ctk.CTk):
         chatWindow.grid(row=0, column=4, sticky="NSEW")
 
         self.ChatFrame = ctk.CTkScrollableFrame(
-            chatWindow, fg_color="gray50", width=550, height=385
+            chatWindow, fg_color=self.configfile.get("FrameColor"), width=550, height=385, scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor")
         )
-        self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
+        self.ChatFrame.place(anchor="nw", relx=0.01, rely=0.005)
 
         # End Chat
         self.EndChatButton(chatWindow, id)
@@ -299,11 +308,11 @@ class DocGUI(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        self.JoinChatServer(id)
+        # self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
-            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25,fg_color="gray50")
+            master, font=ctk.CTkFont(size=14, weight="bold"), width=520, height=25,fg_color= self.configfile.get("FrameColor"), text_color=self.configfile.get("TextColor"),border_color=self.configfile.get("TextColor"),border_width=1)
         self.chatbox.place(anchor="nw", relx=0.01, rely=0.57)
         self.chatbox.bind(
             "<Return>", self.sendMessage
@@ -330,13 +339,14 @@ class DocGUI(ctk.CTk):
         else:
             Imagesrc = ctk.CTkImage(FemaleImage, size=(100, 100))
 
-        Patientinfo = ctk.CTkFrame(master)
+        Patientinfo = ctk.CTkFrame(master,fg_color="transparent")
         Patientinfo.place(anchor="nw", relx=0.76, rely=0.005)
 
         PImage = ctk.CTkLabel(Patientinfo, height=40, text="", image=Imagesrc)
         PImage.grid(row=0, column=0)
         PName = ctk.CTkLabel(
             Patientinfo,
+            text_color=self.configfile.get("TextColor"),
             height=10,
             text=PatientData.userName,
             font=ctk.CTkFont(size=16, weight="bold"),
@@ -345,6 +355,7 @@ class DocGUI(ctk.CTk):
 
         PAge = ctk.CTkLabel(
             Patientinfo,
+            text_color=self.configfile.get("TextColor"),
             height=10,
             text=PatientData.CalcAge(PatientData.userAge),
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -353,6 +364,7 @@ class DocGUI(ctk.CTk):
 
         PBloodType = ctk.CTkLabel(
             Patientinfo,
+            text_color=self.configfile.get("TextColor"),
             height=10,
             text=PatientData.Blood_Type,
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -368,17 +380,16 @@ class DocGUI(ctk.CTk):
             corner_radius=0,
             width=290,
             height=250,
-            fg_color="transparent",
-            bg_color="gray40",
+            fg_color=self.configfile.get("FrameColor"),
         )
         HealthStatusFrame.place(anchor="nw", relx=0.01, rely=0.63)
 
         HealthStatusLabel = ctk.CTkLabel(
             HealthStatusFrame,
             height=10,
+            text_color=self.configfile.get("TextColor"),
             text="Patient Health Status:",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            fg_color="gray40",
+            font=ctk.CTkFont(size=16, weight="bold")
         )
         HealthStatusLabel.place(anchor="nw", relx=0.2, rely=0.03)
 
@@ -386,9 +397,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Allergies",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
+            text_color_disabled=self.configfile.get("TextColor"),
         )
         AllergiesBox.place(anchor="nw", relx=0.03, rely=0.15)
 
@@ -396,9 +406,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Diabetes",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
+            text_color_disabled=self.configfile.get("TextColor"),
         )
         DiabetesBox.place(anchor="nw", relx=0.03, rely=0.35)
 
@@ -406,9 +415,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Cancer",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
+            text_color_disabled=self.configfile.get("TextColor"),
         )
         CancerBox.place(anchor="nw", relx=0.03, rely=0.55)
 
@@ -416,9 +424,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Heart Diseases",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
+            text_color_disabled=self.configfile.get("TextColor"),
         )
         Heart_DiseasesBox.place(anchor="nw", relx=0.03, rely=0.75)
 
@@ -426,9 +433,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Obesity",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
+            text_color_disabled=self.configfile.get("TextColor"),
         )
         ObesityBox.place(anchor="nw", relx=0.5, rely=0.15)
 
@@ -436,9 +442,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Smoker",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
+            text_color_disabled=self.configfile.get("TextColor"),
         )
         SmokerBox.place(anchor="nw", relx=0.5, rely=0.35)
 
@@ -446,10 +451,8 @@ class DocGUI(ctk.CTk):
             HealthStatusFrame,
             text="Hypertension",
             state="disabled",
-            bg_color="gray40",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color_disabled="#000000",
-        )
+            text_color_disabled=self.configfile.get("TextColor"))
         HypertensionBox.place(anchor="nw", relx=0.5, rely=0.55)
 
         # Check the box if he has this state
@@ -486,10 +489,10 @@ class DocGUI(ctk.CTk):
             Medications = "-"
 
         # Create blocks that will contain Symptoms, Medications, Illness_Time, Extra_Info
-        self.Createblock(master, 0.71, 0.24, 230, 90, "Symptoms", Symptoms)
-        self.Createblock(master, 0.71, 0.38, 230, 90, "Medications", Medications)
-        self.Createblock(master, 0.71, 0.52, 230, 90, "Illness_Time", Illness_Time)
-        self.Createblock(master, 0.71, 0.66, 230, 90, "Extra_Info", Extra_Info)
+        self.Createblock(master, 0.71, 0.24, 230, 90, "Symptoms:", Symptoms)
+        self.Createblock(master, 0.71, 0.38, 230, 90, "Medications:", Medications)
+        self.Createblock(master, 0.71, 0.52, 230, 90, "Illness_Time:", Illness_Time)
+        self.Createblock(master, 0.71, 0.66, 230, 90, "Extra_Info:", Extra_Info)
 
         # Scan Block will contain Patient X-ray Scan with the prediction made by the system
         self.createScanBlock(
@@ -552,10 +555,15 @@ class DocGUI(ctk.CTk):
         )  # Open the window in the center of the Screen
         self.MedicineWindow.attributes('-topmost', 'true')
         self.MedicineWindow.resizable(False, False)
+        self.MedicineWindow.configure(bg_color=self.configfile.get("BackgroundColor"))
+        self.MedicineWindow.configure(fg_color=self.configfile.get("BackgroundColor"))
+
+
 
         Text = ctk.CTkLabel(
             self.MedicineWindow,
             text="Add Medications:",
+            text_color=self.configfile.get("TextColor"),
             font=ctk.CTkFont(size=16, weight="bold"),
         )
         Text.place(anchor="nw", relx=0.01, rely=0)
@@ -576,7 +584,7 @@ class DocGUI(ctk.CTk):
         delete.bind("<Button-1>", self.DelMedications)
 
         self.MedicineFrame = ctk.CTkScrollableFrame(
-            self.MedicineWindow, fg_color="gray40", width=690, height=300
+            self.MedicineWindow, fg_color=self.configfile.get("FrameColor"), width=690, height=300, scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor")
         )
         self.MedicineFrame.place(anchor="nw", relx=0.01, rely=0.1)
 
@@ -584,9 +592,9 @@ class DocGUI(ctk.CTk):
             self.MedicineWindow,
             text="Show",
             command=lambda: self.FinalizePrescription(id, "Show"),
-            bg_color="#6495ED",
-            fg_color="#6495ED",
-            hover_color="#0047AB",
+            text_color=self.configfile.get("TextColor"), 
+            fg_color=self.configfile.get("FrameColor"), 
+            hover_color=self.configfile.get("FrameColor")
         )
         Show.place(anchor="nw", relx=0.75, rely=0.9)
 
@@ -594,9 +602,9 @@ class DocGUI(ctk.CTk):
             self.MedicineWindow,
             text="Save",
             command=lambda: self.FinalizePrescription(id, "Save"),
-            bg_color="#097969",
-            fg_color="#097969",
-            hover_color="#088F8F",
+            text_color=self.configfile.get("TextColor"), 
+            fg_color=self.configfile.get("FrameColor"), 
+            hover_color=self.configfile.get("FrameColor")
         )
         Save.place(anchor="nw", relx=0.55, rely=0.9)
 
@@ -604,18 +612,28 @@ class DocGUI(ctk.CTk):
         MedicinEntry = ctk.CTkEntry(
             self.MedicineFrame,
             placeholder_text="Enter Medicine Name",
+            text_color=self.configfile.get("TextColor"),
+            placeholder_text_color=self.configfile.get("TextColor"),
+            border_color=self.configfile.get("TextColor"),
+            fg_color=self.configfile.get("FrameColor"),
+            border_width=1,
             width=300,
             height=40,
         )
-        MedicinEntry.grid(row=self.loc, column=0)
+        MedicinEntry.grid(row=self.loc, column=0,pady=5)
 
         MedicinEntry = ctk.CTkEntry(
             self.MedicineFrame,
             placeholder_text="Enter Medicine Note",
+            text_color=self.configfile.get("TextColor"),
+            placeholder_text_color=self.configfile.get("TextColor"),
+            border_color=self.configfile.get("TextColor"),
+            fg_color=self.configfile.get("FrameColor"),
+            border_width=1,
             width=300,
             height=40,
         )
-        MedicinEntry.grid(row=self.loc, column=1)
+        MedicinEntry.grid(row=self.loc, column=1, padx=5,pady=5)
         self.loc += 1
 
     def DelMedications(self, event):
@@ -628,9 +646,7 @@ class DocGUI(ctk.CTk):
         patient = UserFactory.createUser(id, "patient")
         path = f"Data\Prescriptions\{patient.userName}.pdf"
         if len(self.MedicineFrame.winfo_children()) == 0:
-            return MessageBox(
-                self.MedicineFrame, "error", "No Medicine to be added to Prescription"
-            )
+            return messagebox.showerror("Error", self.systemError.get(20), icon="error", parent=self.LeftSideBar_frame)
         Medicines = []
         MedicinesNotes = []
         for pos, widget in enumerate(
@@ -638,9 +654,7 @@ class DocGUI(ctk.CTk):
         ):
             if pos % 2 == 0:
                 if len(widget.get()) == 0:
-                    return MessageBox(
-                        self, "error", "Medicine Name cannot be empty"
-                    )
+                    return messagebox.showerror("Error", self.systemError.get(21), icon="error", parent=self.LeftSideBar_frame)
                 else:
                     Medicines.append(widget.get())
             else:
@@ -690,7 +704,7 @@ class DocGUI(ctk.CTk):
             )  # Send any message to the Patient
             writeThread.start()
         except Exception:
-            messagebox.showerror("Error","Problem With Chat Server")
+            print("Error with chat")
 
     def LoadChatData(self, Patientid):
         # Load the chat of Patient with id
@@ -711,8 +725,7 @@ class DocGUI(ctk.CTk):
             corner_radius=0,
             width=w,
             height=h,
-            fg_color="transparent",
-            bg_color="gray40",
+            fg_color="transparent"
         )
         blockFrame.place(anchor="nw", relx=x, rely=y)
 
@@ -720,8 +733,8 @@ class DocGUI(ctk.CTk):
             blockFrame,
             height=10,
             text=Title,
+            text_color=self.configfile.get("TextColor"),
             font=ctk.CTkFont(size=12, weight="bold"),
-            bg_color="gray40",
         )
         firsttextLabel.place(anchor="nw", relx=0.01, rely=0.01)
 
@@ -731,7 +744,10 @@ class DocGUI(ctk.CTk):
             height=50,
             width=wid,
             font=ctk.CTkFont(size=12, weight="bold"),
-            bg_color="gray40",
+            text_color=self.configfile.get("TextColor"),
+            fg_color=self.configfile.get("FrameColor"),
+            border_color=self.configfile.get("TextColor"),
+            border_width=1
         )
         text.place(anchor="nw", relx=0.03, rely=0.36)
         text.insert("end", Content)
@@ -744,8 +760,7 @@ class DocGUI(ctk.CTk):
             corner_radius=0,
             width=w,
             height=h,
-            fg_color="transparent",
-            bg_color="gray40",
+            fg_color=self.configfile.get("FrameColor"),
         )
         blockFrame.place(anchor="nw", relx=x, rely=y)
 
@@ -758,6 +773,7 @@ class DocGUI(ctk.CTk):
             blockFrame,
             height=10,
             text="",
+            text_color=self.configfile.get("TextColor"),
             image=ctk.CTkImage(Image.open(scanImage), size=(220, 220)),
             font=ctk.CTkFont(size=12, weight="bold"),
             bg_color="gray40",
@@ -771,8 +787,8 @@ class DocGUI(ctk.CTk):
             blockFrame,
             height=10,
             text=prediction,
-            font=ctk.CTkFont(size=12, weight="bold"),
-            bg_color="gray40",
+            text_color=self.configfile.get("TextColor"),
+            font=ctk.CTkFont(size=12, weight="bold")
         )
         predictionLabel.place(anchor="nw", relx=0.4, rely=0.93)
 
@@ -830,10 +846,12 @@ class DocGUI(ctk.CTk):
         m_frame.pack(anchor="nw", pady=5)
         m_frame.columnconfigure(0, weight=1)
 
-        m_label = ctk.CTkLabel(#bg="#c5c7c9",
+        m_label = ctk.CTkLabel(
             m_frame,
             wraplength=800,
             text=msg,
+            height=20,
+            text_color=self.configfile.get("TextColor"),
             font=ctk.CTkFont("lucida",size=14,weight="bold"),
             justify="left",
             anchor="w",
@@ -869,23 +887,25 @@ class DocGUI(ctk.CTk):
         center(ReportWindow, 720, 400)  # Open the window in the center of the Screen
         title = f"Report {name}"
         ReportWindow.title(title)
+        ReportWindow.configure(bg_color=self.configfile.get("BackgroundColor"))
+        ReportWindow.configure(fg_color=self.configfile.get("BackgroundColor"))
         ReportWindow.geometry("400x200")
         ReportWindow.resizable(False, False)
         ReportWindow.attributes('-topmost', 'true')
         self.reasonEntry = ctk.CTkEntry(
-            ReportWindow, width=270, placeholder_text="Enter Reason"
-        )
+            ReportWindow, width=270, placeholder_text="Enter Reason",placeholder_text_color=self.configfile.get("TextColor"),text_color=self.configfile.get("TextColor"), border_color=self.configfile.get("TextColor"),fg_color=self.configfile.get("FrameColor"))
         self.reasonEntry.place(anchor="nw", relx=0.15, rely=0.3)
 
         ConfirmButton = ctk.CTkButton(
-            ReportWindow, text="Report", command=lambda: self.ReportEvent(id)
+            ReportWindow, text="Report", command=lambda: self.ReportEvent(id),text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor")
         )
+        
         ConfirmButton.place(anchor="nw", relx=0.3, rely=0.6)
 
     def ReportEvent(self, id):
         Reason = self.reasonEntry.get()
         if len(Reason) == 0:
-            return MessageBox(self, "error", "Reason Should not be empty")
+            return messagebox.showerror("Error", self.systemError.get(19), icon="error", parent=self.LeftSideBar_frame)
         self.user.ReportUser(id, Reason)
         self.user.EndChat(id, "Report")
         self.LoadActiveChat()
@@ -909,6 +929,7 @@ class DocGUI(ctk.CTk):
         HeaderLabel = ctk.CTkLabel(
             self.PatientRequests_frame,
             text="Available Patients",
+            text_color=self.configfile.get("TextColor"),
             width=100,
             height=50,
             font=ctk.CTkFont(size=30, weight="bold"),
@@ -918,10 +939,10 @@ class DocGUI(ctk.CTk):
         res = self.user.LoadWaitingPatientRequests()
         # Scrollable frame that will hold all Available Patients with request status as waiting
         AvailablePatientsFrame = ctk.CTkScrollableFrame(
-            self.PatientRequests_frame, fg_color="gray20", width=1050, height=640)
+            self.PatientRequests_frame, fg_color=self.configfile.get("FrameColor"), width=1050, height=640,scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor"))
         AvailablePatientsFrame.place(anchor="nw", relx=0.01, rely=0.08)
         if len(res)==0:
-            Nodata = ctk.CTkLabel( AvailablePatientsFrame, text="No Patients Found!", width=1050, height=600, font=ctk.CTkFont(size=15, weight="bold"))
+            Nodata = ctk.CTkLabel( AvailablePatientsFrame, text="No Patients Found!", width=1050, height=600, font=ctk.CTkFont(size=15, weight="bold"),text_color=self.configfile.get("TextColor"))
             Nodata.grid(row=0, column=0, pady=6)
 
         for i in range(len(res)):
@@ -936,11 +957,13 @@ class DocGUI(ctk.CTk):
             patient_border = ctk.CTkFrame(
                 AvailablePatientsFrame,
                 corner_radius=0,
-                fg_color="gray40",
-                width=1070,
+                width=1050,
                 height=100,
+                fg_color=self.configfile.get("FrameColor"),
+                border_color=self.configfile.get("TextColor"),
+                border_width=2
             )
-            patient_border.grid(row=i, column=0, pady=6)
+            patient_border.grid(row=i, column=0, padx=1, pady=6)
 
             if (
                 Patient_Gender == "Male"
@@ -965,9 +988,10 @@ class DocGUI(ctk.CTk):
             NameLabel = ctk.CTkLabel(
                 patient_border,
                 text=Patient_Name,
+                text_color=self.configfile.get("TextColor"),
                 bg_color="transparent",
                 fg_color="transparent",
-                width=100,
+                width=200,
                 height=20,
                 font=ctk.CTkFont(size=15, weight="bold"),
             )
@@ -1000,24 +1024,26 @@ class DocGUI(ctk.CTk):
                 )
             else:
                 VIP = ctk.CTkLabel(patient_border, text="", width=100, height=20)
-            VIP.place(anchor="nw", relx=0.2, rely=0.25)
+            VIP.place(anchor="nw", relx=0.27, rely=0.25)
 
             GenderLabel = ctk.CTkLabel(
                 patient_border,
                 text=Patient_Gender,
                 bg_color="transparent",
                 fg_color="transparent",
+                text_color=self.configfile.get("TextColor"),
                 width=100,
                 height=20,
                 font=ctk.CTkFont(size=15, weight="bold"),
             )
-            GenderLabel.place(anchor="nw", relx=0.3, rely=0.35)
+            GenderLabel.place(anchor="nw", relx=0.37, rely=0.35)
 
             AgeLabel = ctk.CTkLabel(
                 patient_border,
                 text=self.user.CalcAge(Patient_Age),
                 bg_color="transparent",
                 fg_color="transparent",
+                text_color=self.configfile.get("TextColor"),
                 width=100,
                 height=20,
                 font=ctk.CTkFont(size=15, weight="bold"),
@@ -1029,6 +1055,7 @@ class DocGUI(ctk.CTk):
                 text=Patient_Req_Date,
                 bg_color="transparent",
                 fg_color="transparent",
+                text_color=self.configfile.get("TextColor"),
                 width=100,
                 height=20,
                 font=ctk.CTkFont(size=15, weight="bold"),
@@ -1038,8 +1065,9 @@ class DocGUI(ctk.CTk):
             AcceptButton = ctk.CTkButton(
                 patient_border,
                 text="Chat",
-                bg_color="gray50",
-                fg_color="transparent",
+                text_color=self.configfile.get("TextColor"), 
+                fg_color=self.configfile.get("FrameColor"), 
+                hover_color=self.configfile.get("BackgroundColor"),
                 corner_radius=0,
                 width=100,
                 height=20,
@@ -1089,18 +1117,23 @@ class DocGUI(ctk.CTk):
         self.InformationLabel = ctk.CTkLabel(
             self.credits_frame,
             text="Credit Card Information",
+            text_color=self.configfile.get("TextColor"),
             width=60,
             font=ctk.CTkFont(size=20, weight="bold"),
         )
-        self.InformationLabel.place(anchor="nw", relx=0.4, rely=0.05)
+        self.InformationLabel.place(anchor="nw", relx=0.37, rely=0.05)
 
         self.CardNumber = ctk.CTkEntry(
             self.credits_frame,
             placeholder_text="Credit Card Number",
-            width=160,
+            text_color=self.configfile.get("TextColor"),
+            border_color=self.configfile.get("TextColor"),
+            fg_color=self.configfile.get("FrameColor"),
+            placeholder_text_color=self.configfile.get("TextColor"),
+            width=200,
             font=ctk.CTkFont(size=14),
         )  # 5471462613718519
-        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.25)
+        self.CardNumber.place(anchor="nw", relx=0.05, rely=0.15)
         self.CardNumber.bind(
             "<Leave>", self.CardNumberValidation
         )  # Handle all functions will be applied for card number + validation
@@ -1109,41 +1142,52 @@ class DocGUI(ctk.CTk):
             self.credits_frame,
             show="*",
             placeholder_text="CVV",
-            width=42,
+            fg_color=self.configfile.get("FrameColor"),
+            text_color=self.configfile.get("TextColor"),
+            border_color=self.configfile.get("TextColor"),
+            placeholder_text_color=self.configfile.get("TextColor"),
+            width=70,
             font=ctk.CTkFont(size=14),
         )
-        self.CVV.place(anchor="nw", relx=0.35, rely=0.25)
+        self.CVV.place(anchor="nw", relx=0.35, rely=0.15)
         self.CVV.bind("<Leave>", self.HandleCVV)
 
         self.ExpireMonth = ctk.CTkComboBox(
             self.credits_frame,
+            fg_color=self.configfile.get("FrameColor"),
+            button_color=self.configfile.get("FrameColor"),
+            text_color=self.configfile.get("TextColor"),
+            border_color=self.configfile.get("FrameColor"),
             width=60,
             values=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
         )
-        self.ExpireMonth.place(anchor="nw", relx=0.55, rely=0.25)
+        self.ExpireMonth.place(anchor="nw", relx=0.55, rely=0.15)
 
         self.slashLabel = ctk.CTkLabel(
-            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14)
-        )
-        self.slashLabel.place(anchor="nw", relx=0.615, rely=0.25)
+            self.credits_frame, text="/", width=20, font=ctk.CTkFont(size=14), text_color=self.configfile.get("TextColor"))
+        self.slashLabel.place(anchor="nw", relx=0.615, rely=0.15)
 
         self.ExpireYear = ctk.CTkComboBox(
             self.credits_frame,
+            fg_color=self.configfile.get("FrameColor"),
+            button_color=self.configfile.get("FrameColor"),
+            text_color=self.configfile.get("TextColor"),
+            border_color=self.configfile.get("FrameColor"),
             width=60,
             values=["21", "22", "23", "24", "25", "26", "27"],
         )
-        self.ExpireYear.place(anchor="nw", relx=0.64, rely=0.25)
+        self.ExpireYear.place(anchor="nw", relx=0.64, rely=0.15)
 
         self.CheckCard = ctk.CTkButton(
             self.credits_frame,
             text="Check Card Expiration",
             anchor="w",
-            fg_color="gray50",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"), 
+            fg_color=self.configfile.get("FrameColor"), 
+            hover_color=self.configfile.get("FrameColor"),
             command=self.CheckCard_button_event,
         )
-        self.CheckCard.place(anchor="nw", relx=0.74, rely=0.25)
+        self.CheckCard.place(anchor="nw", relx=0.74, rely=0.15)
 
     def CardNumberValidation(self, event):
         if (
@@ -1214,17 +1258,18 @@ class DocGUI(ctk.CTk):
             self.credits_frame,
             text="Withdraw Credits",
             width=60,
+            text_color=self.configfile.get("TextColor"),
             font=ctk.CTkFont(size=20, weight="bold"),
         )
         self.WithdrawLabel.place(anchor="nw", relx=0.4, rely=0.45)
 
         self.QuickSelectionsFrame = ctk.CTkFrame(
-            self.credits_frame, corner_radius=0, fg_color="gray30", width=350
+            self.credits_frame, corner_radius=0, fg_color=self.configfile.get("FrameColor"), width=350
         )
         self.QuickSelectionsFrame.place(anchor="nw", relx=0.05, rely=0.65)
 
         self.Label = ctk.CTkLabel(
-            self.QuickSelectionsFrame, text="Select Credits:", font=ctk.CTkFont(size=14)
+            self.QuickSelectionsFrame, text="Select Credits:", font=ctk.CTkFont(size=14), text_color=self.configfile.get("TextColor")
         )
         self.Label.place(anchor="w", relx=0.41, rely=0.1)
 
@@ -1257,15 +1302,15 @@ class DocGUI(ctk.CTk):
             self.credits_frame,
             text="Withdraw",
             anchor="w",
-            fg_color="gray50",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"), 
+            fg_color=self.configfile.get("FrameColor"), 
+            hover_color=self.configfile.get("FrameColor"),
             command=self.Withdraw_button_event,
         )
         self.Withdraw_Button.place(anchor="nw", relx=0.66, rely=0.8)
 
     def AddOption(self, master, x, y, vari, txt, val, fun=True):
-        option = ctk.CTkRadioButton(master, variable=vari, text=txt, value=val)
+        option = ctk.CTkRadioButton(master, variable=vari, text=txt, value=val,text_color=self.configfile.get("TextColor"))
         option.place(anchor="w", relx=x, rely=y)
         if fun:
             option.bind("<Button-1>", self.RemoveAmount)  # Remove Entry Frame if found
@@ -1276,19 +1321,23 @@ class DocGUI(ctk.CTk):
     def HandleAmount(self, event):
         if self.Created[3]:
             self.AmountFrame = ctk.CTkFrame(
-                self.credits_frame, corner_radius=0, fg_color="gray30", width=150
+                self.credits_frame, corner_radius=0, fg_color=self.configfile.get("FrameColor"), width=150
             )
             self.Created[3] = False
         self.AmountFrame.place(anchor="nw", relx=0.38, rely=0.65)
 
         self.clabel = ctk.CTkLabel(
-            self.AmountFrame, text="Enter Credits:", font=ctk.CTkFont(size=14)
+            self.AmountFrame, text="Enter Credits:", font=ctk.CTkFont(size=14),text_color=self.configfile.get("TextColor")
         )
         self.clabel.place(anchor="w", relx=0.2, rely=0.1)
 
         self.Amount = ctk.CTkEntry(
             self.AmountFrame,
             placeholder_text="Amount",
+            placeholder_text_color=self.configfile.get("TextColor"),
+            text_color=self.configfile.get("TextColor"),
+            fg_color=self.configfile.get("FrameColor"),
+            border_color=self.configfile.get("TextColor"),
             width=100,
             font=ctk.CTkFont(size=14),
         )  # 5471462613718519
@@ -1305,19 +1354,19 @@ class DocGUI(ctk.CTk):
         Year = f"20{self.ExpireYear.get()}"
         if int(Year) < date.today().year:
             self.CardChecked = False
-            return MessageBox(self, "error", "Credit Card Expired")
+            return messagebox.showerror("Error", self.systemError.get(16), icon="error", parent=self.LeftSideBar_frame)
         if (
             int(self.ExpireMonth.get()) < date.today().month
             and int(Year) == date.today().year
         ):
             self.CardChecked = False
-            return MessageBox(self, "error", "Credit Card Expired")
+            return messagebox.showerror("Error", self.systemError.get(16), icon="error", parent=self.LeftSideBar_frame)
         else:
             self.CardChecked = True
 
     def Withdraw_button_event(self):
         if self.CardChecked == False:  #
-            MessageBox(self, "error", "Credit Card is not checked")
+            return messagebox.showerror("Error", self.systemError.get(17), icon="error", parent=self.LeftSideBar_frame)
         else:
             if int(self.credit_val.get()) == -1:
                 if (
@@ -1325,7 +1374,7 @@ class DocGUI(ctk.CTk):
                     or self.Amount.get().isalpha()
                     or int(self.Amount.get()) <= 0
                 ):
-                    return MessageBox(self, "error", "Invalid Amount")
+                    return messagebox.showerror("Error", self.systemError.get(18), icon="error", parent=self.LeftSideBar_frame)
                 else:
                     Amount = int(self.Amount.get()) * -1
             else:
@@ -1358,15 +1407,15 @@ class DocGUI(ctk.CTk):
     def select_frame_by_name(self, name):
         # set button color for selected button
         self.Active_Chats_button.configure(
-            fg_color=("gray75", "gray25") if name == "Active_Chats" else "transparent"
+            fg_color=self.configfile.get("BackgroundColor") if name == "Active_Chats" else "transparent"
         )
         self.PatientRequests_button.configure(
-            fg_color=("gray75", "gray25")
+            fg_color=self.configfile.get("BackgroundColor")
             if name == "PatientRequests"
             else "transparent"
         )
         self.Credits_button.configure(
-            fg_color=("gray75", "gray25") if name == "Credits" else "transparent"
+            fg_color=self.configfile.get("BackgroundColor") if name == "Credits" else "transparent"
         )
 
         # show selected frame
@@ -1413,6 +1462,6 @@ class DocGUI(ctk.CTk):
 
 
 
-# if __name__ == "__main__":
-#     app = DoctorGUI()
-#     app.mainloop()
+if __name__ == "__main__":
+    app = DocGUI(4)
+    app.mainloop()

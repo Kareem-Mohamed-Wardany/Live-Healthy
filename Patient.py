@@ -3,10 +3,12 @@ import subprocess
 from tkinter import filedialog
 from datetime import date, timedelta
 from Model import *
+from Error import *
 
 class Patient(User):
 
     db = Database()  # Create connection with Database to access it
+    systemError = SystemErrors()
 
     BasePredictScanPrice = 75
     BaseChatPrice = 150
@@ -198,7 +200,7 @@ class Patient(User):
 
     def Purchase(self, button, master, LeftSideBar, CardChecked):
         if CardChecked == False:  #
-            MessageBox(master, "error", "Credit Card is not checked")
+            messagebox.showerror("Error", self.systemError.get(17), icon="error", parent=master)
         else:
             if button == "1":
                 value = 100
