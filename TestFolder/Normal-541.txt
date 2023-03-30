@@ -1,0 +1,2 @@
+Highest Class Percentage: Normal --> 100.0% 
+Second Class Percentage: Fibrosis --> 80.19%

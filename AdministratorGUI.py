@@ -24,7 +24,7 @@ from UserFactory import *
 
 class AdminGUI(ctk.CTk):
     # load Config dict
-    config = SystemConfig()
+    configfile = SystemConfig()
 
     # connect to DB
     db = Database()
@@ -42,6 +42,8 @@ class AdminGUI(ctk.CTk):
     def __init__(self, id):
         super().__init__()
         self.user = UserFactory.createUser(id,"admin")
+        self.configure(bg_color=self.configfile.get("BackgroundColor"))
+        self.configure(fg_color=self.configfile.get("BackgroundColor"))
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -58,8 +60,8 @@ class AdminGUI(ctk.CTk):
         # set Dimension of GUI
         center(
             self,
-            self.config.get("FramesSizeWidth"),
-            self.config.get("FramesSizeHeight"),
+            self.configfile.get("FramesSizeWidth"),
+            self.configfile.get("FramesSizeHeight"),
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
         self.protocol('WM_DELETE_WINDOW', self.exit_function)
@@ -72,25 +74,25 @@ class AdminGUI(ctk.CTk):
         # load images
         Administrator_Image = ctk.CTkImage(
             AdministratorImage,
-            size=(self.config.get("UserImageSize"),
-                  self.config.get("UserImageSize")),
+            size=(self.configfile.get("UserImageSize"),
+                  self.configfile.get("UserImageSize")),
         )
         Handle_Reports_image = ctk.CTkImage(
             HandleReports,
             size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
             ),
         )
         Verify_Doctors_image = ctk.CTkImage(
             VerifyDoctor,
             size=(
-                self.config.get("ButtonIconsSize"),
-                self.config.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
             ),
         )
         # create LeftSideBar frame
-        self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=self.configfile.get("FrameColor"))
         self.LeftSideBar_frame.grid(row=0, column=0, sticky="nsew")
         self.LeftSideBar_frame.grid_rowconfigure(
             8, weight=1
@@ -109,6 +111,7 @@ class AdminGUI(ctk.CTk):
         Administrator_Name_label = ctk.CTkLabel(
             self.LeftSideBar_frame,
             text=self.user.userName,
+            text_color=self.configfile.get("TextColor"),
             width=100,
             height=20,
             compound="left",
@@ -121,10 +124,10 @@ class AdminGUI(ctk.CTk):
             corner_radius=0,
             height=40,
             border_spacing=10,
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
             text="Handle Reports",
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
             image=Handle_Reports_image,
             anchor="w",
             command=self.Handle_Reports_button_event,
@@ -138,8 +141,8 @@ class AdminGUI(ctk.CTk):
             border_spacing=10,
             text="Verify Doctors",
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
             image=Verify_Doctors_image,
             anchor="w",
             command=self.Verify_Doctors_button_event,
@@ -161,12 +164,10 @@ class AdminGUI(ctk.CTk):
     def select_frame_by_name(self, name):
         # set button color for selected button
         self.Handle_Reports_button.configure(
-            fg_color=(
-                "gray75", "gray25") if name == "Handle_Reports" else "transparent"
+            fg_color=self.configfile.get("BackgroundColor") if name == "Handle_Reports" else "transparent"
         )
         self.Verify_Doctors_button.configure(
-            fg_color=(
-                "gray75", "gray25") if name == "Verify_Doctors" else "transparent"
+            fg_color=self.configfile.get("BackgroundColor") if name == "Verify_Doctors" else "transparent"
         )
 
         # show selected frame
@@ -192,31 +193,30 @@ class AdminGUI(ctk.CTk):
             for widget in self.Handle_Reports_frame.winfo_children():
                 widget.destroy()
 
-        Title = ctk.CTkLabel(self.Handle_Reports_frame, text="Available Reports",
-                             font=ctk.CTkFont(size=20, weight="bold"))
+        Title = ctk.CTkLabel(self.Handle_Reports_frame, text="Available Reports",font=ctk.CTkFont(size=20, weight="bold"), text_color=self.configfile.get("TextColor"))
         Title.place(anchor="nw", relx=0.4, rely=0.02)
 
         LogsFrame = ctk.CTkScrollableFrame(
-            self.Handle_Reports_frame, fg_color="gray40", width=1050,height=600)
+            self.Handle_Reports_frame, fg_color=self.configfile.get("FrameColor"), width=1050,height=600)
         LogsFrame.place(anchor="nw", relx=0.01, rely=0.1)
 
-        DoctorNameLabel = ctk.CTkLabel(LogsFrame, text="Doctor Name",
+        DoctorNameLabel = ctk.CTkLabel(LogsFrame, text="Doctor Name",text_color=self.configfile.get("TextColor"),
                                        font=ctk.CTkFont(size=17, weight="bold"), width=200)
         DoctorNameLabel.grid(row=0, column=0,pady=10)
 
-        PatientNameLabel = ctk.CTkLabel(LogsFrame, text="Patient Name",
+        PatientNameLabel = ctk.CTkLabel(LogsFrame, text="Patient Name",text_color=self.configfile.get("TextColor"),
                                         font=ctk.CTkFont(size=17, weight="bold"), width=200)
         PatientNameLabel.grid(row=0, column=1)
 
-        ReasonLabel = ctk.CTkLabel(LogsFrame, text="Reason",
+        ReasonLabel = ctk.CTkLabel(LogsFrame, text="Reason",text_color=self.configfile.get("TextColor"),
                                    font=ctk.CTkFont(size=17, weight="bold"), width=200)
         ReasonLabel.grid(row=0, column=2)
 
-        DateLabel = ctk.CTkLabel(LogsFrame, text="Date",
+        DateLabel = ctk.CTkLabel(LogsFrame, text="Date",text_color=self.configfile.get("TextColor"),
                                  font=ctk.CTkFont(size=17, weight="bold"), width=200)
         DateLabel.grid(row=0, column=3)
 
-        ShowChatLabel = ctk.CTkLabel(LogsFrame, text="Chat",
+        ShowChatLabel = ctk.CTkLabel(LogsFrame, text="Chat",text_color=self.configfile.get("TextColor"),
                                      font=ctk.CTkFont(size=17, weight="bold"), width=200)
         ShowChatLabel.grid(row=0, column=4)
 
@@ -226,23 +226,23 @@ class AdminGUI(ctk.CTk):
             # entryFrame = ctk.CTkFrame()
             patient = UserFactory.createUser(item[0],"patient")
             Doctor = UserFactory.createUser(item[1],"doctor")
-            DName = ctk.CTkLabel(LogsFrame, text=f"Dr.{Doctor.userName}", wraplength=180,
+            DName = ctk.CTkLabel(LogsFrame, text=f"Dr.{Doctor.userName}", wraplength=180, text_color=self.configfile.get("TextColor"),
                                  font=ctk.CTkFont(size=20, weight="bold"))
             DName.grid(row=pos+1, column=0,pady=10)
 
-            PName = ctk.CTkLabel(LogsFrame, text=patient.userName, wraplength=180,
+            PName = ctk.CTkLabel(LogsFrame, text=patient.userName, wraplength=180, text_color=self.configfile.get("TextColor"),
                                  font=ctk.CTkFont(size=20, weight="bold"))
             PName.grid(row=pos+1, column=1)
 
-            Reas = ctk.CTkLabel(LogsFrame, text=item[2], wraplength=180,
+            Reas = ctk.CTkLabel(LogsFrame, text=item[2], wraplength=180, text_color=self.configfile.get("TextColor"),
                                 font=ctk.CTkFont(size=20, weight="bold"))
             Reas.grid(row=pos+1, column=2)
 
-            Repdate = ctk.CTkLabel(LogsFrame, text=item[3],
+            Repdate = ctk.CTkLabel(LogsFrame, text=item[3], text_color=self.configfile.get("TextColor"),
                                    font=ctk.CTkFont(size=20, weight="bold"))
             Repdate.grid(row=pos+1, column=3)
 
-            Chat = ctk.CTkLabel(LogsFrame, text="Show Chat", image=ctk.CTkImage(Adminchat, size=(35, 35)), compound="left",
+            Chat = ctk.CTkLabel(LogsFrame, text="Show Chat", image=ctk.CTkImage(Adminchat, size=(35, 35)), compound="left", text_color=self.configfile.get("TextColor"),
                                 font=ctk.CTkFont(size=14, weight="bold"))
             Chat.grid(row=pos+1, column=4)
             Chat.bind("<Button-1>",lambda event, id = item[0], PN =patient.userName, DN = Doctor.userName, Chatt = item[4] : self.showChat(event, id, PN, DN, Chatt ))
@@ -254,18 +254,20 @@ class AdminGUI(ctk.CTk):
         center(ChatWindow, 600, 400)  # Open the window in the center of the Screen
         ChatWindow.attributes('-topmost', 'true',)
         ChatWindow.resizable(False, False)
+        ChatWindow.configure(bg_color=self.configfile.get("BackgroundColor"))
+        ChatWindow.configure(fg_color=self.configfile.get("BackgroundColor"))
         ChatLogsFrame = ctk.CTkScrollableFrame(
-            ChatWindow, fg_color="gray30", width=500,height=300)
+            ChatWindow, fg_color=self.configfile.get("FrameColor"), width=500,height=300)
         ChatLogsFrame.place(anchor="nw", relx=0.01, rely=0.01)
         Chatdata = chat.split("&,&")
         for pos, i in enumerate(Chatdata):
             chatitemLabel = ctk.CTkLabel(ChatLogsFrame, text=i, anchor='e',font=ctk.CTkFont(size=15, weight="bold"))
             chatitemLabel.grid(row=pos, column=0,sticky="W")
             
-        RevokeButton = ctk.CTkButton(ChatWindow, text="Revoke Suspension",fg_color="#46c100", command= lambda:self.user.RevokeSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
+        RevokeButton = ctk.CTkButton(ChatWindow, text="Revoke Suspension", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), command= lambda:self.user.RevokeSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
         RevokeButton.place(anchor="nw", relx=0.5, rely=0.85)
 
-        PermaButton = ctk.CTkButton(ChatWindow, text="Permanent Suspension",fg_color="#ff0000", command= lambda:self.user.ConfirmSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
+        PermaButton = ctk.CTkButton(ChatWindow, text="Permanent Suspension", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), command= lambda:self.user.ConfirmSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
         PermaButton.place(anchor="nw", relx=0.75, rely=0.85)
 
     def Handle_Reports_button_event(self):
@@ -287,36 +289,36 @@ class AdminGUI(ctk.CTk):
             for widget in self.Verify_Doctors_frame.winfo_children():
                 widget.destroy()
 
-        Title = ctk.CTkLabel(self.Verify_Doctors_frame, text="Unverified Doctors",
+        Title = ctk.CTkLabel(self.Verify_Doctors_frame, text="Unverified Doctors", text_color=self.configfile.get("TextColor"),
                              font=ctk.CTkFont(size=20, weight="bold"))
         Title.place(anchor="nw", relx=0.4, rely=0.02)
 
-        Doctors_frame = ctk.CTkScrollableFrame(self.Verify_Doctors_frame, fg_color="gray30", width=1050,height=600)
+        Doctors_frame = ctk.CTkScrollableFrame(self.Verify_Doctors_frame, fg_color=self.configfile.get("FrameColor"), width=1050,height=600)
         Doctors_frame.place(anchor="nw", relx=0.01, rely=0.1)
 
-        DoctorNameLabel = ctk.CTkLabel(Doctors_frame, text="Doctor Name",
+        DoctorNameLabel = ctk.CTkLabel(Doctors_frame, text="Doctor Name",text_color=self.configfile.get("TextColor"),
                                        font=ctk.CTkFont(size=17, weight="bold"), width=200)
         DoctorNameLabel.grid(row=0, column=0,pady=10)
 
-        UniversityLabel = ctk.CTkLabel(Doctors_frame, text="University Name",
+        UniversityLabel = ctk.CTkLabel(Doctors_frame, text="University Name",text_color=self.configfile.get("TextColor"),
                                        font=ctk.CTkFont(size=17, weight="bold"), width=200)
         UniversityLabel.grid(row=0, column=1,pady=10)
 
-        IDCardLabel = ctk.CTkLabel(Doctors_frame, text="ID Card",
+        IDCardLabel = ctk.CTkLabel(Doctors_frame, text="ID Card",text_color=self.configfile.get("TextColor"),
                                        font=ctk.CTkFont(size=17, weight="bold"), width=200)
         IDCardLabel.grid(row=0, column=2,pady=10)
 
-        ProfLicLabel = ctk.CTkLabel(Doctors_frame, text="Profession License",
+        ProfLicLabel = ctk.CTkLabel(Doctors_frame, text="Profession License",text_color=self.configfile.get("TextColor"),
                                        font=ctk.CTkFont(size=17, weight="bold"), width=200)
         ProfLicLabel.grid(row=0, column=3,pady=10)
         res = self.user.getUnverifiedDoctors()
         for pos, i in enumerate(res):
             # doctordata.Doctor_ID, users.Name, doctordata.University, doctordata.ID_Card, doctordata.Prof_License
-            DName = ctk.CTkLabel(Doctors_frame, text=f"Dr. {i[1]}", wraplength=180,
+            DName = ctk.CTkLabel(Doctors_frame, text=f"Dr. {i[1]}", wraplength=180, text_color=self.configfile.get("TextColor"),
                                  font=ctk.CTkFont(size=20, weight="bold"))
             DName.grid(row=pos+1, column=0,pady=10)
 
-            UniversityName = ctk.CTkLabel(Doctors_frame, text=f"{i[2]}", wraplength=180,
+            UniversityName = ctk.CTkLabel(Doctors_frame, text=f"{i[2]}", wraplength=180,text_color=self.configfile.get("TextColor"),
                                  font=ctk.CTkFont(size=20, weight="bold"))
             UniversityName.grid(row=pos+1, column=1,pady=10)
 
@@ -373,5 +375,5 @@ class AdminGUI(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = AdminGUI()
+    app = AdminGUI(0)
     app.mainloop()

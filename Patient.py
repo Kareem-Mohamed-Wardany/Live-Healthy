@@ -100,9 +100,9 @@ class Patient(User):
     def PredictMyScan(self, ScanPath, SaveType):
         m = ResNetModel()
         prediction = m.PredictScan(ScanPath)
-        self.max1 = 0
+        self.max1 = -99
         if SaveType == "Two":
-            self.max2 = 0
+            self.max2 = -98
             self.p1=""
             self.p2=""
             for i in prediction:
@@ -114,6 +114,14 @@ class Patient(User):
                     else:
                         self.max2 = value
                         self.p2 = i[0]
+
+            if self.max1 < self.max2:
+                temp = self.max1
+                temptext = self.p1
+                self.max1 = self.max2
+                self.p1 = self.p2
+                self.p2 = temptext
+                self.max2=temp
 
             Label1 = f"{self.p1} ➜ {self.max1}%"
             Label2 = f"{self.p2} ➜ {self.max2}%"
@@ -132,6 +140,7 @@ class Patient(User):
         with open(newpath, "w") as f:
             f.write(f"Highest Class Percentage: {self.p1} --> {self.max1}% \n")
             f.write(f"Second Class Percentage: {self.p2} --> {self.max2}%")
+        messagebox.showinfo("Info","Text File saved successfully")
 
     def PriceInfo(self, ContextType):
         if ContextType =="Chat":

@@ -53,7 +53,8 @@ class RadioloGUI(ctk.CTk):
         # let title be 'Welcome Specialist|Consultant UserName'
         Title = f"Welcome {self.user.userName}"
         self.title(Title)
-
+        self.configure(bg_color=self.configfile.get("BackgroundColor"))
+        self.configure(fg_color=self.configfile.get("BackgroundColor"))
         # set Dimension of GUI
         center(
             self,
@@ -67,17 +68,6 @@ class RadioloGUI(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
 
     def LeftSideBar(self):
-        # load images
-        # self.Male_image = ctk.CTkImage(
-        #     MaleImage,
-        #     size=(self.configfile.get("UserImageSize"),
-        #           self.configfile.get("UserImageSize")),
-        # )
-        # self.Female_image = ctk.CTkImage(
-        #     FemaleImage,
-        #     size=(self.configfile.get("UserImageSize"),
-        #           self.configfile.get("UserImageSize")),
-        # )
         self.Predict_scan_image = ctk.CTkImage(
             predict_image,
             size=(
@@ -87,7 +77,7 @@ class RadioloGUI(ctk.CTk):
         )
 
         # create LeftSideBar frame
-        self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=self.configfile.get("FrameColor"))
         self.LeftSideBar_frame.grid(row=0, column=0, sticky="nsew")
         # self.LeftSideBar_frame.grid_rowconfigure(3, weight=1)  # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
         # let row 6 with bigger weight to sperate between credit button, apperance mode and other button
@@ -131,6 +121,7 @@ class RadioloGUI(ctk.CTk):
             width=100,
             height=20,
             compound="left",
+            text_color=self.configfile.get("TextColor"),
             font=ctk.CTkFont(size=15, weight="bold"),
         )
         self.RadiologistName_label.grid(row=1, column=0)
@@ -141,6 +132,7 @@ class RadioloGUI(ctk.CTk):
             width=100,
             height=20,
             compound="left",
+            text_color=self.configfile.get("TextColor"),
             font=ctk.CTkFont(size=15, weight="bold"),
         )
         self.RadiologyCenterName_label.grid(row=2, column=0)
@@ -152,8 +144,8 @@ class RadioloGUI(ctk.CTk):
             border_spacing=10,
             text="Predict X-Ray Scan",
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
             image=self.Predict_scan_image,
             anchor="w",
             command=self.Predict_Scan_button_event,
@@ -183,10 +175,10 @@ class RadioloGUI(ctk.CTk):
             for widget in self.Predict_Scan_frame.winfo_children():
                 widget.destroy()
         self.ScanPathEntry = ctk.CTkEntry(
-            self.Predict_Scan_frame, width=700, state="disabled")
+            self.Predict_Scan_frame, width=700, state="disabled", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"),border_color=self.configfile.get("TextColor"))
         self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
         ImportScanButton = ctk.CTkButton(
-            self.Predict_Scan_frame, text="Import Folder", command=self.ImportScanFolder)
+            self.Predict_Scan_frame, text="Import Folder", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), command=self.ImportScanFolder)
         ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
 
     def ImportScanFolder(self):
@@ -202,25 +194,25 @@ class RadioloGUI(ctk.CTk):
         output = self.user.PredictScanFolder(self.ScansFolderPath)
 
         ScrollableFrame = ctk.CTkScrollableFrame(
-            self.Predict_Scan_frame, width=550)
+            self.Predict_Scan_frame, width=550,fg_color=self.configfile.get("FrameColor"))
         ScrollableFrame.place(anchor="nw", relx=0.05, rely=0.2)
 
-        Name = ctk.CTkLabel(ScrollableFrame, text="Image Name",
+        Name = ctk.CTkLabel(ScrollableFrame, text="Image Name", text_color=self.configfile.get("TextColor"),
                             font=ctk.CTkFont(size=15), width=275)
         Name.grid(row=0, column=0)
-        Name = ctk.CTkLabel(ScrollableFrame, text="Prediction",
+        Name = ctk.CTkLabel(ScrollableFrame, text="Prediction",text_color=self.configfile.get("TextColor"),
                             font=ctk.CTkFont(size=15), width=275)
         Name.grid(row=0, column=1)
 
         for pos, i in enumerate(output):
             ImageName = ctk.CTkLabel(
-                ScrollableFrame, text=i[0], font=ctk.CTkFont(size=15), width=275)
+                ScrollableFrame, text=i[0], font=ctk.CTkFont(size=15), width=275,text_color=self.configfile.get("TextColor"))
             ImageName.grid(row=pos+1, column=0)
             ImageName.bind("<Button-1>", lambda event,
                            imageName=i[0]: self.ShowImage(event, imageName))
 
             Prediction = ctk.CTkLabel(
-                ScrollableFrame, text=i[1], font=ctk.CTkFont(size=15), width=275)
+                ScrollableFrame, text=i[1], font=ctk.CTkFont(size=15), width=275,text_color=self.configfile.get("TextColor"))
             Prediction.grid(row=pos+1, column=1)
             Prediction.bind("<Button-1>", lambda event,
                             imageName=i[0]: self.ShowImage(event, imageName))
@@ -244,8 +236,7 @@ class RadioloGUI(ctk.CTk):
     def select_frame_by_name(self, name):
         # set button color for selected button
         self.Predict_Scan_button.configure(
-            fg_color=(
-                "gray75", "gray25") if name == "Predict_Scan" else "transparent"
+            fg_color=self.configfile.get("BackgroundColor") if name == "Predict_Scan" else "transparent"
         )
 
         # show selected frame
@@ -269,6 +260,6 @@ class RadioloGUI(ctk.CTk):
         self.db.Commit()
 
 
-# if __name__ == "__main__":
-#     app = RadiologistGUI(3)
-#     app.mainloop()
+if __name__ == "__main__":
+    app = RadioloGUI(3)
+    app.mainloop()
