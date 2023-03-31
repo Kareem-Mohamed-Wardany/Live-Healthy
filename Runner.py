@@ -1,5 +1,4 @@
 from LoginGUI import *
-
 def MoveTo(UserInfo):
     id = str(UserInfo[0])
     if UserInfo[1] == "patient": # ahmed@gmail.com     PW: 123

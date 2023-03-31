@@ -12,6 +12,9 @@ from AdministratorGUI import *
 from Config import *
 from Database import *
 from DoctorGUI import *
+from RegisterGUI import *
+from PatientGUI import *
+from RadiologistGUI import *
 from Error import *
 from GUIHelperFunctions import *
 from Images import *
@@ -216,4 +219,3 @@ class Login(ctk.CTk):
     def Goto_Register(self):
         self.MovetoReg = True
         self.destroy()
-        
