@@ -160,7 +160,7 @@ class Patient(User):
                 Credits = self.GetDiscount(self.BaseChatPrice, 100)
                 Infotext = "Chat with our doctors is Free"
             else:
-                self.Credits = self.GetDiscount(self.BaseChatPrice, 0)
+                Credits = self.GetDiscount(self.BaseChatPrice, 0)
                 Infotext = f"You are going to pay {Credits} credit to chat with our doctors"
         else:
             if self.userVIPLevel == 1:

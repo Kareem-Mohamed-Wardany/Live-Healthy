@@ -638,10 +638,7 @@ class Register(ctk.CTk):
 
     def userNameChecker(self):
         pattern = re.compile("^[a-zA-Z ]*$")
-        if pattern.fullmatch(self.userName) is not None:
-            return -1
-        else:
-            return 2
+        return -1 if pattern.fullmatch(self.userName) is not None else 2
     
     def emailChecker(self):
         pat = "^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
@@ -719,14 +716,16 @@ class Register(ctk.CTk):
         if self.UsType == "Patient":
             pp = Patient.CreatePatient(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.heart, self.diabetes, self.cancer, self.obesity, self.smoker, self.hypertension, self.allergies, self.Blood)
             pp.SaveData()
-            
         if self.UsType == "Radiologist":
             radiologistdata = Radiologist.CreateRadiologist(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.radioCenter)
             radiologistdata.SaveData()
         if self.UsType in ["Consultant", "Specialist"]:
             doctordata = Doctor.CreateDoctor(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.uni, self.IDbinary, self.LicenseBinary)
             doctordata.SaveData()
-        return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
+        x= messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
+        if x == "ok":
+            self.destroy()
+            from Runner import Runit
 
 if __name__ == "__main__":
     app = Register()

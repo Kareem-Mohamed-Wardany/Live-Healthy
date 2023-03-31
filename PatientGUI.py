@@ -320,10 +320,6 @@ class PatGUI(ctk.CTk):
         self.destroy()
         from Runner import Runit
 
-    def logout(self):
-        self.destroy()
-        from Runner import Runit
-
     def LoadPredictScanFrame(self):
         if self.Created[0]:
             self.Predict_Scan_frame = ctk.CTkFrame(
@@ -766,10 +762,9 @@ class PatGUI(ctk.CTk):
             )
             self.Created[1] = False
         with contextlib.suppress(Exception):
-            os.mkdir("Data/Prescriptions/")
-        with contextlib.suppress(Exception):
             for widget in self.ChatWithDoctor_frame.winfo_children():
                 widget.destroy()
+            os.mkdir("Data/Prescriptions/")
 
         if self.user.checkRequest(): # Check if the Patient already has a request
             res = self.db.Select("SELECT Request_Status FROM requests WHERE Patient_ID= %s", [self.user.userid])[0][0]
@@ -780,6 +775,8 @@ class PatGUI(ctk.CTk):
 
         else:
             Infotext, self.Price = self.user.PriceInfo("Chat")
+            self.Price *= -1 
+            print(self.Price)
             MessageBox(self.ChatWithDoctor_frame,"info",Infotext)
 
             self.ScanPathTextbox = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=700, state = "disabled", height=10,text_color=self.configfile.get("TextColor"),
@@ -874,10 +871,11 @@ class PatGUI(ctk.CTk):
                     command=self.Credits_button_event,
                 )
                 self.Credits_button.grid(row=10, column=0, sticky="ew")
+                return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
                 
         else:
             self.user.CreateRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
-        return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
+            return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
 
     # Chat Section
     def openChat(self):
@@ -1095,6 +1093,9 @@ class PatGUI(ctk.CTk):
         MainWindow = ctk.CTkScrollableFrame(self.Prescriptions_frame, fg_color=self.configfile.get("FrameColor"),width=1040,height=600,scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor"))
         MainWindow.place(anchor="nw", relx=0.01, rely=0.1)
         res = self.user.MyPrescriptions()
+        if len(res)==0:
+            NoData= ctk.CTkLabel(MainWindow, text="No Prescriptions Found!" , width=1040, height=self.winfo_height() - 150, text_color=self.configfile.get("TextColor"), font=ctk.CTkFont(size=20))
+            NoData.grid(row=0, column=0, pady=6)
         for pos, i in enumerate(res):
             self.PrescriptionEntry(MainWindow, pos, i[0], i[1], i[2])
 
@@ -1124,5 +1125,5 @@ class PatGUI(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = PatGUI(5)
+    app = PatGUI(14)
     app.mainloop()

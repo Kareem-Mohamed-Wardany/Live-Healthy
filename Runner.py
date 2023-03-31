@@ -1,16 +1,17 @@
 from LoginGUI import *
+
 def MoveTo(UserInfo):
     id = str(UserInfo[0])
-    if UserInfo[1] == "patient": # ahmed@gmail.com     PW: 123
+    if UserInfo[1].lower() == "patient": # sali@gmail.com       pw: 123
         patient = PatGUI(id)
         patient.mainloop()
-    if UserInfo[1] == "Radiologist": # salma@gmail.com     PW: 123
+    if UserInfo[1].lower() == "radiologist": # salma@gmail.com     PW: 123
         Radiologist = RadioloGUI(id)
         Radiologist.mainloop()
-    if UserInfo[1] == "Administrator": # admin@admin.com    PW: admin
+    if UserInfo[1].lower() == "administrator": # admin   PW: admin
         Admin = AdminGUI(id)
         Admin.mainloop()
-    if UserInfo[1] in ["Specialist","Consultant"]: # khaled@gmail.com     PW: 123
+    if UserInfo[1].lower() in ["specialist","consultant"]: # sherif_mohamed@gmail.com       pw: 123
         Doctor = DocGUI(id)
         Doctor.mainloop()
 
