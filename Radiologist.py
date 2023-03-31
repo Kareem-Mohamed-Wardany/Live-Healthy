@@ -15,19 +15,18 @@ class Radiologist(User):
     def __init__(self, id):
         if id != -1:
             super().__init__(id)
-            radiodata = self.db.Select("SELECT Center_ID FROM radiologists WHERE Radiologist_ID= %s",[self.userid], )[0][0]  # get the id for Radiology center
-            self.CenterName = self.db.Select("SELECT Name FROM radiologycenters WHERE ID= %s", [radiodata])[0][0] 
+            radiodata = SelectQuery("SELECT Center_ID FROM radiologists WHERE Radiologist_ID= %s",[self.userid], )[0][0]  # get the id for Radiology center
+            self.CenterName = SelectQuery("SELECT Name FROM radiologycenters WHERE ID= %s", [radiodata])[0][0] 
 
     def SaveData(self):
         super().SaveData()
-        centerID = self.db.Select("SELECT ID FROM radiologycenters WHERE Name LIKE %s", [self.CenterName])[0][0] 
-        self.db.Insert(
+        centerID = SelectQuery("SELECT ID FROM radiologycenters WHERE Name LIKE %s", [self.CenterName])[0][0] 
+        InsertQuery(
             "INSERT INTO radiologists (Radiologist_ID, Center_ID) VALUES (%s, %s)",
             [
                 self.userid,
                 centerID,
             ])
-        self.db.Commit()
     
     @classmethod
     def CreateRadiologist(cls, name, Mail, Password, Utype, Phone, Age, Gender, CenterName):

@@ -19,7 +19,7 @@ class User:
     def __init__(self, id):
         # constructor Used during Login to get user id
         self.userid = id
-        res = self.db.Select("SELECT * FROM users WHERE ID= %s", [self.userid]) 
+        res = SelectQuery("SELECT * FROM users WHERE ID= %s", [self.userid]) 
         (self.userName,
         self.userMail,
         self.userPassword,
@@ -33,7 +33,7 @@ class User:
         self.userVIPEnd) = self.fillindata(res[0],[0])
 
     def GetMaxID(self):
-        return self.db.Select("SELECT MAX(ID) FROM users")[0][0]
+        return SelectQuery("SELECT MAX(ID) FROM users")[0][0]
 
     def CalcAge(self, Birthdate):
         return (
@@ -77,7 +77,7 @@ class User:
         pass
 
     def SaveData(self):
-        self.db.Insert(
+        InsertQuery(
             "INSERT INTO users (ID, Name, Mail, Password, Account_Type, Credits_Balance, Phone, DateOfBirth, Apperance_Mode, Gender, Vip_Level, Vip_End_Date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             [
                 self.userid,
@@ -114,17 +114,15 @@ class User:
             MessageBox(parent, "error", "Invalid Amount")
             return -1
         self.userBalance += val
-        self.db.Update(
+        UpdateQuery(
             "UPDATE users SET Credits_Balance = %s WHERE ID= %s",
             [self.userBalance, self.userid],
         )
-        self.db.Commit()
 
     def SetApperanceMode(self, mode):
         self.userSystemApperanceMode = mode
-        self.db.Update(
+        UpdateQuery(
             "UPDATE users SET Apperance_Mode = %s WHERE ID= %s",
             [mode, self.userid],
         )
-        self.db.Commit()
     # --------------------------------END OF FUNCTIONS SECTION---------------------------------------------#

@@ -17,7 +17,7 @@ class Patient(User):
     def __init__(self, id):
         if id != -1:
             super().__init__(id)
-            res= self.db.Select("SELECT * FROM patienthealthstatus WHERE Patient_ID= %s",[self.userid])
+            res= SelectQuery("SELECT * FROM patienthealthstatus WHERE Patient_ID= %s",[self.userid])
             (
                 self.Heart_Diseases,
                 self.Diabetes,
@@ -31,7 +31,7 @@ class Patient(User):
 
     def SaveData(self):
         super().SaveData()
-        self.db.Insert(
+        InsertQuery(
             "INSERT INTO patienthealthstatus (Patient_ID, Heart_Diseases, Diabetes, Cancer, Obesity, Smoker, Hypertension, Allergies, Blood_Type) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             [
                 self.userid,
@@ -44,7 +44,6 @@ class Patient(User):
                 self.Allergies,
                 self.Blood_Type,
             ])
-        self.db.Commit()
     
     @classmethod
     def CreatePatient(cls, name, Mail, Password, Utype, Phone, Age, Gender, HD = 0, diabetes = 0, cancer = 0, obesity = 0, smoker = 0, hypertension = 0, Allergies = 0, BloodType = "UNKNOWN"):
@@ -72,15 +71,15 @@ class Patient(User):
         return p
 
     def checkRequest(self):
-        res = self.db.Select("SELECT * FROM requests WHERE Patient_ID= %s", [self.userid])
+        res = SelectQuery("SELECT * FROM requests WHERE Patient_ID= %s", [self.userid])
         return len(res) > 0
 
     def CreateRequest(
         self, ScanPath, prediction, symptoms, illnessTime, medications, extraInfo
     ):
-        binaryimage = self.db.convertToBinaryData(ScanPath)
+        binaryimage = convertToBinaryData(ScanPath)
         RequestDate = date.today()
-        self.db.Insert(
+        InsertQuery(
             "INSERT INTO requests (Patient_ID, Request_Date, Request_Status, Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             [
                 self.userid,
@@ -94,10 +93,9 @@ class Patient(User):
                 illnessTime,
             ],
         )
-        self.db.Commit()
 
     def RequestData(self):
-        res = self.db.Select(
+        res = SelectQuery(
             "SELECT Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time FROM requests WHERE Patient_ID= %s",
             [self.userid],
         )
@@ -197,8 +195,7 @@ class Patient(User):
             else:
                 self.userVIPEnd += timedelta(days=30)
             self.userVIPLevel = level
-            self.db.Update("UPDATE users SET Vip_Level= %s, Vip_End_Date= %s WHERE ID = %s",[self.userVIPLevel, self.userVIPEnd, self.userid])
-            self.db.Commit()
+            UpdateQuery("UPDATE users SET Vip_Level= %s, Vip_End_Date= %s WHERE ID = %s",[self.userVIPLevel, self.userVIPEnd, self.userid])
             LeftSideBar() # Update Left Side bar in GUI passed as a function
             MessageBox(master,"info","Purchase Complete")
 
@@ -218,7 +215,7 @@ class Patient(User):
                 MessageBox(master,"info","Balance Recharge Completed")
 
     def MyPrescriptionGenerated(self, id):
-        res = self.db.Select(
+        res = SelectQuery(
             "SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",
             [self.userid, id],
         )[0][0]
@@ -228,16 +225,16 @@ class Patient(User):
         path = f"Data\Prescriptions\{self.userName}.pdf"
         if self.MyPrescriptionGenerated(id):
             return MessageBox(master, "info", "Prescription is not created yet")
-        self.Prescription = self.db.Select("SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",[self.userid, id])[0][0]
-        self.db.write_file(self.Prescription, path)
+        self.Prescription = SelectQuery("SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",[self.userid, id])[0][0]
+        write_file(self.Prescription, path)
         subprocess.Popen([path], shell=True)
 
     def MyPrescriptions(self):
-        return self.db.Select("SELECT Doc_ID, prescriptionDate, prescriptionPDF FROM prescriptions WHERE Patient_ID = %s ORDER BY prescriptionDate DESC",[self.userid]) 
+        return SelectQuery("SELECT Doc_ID, prescriptionDate, prescriptionPDF FROM prescriptions WHERE Patient_ID = %s ORDER BY prescriptionDate DESC",[self.userid]) 
 
     def DownloadPrescription(self, event, presDate, presPDF, master):
         SavePath = filedialog.askdirectory(title="Select Where to Download Prescription")
         FullPathName = f"{SavePath}/Prescription_{presDate}.pdf"
-        self.db.write_file(presPDF, FullPathName)
+        write_file(presPDF, FullPathName)
         subprocess.Popen([FullPathName], shell=True)  # Show the Prescription for the patient
         return MessageBox(master,"info","Prescription saved successfully")

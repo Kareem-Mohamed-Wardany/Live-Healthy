@@ -317,6 +317,9 @@ class PatGUI(ctk.CTk):
         self.appearance_mode_menu.grid(row=12, column=0, padx=20, pady=20, sticky="s")
         
     def logout(self):
+        with contextlib.suppress(Exception):
+            shutil.rmtree("Data/Prescriptions/")
+            self.Userclient.end()
         self.destroy()
         from Runner import Runit
 
@@ -767,10 +770,10 @@ class PatGUI(ctk.CTk):
             os.mkdir("Data/Prescriptions/")
 
         if self.user.checkRequest(): # Check if the Patient already has a request
-            res = self.db.Select("SELECT Request_Status FROM requests WHERE Patient_ID= %s", [self.user.userid])[0][0]
+            res = SelectQuery("SELECT Request_Status FROM requests WHERE Patient_ID= %s", [self.user.userid])[0][0]
             if res == "waiting":
                 return MessageBox(self.ChatWithDoctor_frame,"info", "Waiting for a doctor to respond")
-            self.DoctorID = self.db.Select("SELECT Doc_ID FROM chatdata WHERE Patient_ID= %s", [self.user.userid])[0][0]
+            self.DoctorID = SelectQuery("SELECT Doc_ID FROM chatdata WHERE Patient_ID= %s", [self.user.userid])[0][0]
             self.openChat()
 
         else:
@@ -1011,7 +1014,7 @@ class PatGUI(ctk.CTk):
 
     def LoadChatData(self):
         # Load the chat of Patient with id
-        res = self.db.Select(
+        res = SelectQuery(
             "SELECT Chat_Logs FROM chatdata WHERE Patient_ID= %s", [self.user.userid]
         )[0][0]
         msg = res.split(
@@ -1025,10 +1028,9 @@ class PatGUI(ctk.CTk):
         c = list(chatqueue.queue)  # convert Queue to List
         textChat = "".join(c[i] if i == 0 else f"&,&{c[i]}" for i in range(len(c)))
         # Update the chat in database
-        res = self.db.Update(
+        res = UpdateQuery(
             "UPDATE chatdata SET Chat_Logs= %s WHERE Patient_ID= %s", [textChat, self.user.userid]
         )
-        self.db.Commit()
 
     def AddLoadedChat(self):
         # check that there is no items in LoaddedChat

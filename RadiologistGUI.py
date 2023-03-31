@@ -283,11 +283,10 @@ class RadioloGUI(ctk.CTk):
     def change_appearance_mode(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
         self.user.userSystemApperanceMode = new_appearance_mode
-        self.db.Update(
+        UpdateQuery(
             "UPDATE users SET Apperance_Mode = %s WHERE ID= %s",
             [new_appearance_mode, self.user.userid],
         )
-        self.db.Commit()
 
 
 if __name__ == "__main__":

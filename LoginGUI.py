@@ -169,7 +169,7 @@ class Login(ctk.CTk):
             return messagebox.showerror("Error", self.systemError.get(suspended), icon="error", parent=self.loginFrame)
         if userinfo != "ok":
             if userinfo[1] in ["Specialist","Consultant"]:
-                res = self.db.Select("SELECT Verified FROM doctordata WHERE Doctor_ID=%s",[userinfo[0]])[0][0]
+                res = SelectQuery("SELECT Verified FROM doctordata WHERE Doctor_ID=%s",[userinfo[0]])[0][0]
                 if res == 0:
                     return messagebox.showerror("Error", self.systemError.get(15), icon="error", parent=self.loginFrame)
             self.Moveto = True
@@ -182,7 +182,7 @@ class Login(ctk.CTk):
         if len(mail) == 0:
             return messagebox.showerror("Error", self.systemError.get(14), icon="error", parent=self.loginFrame)
 
-        password = self.db.Select("SELECT Password FROM users WHERE Mail LIKE %s",[mail])
+        password = SelectQuery("SELECT Password FROM users WHERE Mail LIKE %s",[mail])
         if len(password) == 0:
             return messagebox.showerror("Error", self.systemError.get(3), icon="error", parent=self.loginFrame)
         password = password[0][0]
@@ -213,7 +213,7 @@ class Login(ctk.CTk):
 
 
     def suspended(self, id):
-        res = self.db.Select("SELECT COUNT(*) FROM suspended WHERE User_ID = %s",[id])[0][0]
+        res = SelectQuery("SELECT COUNT(*) FROM suspended WHERE User_ID = %s",[id])[0][0]
         return 26 if res == 1 else -1
 
     def Goto_Register(self):

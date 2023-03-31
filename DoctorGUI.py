@@ -229,6 +229,10 @@ class DocGUI(ctk.CTk):
         self.appearance_mode_menu.grid(row=8, column=0, padx=20, pady=20, sticky="s")
 
     def logout(self):
+        with contextlib.suppress(Exception):
+            shutil.rmtree("Data/PatientScans/")
+            shutil.rmtree("Data/Prescriptions/")
+            self.Userclient.end()
         self.destroy()
         from Runner import Runit
     # Active Chat Section
@@ -267,7 +271,7 @@ class DocGUI(ctk.CTk):
             self.AddtoChatMenu(frame, item[0], pos)
 
     def AddtoChatMenu(self, master, id, pos):
-        output = self.db.Select("SELECT Name, Gender FROM users WHERE ID=%s", [id])
+        output = SelectQuery("SELECT Name, Gender FROM users WHERE ID=%s", [id])
         Name = output[0][0]
         Gender = output[0][1]
         if Gender == "Male":
@@ -732,7 +736,7 @@ class DocGUI(ctk.CTk):
 
     def LoadChatData(self, Patientid):
         # Load the chat of Patient with id
-        res = self.db.Select(
+        res = SelectQuery(
             "SELECT Chat_Logs FROM chatdata WHERE Patient_ID= %s", [Patientid]
         )[0][0]
         msg = res.split(
@@ -791,7 +795,7 @@ class DocGUI(ctk.CTk):
         # save binary Data of image as an image named as PatientName.png
         scanImage = f"Data/PatientScans/{name}.png"
 
-        self.db.write_file(scan, scanImage)
+        write_file(scan, scanImage)
 
         X_ray = ctk.CTkLabel(
             blockFrame,
@@ -841,11 +845,9 @@ class DocGUI(ctk.CTk):
         c = list(chatqueue.queue)  # convert Queue to List
         textChat = "".join(c[i] if i == 0 else f"&,&{c[i]}" for i in range(len(c)))
         # Update the chat in database
-        res = self.db.Update(
+        UpdateQuery(
             "UPDATE chatdata SET Chat_Logs= %s WHERE Patient_ID= %s", [textChat, id]
         )
-        self.db.Commit()
-
     def AddLoadedChat(self):
         # check that there is no items in LoaddedChat
         while self.LoaddedChat.qsize() > 0:

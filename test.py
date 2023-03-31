@@ -19,3 +19,7 @@ scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover
 
 
 self.ChatWithDoctor()
+
+UpdateQuery
+SelectQuery
+InsertQuery

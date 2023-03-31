@@ -536,7 +536,7 @@ class Register(ctk.CTk):
         )
         RadioCenterLabel.place(anchor="nw",relx=0, rely=0.05)
 
-        res = self.db.Select("SELECT Name FROM radiologycenters")
+        res = SelectQuery("SELECT Name FROM radiologycenters")
         RadioCenters = [i[0] for i in res]
         self.RadioCenterCombo = ctk.CTkOptionMenu(
         RadiologistFrame,
@@ -662,13 +662,12 @@ class Register(ctk.CTk):
         return 9 if self.GenderVar.get() == -1 else -1
 
     def CheckRadioCenter(self):
-        res = self.db.Select("SELECT Registercode, Center_Limit FROM radiologycenters WHERE Name=%s",[self.radioCenter])
+        res = SelectQuery("SELECT Registercode, Center_Limit FROM radiologycenters WHERE Name=%s",[self.radioCenter])
         limit = res[0][1]
         code = res[0][0]
         if self.radioCenterCode == code and limit > 0:
             limit -= 1
-            self.db.Update("UPDATE radiologycenters SET Center_Limit=%s WHERE Name=%s",[limit,self.radioCenter])
-            self.db.Commit()
+            UpdateQuery("UPDATE radiologycenters SET Center_Limit=%s WHERE Name=%s",[limit,self.radioCenter])
         if limit == 0:
             self.Valid = False
             return 4
@@ -707,8 +706,8 @@ class Register(ctk.CTk):
             if self.UniEntry.get() == "" :
                 return 10
             self.uni = self.UniEntry.get()
-            self.IDbinary = self.db.convertToBinaryData(self.IDPath)
-            self.LicenseBinary = self.db.convertToBinaryData(self.LicensePath)
+            self.IDbinary = convertToBinaryData(self.IDPath)
+            self.LicenseBinary = convertToBinaryData(self.LicensePath)
         return -1
 
     def insertUserInfo(self):

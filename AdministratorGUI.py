@@ -355,7 +355,7 @@ class AdminGUI(ctk.CTk):
             UniversityName.grid(row=pos+1, column=1,pady=10)
 
 
-            self.db.write_file(i[3],f"Data/images/ID_Card_{i[1]}.png")
+            write_file(i[3],f"Data/images/ID_Card_{i[1]}.png")
             img = Image.open(f"Data/images/ID_Card_{i[1]}.png")
 
             IDCard = ctk.CTkLabel(Doctors_frame, text="", wraplength=180,image= ctk.CTkImage(img,size=(150,50)),
@@ -365,7 +365,7 @@ class AdminGUI(ctk.CTk):
 
 
 
-            self.db.write_file(i[4],f"Data/images/Prof_lic_{i[1]}.png")
+            write_file(i[4],f"Data/images/Prof_lic_{i[1]}.png")
             img2 = Image.open(f"Data/images/Prof_lic_{i[1]}.png")
 
             Prof_lic = ctk.CTkLabel(Doctors_frame, text="", wraplength=180,image= ctk.CTkImage(img2,size=(150,50)),
