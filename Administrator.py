@@ -38,6 +38,7 @@ class Administrator(User):
         MessageBox(master,"info","Doctor Verified")
 
     def BanDoctor(self, event, master, id, update):
+        self.db.Update("UPDATE doctordata SET Verified= %s WHERE Doctor_ID= %s",[-1, id])
         self.db.Insert("INSERT INTO suspended (User_ID, Suspention_Type, Suspention_Date, Reason) VALUES (%s, %s, %s, %s)",[id, "Permanent",date.today(),"Register With Fake ID and License",])
         self.db.Commit()
         update()

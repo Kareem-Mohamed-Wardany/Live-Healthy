@@ -20,6 +20,7 @@ from User import *
 from UserFactory import *
 
 
+
 class RadioloGUI(ctk.CTk):
     # load Config dict
     configfile = SystemConfig()
@@ -75,7 +76,6 @@ class RadioloGUI(ctk.CTk):
                 self.configfile.get("ButtonIconsSize"),
             ),
         )
-
         # create LeftSideBar frame
         self.LeftSideBar_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=self.configfile.get("FrameColor"))
         self.LeftSideBar_frame.grid(row=0, column=0, sticky="nsew")
@@ -152,6 +152,29 @@ class RadioloGUI(ctk.CTk):
         )
         self.Predict_Scan_button.grid(row=4, column=0, sticky="ew")
 
+
+        self.logoutimg = ctk.CTkImage(
+            logout,
+            size=(
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+            ),
+        )
+        self.logoutbutton = ctk.CTkButton(
+            self.LeftSideBar_frame,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Logout",
+            fg_color="transparent",
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
+            image=self.logoutimg,
+            anchor="w",
+            command=self.logout,
+        )
+        self.logoutbutton.grid(row=6, column=0, sticky="ew")
+
         # create Apperance Mode to what currently the GUI running with
         if self.user.userSystemApperanceMode == "Dark":
             v = ["Dark", "Light", "System"]
@@ -163,7 +186,12 @@ class RadioloGUI(ctk.CTk):
             self.LeftSideBar_frame, values=v, command=self.change_appearance_mode
         )
         self.appearance_mode_menu.grid(
-            row=6, column=0, padx=20, pady=20, sticky="s")
+            row=7, column=0, padx=20, pady=20, sticky="s")
+        
+
+    def logout(self):
+        self.destroy()
+        from Runner import Runit
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
@@ -178,7 +206,7 @@ class RadioloGUI(ctk.CTk):
             self.Predict_Scan_frame, width=700, state="disabled", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"),border_color=self.configfile.get("TextColor"))
         self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
         ImportScanButton = ctk.CTkButton(
-            self.Predict_Scan_frame, text="Import Folder", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), command=self.ImportScanFolder)
+            self.Predict_Scan_frame, text="Import Folder", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"),hover_color=self.configfile.get("FrameColor"), command=self.ImportScanFolder)
         ImportScanButton.place(anchor="nw", relx=0.7, rely=0.05)
 
     def ImportScanFolder(self):
@@ -194,7 +222,9 @@ class RadioloGUI(ctk.CTk):
         output = self.user.PredictScanFolder(self.ScansFolderPath)
 
         ScrollableFrame = ctk.CTkScrollableFrame(
-            self.Predict_Scan_frame, width=550,fg_color=self.configfile.get("FrameColor"))
+            self.Predict_Scan_frame, width=550,fg_color=self.configfile.get("FrameColor"),
+            scrollbar_button_color=self.configfile.get("FrameColor"), 
+            scrollbar_button_hover_color=self.configfile.get("TextColor"))
         ScrollableFrame.place(anchor="nw", relx=0.05, rely=0.2)
 
         Name = ctk.CTkLabel(ScrollableFrame, text="Image Name", text_color=self.configfile.get("TextColor"),

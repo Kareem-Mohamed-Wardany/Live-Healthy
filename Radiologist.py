@@ -13,9 +13,10 @@ class Radiologist(User):
     db = Database()  # Create connection with Database to access it
 
     def __init__(self, id):
-        super().__init__(id)
-        radiodata = self.db.Select("SELECT Center_ID FROM radiologists WHERE Radiologist_ID= %s",[self.userid], )[0][0]  # get the id for Radiology center
-        self.CenterName = self.db.Select("SELECT Name FROM radiologycenters WHERE ID= %s", [radiodata])[0][0] 
+        if id != -1:
+            super().__init__(id)
+            radiodata = self.db.Select("SELECT Center_ID FROM radiologists WHERE Radiologist_ID= %s",[self.userid], )[0][0]  # get the id for Radiology center
+            self.CenterName = self.db.Select("SELECT Name FROM radiologycenters WHERE ID= %s", [radiodata])[0][0] 
 
     def SaveData(self):
         super().SaveData()
@@ -26,23 +27,25 @@ class Radiologist(User):
                 self.userid,
                 centerID,
             ])
+        self.db.Commit()
     
     @classmethod
     def CreateRadiologist(cls, name, Mail, Password, Utype, Phone, Age, Gender, CenterName):
-        cls.userid = cls.GetMaxID(cls) + 1 
-        cls.userName = name
-        cls.userMail = Mail
-        cls.userPassword = Password
-        cls.userType = Utype
-        cls.userPhone = Phone
-        cls.userAge = Age
-        cls.userGender = Gender
-        cls.userSystemApperanceMode = "System"
-        cls.userBalance = 0
-        cls.userVIPLevel = 0
-        cls.userVIPEnd = date(2001, 1, 1)
-        cls.CenterName = CenterName
-        return cls
+        r = cls(-1)
+        r.userid = r.GetMaxID() + 1 
+        r.userName = name
+        r.userMail = Mail
+        r.userPassword = Password
+        r.userType = Utype
+        r.userPhone = Phone
+        r.userAge = Age
+        r.userGender = Gender
+        r.userSystemApperanceMode = "System"
+        r.userBalance = 0
+        r.userVIPLevel = 0
+        r.userVIPEnd = date(2001, 1, 1)
+        r.CenterName = CenterName
+        return r
     
 
     def PredictScanFolder(self, FolderPath):

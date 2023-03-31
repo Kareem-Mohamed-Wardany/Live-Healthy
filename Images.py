@@ -4,11 +4,15 @@ from PIL import Image
 # Logo
 logo = Image.open("asset\Logo.png")
 
+
 LoginBG = Image.open("asset/login.jpg")
 LoginBG2 = Image.open("asset/login2.jpg")
 
 RegisterBG = Image.open("asset/RegBG.jpg")
-# RegisterBG2 = Image.open("asset/login2.jpg")
+
+
+
+logout = Image.open("asset\logout.png")
 
 
 # Male and Female Images

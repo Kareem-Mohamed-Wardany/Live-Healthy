@@ -7,16 +7,17 @@ class Doctor(User):
     db = Database()  # Create connection with Database to access it
 
     def __init__(self, id):
-        super().__init__(id)
-        res = self.db.Select(
-            "SELECT * FROM doctordata WHERE Doctor_ID= %s", [self.userid]
-        )
-        (
-            self.Verified,
-            self.University,
-            self.ID_Card,
-            self.Prof_License,
-        ) = self.fillindata(res[0], [0])
+        if id != -1:
+            super().__init__(id)
+            res = self.db.Select(
+                "SELECT * FROM doctordata WHERE Doctor_ID= %s", [self.userid]
+            )
+            (
+                self.Verified,
+                self.University,
+                self.ID_Card,
+                self.Prof_License,
+            ) = self.fillindata(res[0], [0])
 
     def SaveData(self):
         super().SaveData()
@@ -30,6 +31,7 @@ class Doctor(User):
                 self.Prof_License,
             ],
         )
+        self.db.Commit()
 
     @classmethod
     def CreateDoctor(
@@ -46,23 +48,24 @@ class Doctor(User):
         Prof_License,
         Verified=0,
     ):
-        cls.userid = cls.GetMaxID(cls) + 1
-        cls.userName = name
-        cls.userMail = Mail
-        cls.userPassword = Password
-        cls.userType = Utype
-        cls.userPhone = Phone
-        cls.userAge = Age
-        cls.userGender = Gender
-        cls.userSystemApperanceMode = "System"
-        cls.userBalance = 0
-        cls.userVIPLevel = 0
-        cls.userVIPEnd = date(2001, 1, 1)
-        cls.Verified = Verified
-        cls.University = University
-        cls.ID_Card = ID_Card
-        cls.Prof_License = Prof_License
-        return cls
+        d = cls(-1)
+        d.userid = d.GetMaxID() + 1
+        d.userName = name
+        d.userMail = Mail
+        d.userPassword = Password
+        d.userType = Utype
+        d.userPhone = Phone
+        d.userAge = Age
+        d.userGender = Gender
+        d.userSystemApperanceMode = "System"
+        d.userBalance = 0
+        d.userVIPLevel = 0
+        d.userVIPEnd = date(2001, 1, 1)
+        d.Verified = Verified
+        d.University = University
+        d.ID_Card = ID_Card
+        d.Prof_License = Prof_License
+        return d
 
     def ReportUser(self, userID, Reason):
         ReportDate = date.today()

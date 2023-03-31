@@ -15,11 +15,6 @@ from DoctorGUI import *
 from Error import *
 from GUIHelperFunctions import *
 from Images import *
-from PatientGUI import *
-from RadiologistGUI import *
-from RegisterGUI import *
-from User import *
-
 
 class Login(ctk.CTk):
     # load Config dict
@@ -105,7 +100,7 @@ class Login(ctk.CTk):
             height=25,
             font=ctk.CTkFont(size=20, weight="bold", family="Times New Roman")
         )
-        emailLabel.place(anchor="nw", relx=0.061, rely=0.4)
+        emailLabel.place(anchor="nw", relx=0.045, rely=0.4)
         self.emailEntry = ctk.CTkEntry(
             self.loginFrame,
             placeholder_text="Your email...",

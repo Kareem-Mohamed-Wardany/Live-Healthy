@@ -282,6 +282,28 @@ class PatGUI(ctk.CTk):
             command=self.Credits_button_event,
         )
         self.Credits_button.grid(row=10, column=0, sticky="ew")
+
+        self.logoutimg = ctk.CTkImage(
+            logout,
+            size=(
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+            ),
+        )
+        self.logoutbutton = ctk.CTkButton(
+            self.LeftSideBar_frame,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Logout",
+            fg_color="transparent",
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
+            image=self.logoutimg,
+            anchor="w",
+            command=self.logout,
+        )
+        self.logoutbutton.grid(row=11, column=0, sticky="ew")
         # create Apperance Mode to what currently the GUI running with
         if self.user.userSystemApperanceMode == "Dark":
             v = ["Dark", "Light", "System"]
@@ -292,7 +314,15 @@ class PatGUI(ctk.CTk):
         self.appearance_mode_menu = ctk.CTkOptionMenu(
             self.LeftSideBar_frame, values=v, command=self.change_appearance_mode
         )
-        self.appearance_mode_menu.grid(row=11, column=0, padx=20, pady=20, sticky="s")
+        self.appearance_mode_menu.grid(row=12, column=0, padx=20, pady=20, sticky="s")
+        
+    def logout(self):
+        self.destroy()
+        from Runner import Runit
+
+    def logout(self):
+        self.destroy()
+        from Runner import Runit
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
@@ -878,7 +908,7 @@ class PatGUI(ctk.CTk):
         print(f"--- {time.time() - start_time} seconds ---")
 
         # join Chat Servrt
-        # self.JoinChatServer()
+        self.JoinChatServer()
 
     def DoctorData(self, master):
         DoctorData = UserFactory.createUser(self.DoctorID,"doctor")  # Get the patient Data

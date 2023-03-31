@@ -78,20 +78,21 @@ class User:
 
     def SaveData(self):
         self.db.Insert(
-            "INSERT INTO users (ID, Name, Mail, Password, Type, Phone, Age, Gender, System_Apperance_Mode, Balance, VIP_Level, VIP_End) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO users (ID, Name, Mail, Password, Account_Type, Credits_Balance, Phone, DateOfBirth, Apperance_Mode, Gender, Vip_Level, Vip_End_Date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             [
                 self.userid,
                 self.userName,
                 self.userMail,
                 self.userPassword,
                 self.userType,
+                self.userBalance,
                 self.userPhone,
                 self.userAge,
-                self.userGender,
                 self.userSystemApperanceMode,
-                self.userBalance,
+                self.userGender,
                 self.userVIPLevel,
-                self.userVIPEnd]
+                self.userVIPEnd
+            ]
         )
 
     def fillindata(self, input, skipValues=None):

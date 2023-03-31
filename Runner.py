@@ -15,7 +15,7 @@ def MoveTo(UserInfo):
         Doctor = DocGUI(id)
         Doctor.mainloop()
 
-def Run():
+def Runit():
     app = Login()
     app.mainloop()
 
@@ -30,4 +30,4 @@ def Run():
 
 
 
-Run()
+Runit()

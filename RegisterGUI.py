@@ -588,7 +588,7 @@ class Register(ctk.CTk):
         self.Password = self.PassEntry.get()
         self.ConfirmPassword = self.ConfirmPassEntry.get()
         self.DoB = datetime.strptime(self.cal.get_date(), '%m/%d/%y').date()
-        self.Gender = self.GenderVar.get()
+        self.Gender = "Male" if self.GenderVar.get() == 1 else "Female"
         self.UsType = self.TypeCombo.get()
         CheckData = self.dataValidator()
         
@@ -717,16 +717,22 @@ class Register(ctk.CTk):
     def insertUserInfo(self):
         # Function That calls abstract method to insert user info into database 
         if self.UsType == "Patient":
-            patient = Patient.CreatePatient(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.heart, self.diabetes, self.cancer, self.obesity, self.smoker, self.hypertension, self.allergies, self.Blood)
-            patient.SaveData()
+            pp = Patient.CreatePatient(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.heart, self.diabetes, self.cancer, self.obesity, self.smoker, self.hypertension, self.allergies, self.Blood)
+            pp.SaveData()
+            
         if self.UsType == "Radiologist":
-            radiologist = Radiologist.CreateRadiologist(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.radioCenter)
-            radiologist.SaveData()
+            radiologistdata = Radiologist.CreateRadiologist(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.radioCenter)
+            radiologistdata.SaveData()
         if self.UsType in ["Consultant", "Specialist"]:
-            doctor = Doctor.CreateDoctor(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.uni, self.IDbinary, self.LicenseBinary)
-            doctor.SaveData()
+            doctordata = Doctor.CreateDoctor(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.uni, self.IDbinary, self.LicenseBinary)
+            doctordata.SaveData()
         return messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
 
 if __name__ == "__main__":
     app = Register()
     app.mainloop()
+
+# Sami
+# Ali
+# 01526512341
+# s_ali@gmail.com

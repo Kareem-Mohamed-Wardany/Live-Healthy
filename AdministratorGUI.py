@@ -148,6 +148,28 @@ class AdminGUI(ctk.CTk):
             command=self.Verify_Doctors_button_event,
         )
         self.Verify_Doctors_button.grid(row=3, column=0, sticky="ew")
+
+        self.logoutimg = ctk.CTkImage(
+            logout,
+            size=(
+                self.configfile.get("ButtonIconsSize"),
+                self.configfile.get("ButtonIconsSize"),
+            ),
+        )
+        self.logoutbutton = ctk.CTkButton(
+            self.LeftSideBar_frame,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Logout",
+            fg_color="transparent",
+            text_color=self.configfile.get("TextColor"),
+            hover_color=self.configfile.get("BackgroundColor"),
+            image=self.logoutimg,
+            anchor="w",
+            command=self.logout,
+        )
+        self.logoutbutton.grid(row=9, column=0, sticky="ew")
         # create Apperance Mode to what currently the GUI running with
         if self.user.userSystemApperanceMode == "Dark":
             v = ["Dark", "Light", "System"]
@@ -160,6 +182,10 @@ class AdminGUI(ctk.CTk):
         )
         self.appearance_mode_menu.grid(
             row=10, column=0, padx=20, pady=20, sticky="s")
+        
+    def logout(self):
+        self.destroy()
+        from Runner import Runit
 
     def select_frame_by_name(self, name):
         # set button color for selected button
@@ -197,7 +223,9 @@ class AdminGUI(ctk.CTk):
         Title.place(anchor="nw", relx=0.4, rely=0.02)
 
         LogsFrame = ctk.CTkScrollableFrame(
-            self.Handle_Reports_frame, fg_color=self.configfile.get("FrameColor"), width=1050,height=600)
+            self.Handle_Reports_frame,width=1050,height=600,fg_color=self.configfile.get("FrameColor"),
+            scrollbar_button_color=self.configfile.get("FrameColor"), 
+            scrollbar_button_hover_color=self.configfile.get("TextColor"),)
         LogsFrame.place(anchor="nw", relx=0.01, rely=0.1)
 
         DoctorNameLabel = ctk.CTkLabel(LogsFrame, text="Doctor Name",text_color=self.configfile.get("TextColor"),
@@ -257,17 +285,19 @@ class AdminGUI(ctk.CTk):
         ChatWindow.configure(bg_color=self.configfile.get("BackgroundColor"))
         ChatWindow.configure(fg_color=self.configfile.get("BackgroundColor"))
         ChatLogsFrame = ctk.CTkScrollableFrame(
-            ChatWindow, fg_color=self.configfile.get("FrameColor"), width=500,height=300)
+            ChatWindow, width=500,height=300,fg_color=self.configfile.get("FrameColor"),
+            scrollbar_button_color=self.configfile.get("FrameColor"), 
+            scrollbar_button_hover_color=self.configfile.get("TextColor"),)
         ChatLogsFrame.place(anchor="nw", relx=0.01, rely=0.01)
         Chatdata = chat.split("&,&")
         for pos, i in enumerate(Chatdata):
             chatitemLabel = ctk.CTkLabel(ChatLogsFrame, text=i, anchor='e',font=ctk.CTkFont(size=15, weight="bold"))
             chatitemLabel.grid(row=pos, column=0,sticky="W")
             
-        RevokeButton = ctk.CTkButton(ChatWindow, text="Revoke Suspension", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), command= lambda:self.user.RevokeSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
+        RevokeButton = ctk.CTkButton(ChatWindow, text="Revoke Suspension", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda:self.user.RevokeSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
         RevokeButton.place(anchor="nw", relx=0.5, rely=0.85)
 
-        PermaButton = ctk.CTkButton(ChatWindow, text="Permanent Suspension", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), command= lambda:self.user.ConfirmSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
+        PermaButton = ctk.CTkButton(ChatWindow, text="Permanent Suspension", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda:self.user.ConfirmSuspension(ChatWindow, id, self.LoadHandleReportsFrame))
         PermaButton.place(anchor="nw", relx=0.75, rely=0.85)
 
     def Handle_Reports_button_event(self):
@@ -293,7 +323,9 @@ class AdminGUI(ctk.CTk):
                              font=ctk.CTkFont(size=20, weight="bold"))
         Title.place(anchor="nw", relx=0.4, rely=0.02)
 
-        Doctors_frame = ctk.CTkScrollableFrame(self.Verify_Doctors_frame, fg_color=self.configfile.get("FrameColor"), width=1050,height=600)
+        Doctors_frame = ctk.CTkScrollableFrame(self.Verify_Doctors_frame, fg_color=self.configfile.get("FrameColor"), width=1050,height=600,
+            scrollbar_button_color=self.configfile.get("FrameColor"), 
+            scrollbar_button_hover_color=self.configfile.get("TextColor"),)
         Doctors_frame.place(anchor="nw", relx=0.01, rely=0.1)
 
         DoctorNameLabel = ctk.CTkLabel(Doctors_frame, text="Doctor Name",text_color=self.configfile.get("TextColor"),

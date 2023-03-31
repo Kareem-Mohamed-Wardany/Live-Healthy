@@ -4,6 +4,7 @@ from tkinter import filedialog
 from datetime import date, timedelta
 from Model import *
 from Error import *
+from typing_extensions import Self
 
 class Patient(User):
 
@@ -14,18 +15,19 @@ class Patient(User):
     BaseChatPrice = 150
 
     def __init__(self, id):
-        super().__init__(id)
-        res= self.db.Select("SELECT * FROM patienthealthstatus WHERE Patient_ID= %s",[self.userid])
-        (
-            self.Heart_Diseases,
-            self.Diabetes,
-            self.Cancer,
-            self.Obesity,
-            self.Smoker,
-            self.Hypertension,
-            self.Allergies,
-            self.Blood_Type,
-            ) = self.fillindata(res[0], [0])
+        if id != -1:
+            super().__init__(id)
+            res= self.db.Select("SELECT * FROM patienthealthstatus WHERE Patient_ID= %s",[self.userid])
+            (
+                self.Heart_Diseases,
+                self.Diabetes,
+                self.Cancer,
+                self.Obesity,
+                self.Smoker,
+                self.Hypertension,
+                self.Allergies,
+                self.Blood_Type,
+                ) = self.fillindata(res[0], [0])
 
     def SaveData(self):
         super().SaveData()
@@ -42,30 +44,32 @@ class Patient(User):
                 self.Allergies,
                 self.Blood_Type,
             ])
+        self.db.Commit()
     
     @classmethod
-    def CreatePatient(cls, name, Mail, Password, Utype, Phone, Age, Gender,HD = 0, diabetes = 0, cancer = 0, obesity = 0, smoker = 0, hypertension = 0, Allergies = 0, BloodType = "UNKNOWN"):
-        cls.userid = cls.GetMaxID(cls) + 1 
-        cls.userName = name
-        cls.userMail = Mail
-        cls.userPassword = Password
-        cls.userType = Utype
-        cls.userPhone = Phone
-        cls.userAge = Age
-        cls.userGender = Gender
-        cls.userSystemApperanceMode = "System"
-        cls.userBalance = 0
-        cls.userVIPLevel = 0
-        cls.userVIPEnd = date(2001, 1, 1)
-        cls.Heart_Diseases = HD
-        cls.Diabetes = diabetes
-        cls.Cancer = cancer
-        cls.Obesity = obesity
-        cls.Smoker = smoker
-        cls.Hypertension = hypertension
-        cls.Allergies = Allergies
-        cls.Blood_Type = BloodType
-        return cls
+    def CreatePatient(cls, name, Mail, Password, Utype, Phone, Age, Gender, HD = 0, diabetes = 0, cancer = 0, obesity = 0, smoker = 0, hypertension = 0, Allergies = 0, BloodType = "UNKNOWN"):
+        p = cls(-1)
+        p.userid = p.GetMaxID() + 1
+        p.userName = name
+        p.userMail = Mail
+        p.userPassword = Password
+        p.userType = Utype
+        p.userPhone = Phone
+        p.userAge = Age
+        p.userGender = Gender
+        p.userSystemApperanceMode = "System"
+        p.userBalance = 0
+        p.userVIPLevel = 0
+        p.userVIPEnd = date(2001, 1, 1)
+        p.Heart_Diseases = HD
+        p.Diabetes = diabetes
+        p.Cancer = cancer
+        p.Obesity = obesity
+        p.Smoker = smoker
+        p.Hypertension = hypertension
+        p.Allergies = Allergies
+        p.Blood_Type = BloodType
+        return p
 
     def checkRequest(self):
         res = self.db.Select("SELECT * FROM requests WHERE Patient_ID= %s", [self.userid])
