@@ -16,7 +16,6 @@ from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from Images import *
-from User import *
 from UserFactory import *
 from Error import *
 
@@ -320,8 +319,8 @@ class PatGUI(ctk.CTk):
         with contextlib.suppress(Exception):
             shutil.rmtree("Data/Prescriptions/")
             self.Userclient.end()
-        self.destroy()
-        from Runner import Runit
+        self.user.Logout(self)
+        
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
@@ -333,6 +332,7 @@ class PatGUI(ctk.CTk):
             for widget in self.Predict_Scan_frame.winfo_children():
                 widget.destroy()
         Infotext, self.Price = self.user.PriceInfo("")
+        self.Price *= -1 
         MessageBox(self.Predict_Scan_frame,"info",Infotext)
 
         self.ScanPathEntry = ctk.CTkEntry(self.Predict_Scan_frame, width=700, state="disabled", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"),border_color=self.configfile.get("TextColor"))
@@ -379,11 +379,12 @@ class PatGUI(ctk.CTk):
                     command=self.Credits_button_event,
                 )
                 self.Credits_button.grid(row=10, column=0, sticky="ew")
+                SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath))
+                SavePredictionButton.place(anchor="nw", relx=0.15, rely=0.26)
         else:
             self.Predict()
-
-        SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath))
-        SavePredictionButton.place(anchor="nw", relx=0.15, rely=0.26)
+            SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath))
+            SavePredictionButton.place(anchor="nw", relx=0.15, rely=0.26)
 
     def Predict(self):
         Label1 , Label2 =  self.user.PredictMyScan(self.ScanPath, "Two")
@@ -394,6 +395,7 @@ class PatGUI(ctk.CTk):
 
     def select_frame_by_name(self, name):
         # set button color for selected button
+        self.delType()
         self.Predict_Scan_button.configure(
             fg_color=self.configfile.get("BackgroundColor") if name == "Predict_Scan" else "transparent"
         )
@@ -558,11 +560,11 @@ class PatGUI(ctk.CTk):
 
     def delType(self):
         # Try to handle error if any type was not shown so it will throw an error
-        with contextlib.suppress(NameError, AttributeError):
+        with contextlib.suppress(Exception):
             self.Americanlabel.destroy()
-        with contextlib.suppress(NameError, AttributeError):
+        with contextlib.suppress(Exception):
             self.Visalabel.destroy()
-        with contextlib.suppress(NameError, AttributeError):
+        with contextlib.suppress(Exception):
             self.Masterlabel.destroy()
 
     def CreditCardBlock(self):
@@ -669,21 +671,21 @@ class PatGUI(ctk.CTk):
                     text="",
                     image=ctk.CTkImage(americanexpress, size=(25, 25)),
                 )
-                self.Americanlabel.place(anchor="nw", relx=0.318, rely=0.25)
+                self.Americanlabel.place(anchor="nw", relx=0.36, rely=0.15)
             elif int(string[0]) == 4:
                 self.Visalabel = ctk.CTkLabel(
                     self.credits_frame,
                     text="",
                     image=ctk.CTkImage(visa, size=(25, 25)),
                 )
-                self.Visalabel.place(anchor="nw", relx=0.2, rely=0.25)
+                self.Visalabel.place(anchor="nw", relx=0.25, rely=0.15)
             elif int(string[0]) == 5:
                 self.Masterlabel = ctk.CTkLabel(
                     self.credits_frame,
                     text="",
                     image=ctk.CTkImage(mastercard, size=(25, 25)),
                 )
-                self.Masterlabel.place(anchor="nw", relx=0.2, rely=0.25)
+                self.Masterlabel.place(anchor="nw", relx=0.25, rely=0.15)
 
     def FormateCreditCard(self):
 
@@ -708,9 +710,6 @@ class PatGUI(ctk.CTk):
             self.CardChecked = True
 
     def CheckCard_button_event(self):
-        if len(self.CVV.get()) != 3 or len(self.CardNumber.get()) != 16:
-            self.CardChecked = False
-            return messagebox.showerror("Error", self.systemError.get(25), icon="error", parent=self.LeftSideBar_frame)
         Year = f"20{self.ExpireYear.get()}"
         if int(Year) < date.today().year:
             self.CardChecked = False
@@ -779,7 +778,6 @@ class PatGUI(ctk.CTk):
         else:
             Infotext, self.Price = self.user.PriceInfo("Chat")
             self.Price *= -1 
-            print(self.Price)
             MessageBox(self.ChatWithDoctor_frame,"info",Infotext)
 
             self.ScanPathTextbox = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=700, state = "disabled", height=10,text_color=self.configfile.get("TextColor"),
@@ -900,9 +898,6 @@ class PatGUI(ctk.CTk):
         # Doctor Data
         self.DoctorData(chatWindow)
 
-        # Prescription
-        self.GeneratePrescription(chatWindow)
-
         # ChatBox
         self.ChatBoxBlock(chatWindow)
 
@@ -942,19 +937,6 @@ class PatGUI(ctk.CTk):
         )
         PAge.grid(row=2, column=0)
 
-    def GeneratePrescription(self, master):
-        # Generate Prescription for a Patient
-        GenerateReport = ctk.CTkLabel(
-            master,
-            text="",
-            bg_color="transparent",
-            image=ctk.CTkImage(GeneratePrescription, size=(40, 40)),
-        )
-        GenerateReport.place(anchor="nw", relx=0.83, rely=0.92)
-        GenerateReport.bind(
-            "<Button-1>", lambda event: self.user.ShowPrescription(event, self.DoctorID, self.ChatWithDoctor_frame)
-        )
-
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
             master, font=ctk.CTkFont(size=14, weight="bold"), width=675, height=25,fg_color= self.configfile.get("FrameColor"), text_color=self.configfile.get("TextColor"),border_color=self.configfile.get("TextColor"),border_width=1)
@@ -989,9 +971,7 @@ class PatGUI(ctk.CTk):
             self.ChatLOGS = (
                 queue.Queue()
             )  # Queue that will hold old chat + new chat and save them in database to load it later
-            self.LoadChatData(
-                self.user.userid
-            )  # Load Chat data to LoaddedChat Queue and also ChatLOGS Queue
+            self.LoadChatData()  # Load Chat data to LoaddedChat Queue and also ChatLOGS Queue
             self.AddLoadedChat()  # Add old Chat to the Chatbox
 
             self.CurrentChat = (

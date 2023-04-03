@@ -1,29 +1,35 @@
 import contextlib
 import re
-import subprocess
+import smtplib
+import ssl
 import tkinter as tk
 from datetime import datetime
+from email.message import EmailMessage
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 
 import customtkinter as ctk
-from PIL import Image
+from PIL import Image, ImageTk
 from tkcalendar import Calendar
 
+from AdministratorGUI import *
 from Config import *
 from Database import *
-from Doctor import *
+from DoctorGUI import *
 from Error import *
 from GUIHelperFunctions import *
 from Images import *
-from Patient import *
-from Radiologist import *
-from Runner import *
+from PatientGUI import *
+from RadiologistGUI import *
+
+# from Runner import *
 
 
-class RegisterGUI(ctk.CTk):
+class Starter(ctk.CTk):
     # load Config dict
     config = SystemConfig()
+    MovetoReg = False
+    Moveto = False
     systemError = SystemErrors()
 
     # connect to DB
@@ -32,22 +38,13 @@ class RegisterGUI(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.WindowSettings()
-        self.Register_gui()
-        # set Dimension of GUI
-        self.mainTitle()
-        self.mainRegister()
-        self.patient()
-        self.Registerbutton()
-
-        
+        self.login_gui()
         # Enter all your buttons,Entries here
-    
+
     def WindowSettings(self):
-        # let title be 'Welcome Specialist|Consultant UserName'
-        Title = "Register"
+        Title = "Welcome to Live Healthy"
         self.title(Title)
-        # self.attributes('-alpha', 0.5)
-        # self.attributes('-alpha', 0.5)
+
         # set Dimension of GUI
         center(
             self,
@@ -56,244 +53,385 @@ class RegisterGUI(ctk.CTk):
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
 
-    def Register_gui(self):
+    
+    def login_gui(self):
         self.backgroundFrame = ctk.CTkFrame(
             self,
-            width=1280,
-            height=720,
+            fg_color="#F0F0F0",
+            width=1255,
+            height=710,
         )
-        self.backgroundFrame.place(anchor="nw", relx=0, rely=0)
-        bgImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(RegisterBG, size=(1280, 720)))
+        self.backgroundFrame.place(anchor="nw", relx=0.01, rely=0.011)
+
+
+        
+        bgImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(LoginBG, size=(1255, 710)))
         bgImage.place(anchor="nw", relx=0, rely=0)
-
-    def mainTitle(self):
-        mainLabel = ctk.CTkLabel(
+        self.subbg = ctk.CTkFrame(
             self.backgroundFrame,
-            text="Register Your Account",
-            width=200,
-            bg_color="#b3c7e5",
+            fg_color="#F0F0F0",
+            width=1230,
+            height=694,
+        )
+        self.subbg.place(anchor="nw", relx=0.008, rely=0.01)
+
+        logoImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(
+            logo, size=(65, 65)), bg_color='#f0fafb', fg_color="#f0fafb")
+        logoImage.place(anchor="nw", relx=0.018, rely=0.020)
+        bgImage2 = ctk.CTkLabel(self.subbg, text="", image=ctk.CTkImage(
+            LoginBG2, size=(1230, 694)))
+        bgImage2.place(anchor="nw", relx=0, rely=0)
+
+
+        self.SelectionFrame = ctk.CTkFrame(
+            self.subbg,
+            fg_color="#FFFAFA",
+            width=1230,
+            height=650,
+        )
+        self.SelectionFrame.place(anchor="nw", relx=0.5, rely=0.05)
+
+        self.segbutton = ctk.CTkSegmentedButton(self.subbg,values=["Login","Sign Up"], command=self.ShowFrame)
+        self.segbutton.place(anchor="nw", relx=0.7, rely=0.03)
+        self.segbutton.set("Login")
+        self.ShowLoginFrame()
+        # self.mainRegister()
+
+    def ShowFrame(self, selection):
+        with contextlib.suppress(Exception):
+            for widget in self.SelectionFrame.winfo_children():
+                widget.destroy()
+        if selection == "Login":
+            self.ShowLoginFrame()
+        else:
+            self.mainRegister()
+
+
+    def ShowLoginFrame(self):
+        welcomeLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Welcome Back",
+            text_color="#000000",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=40, weight='bold', slant='italic', family="Times New Roman")
+        )
+        welcomeLabel.place(anchor="nw", relx=0.06, rely=0.2)
+        loginLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Login your account",
+            text_color="#808080",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=20, family="Times New Roman")
+        )
+        loginLabel.place(anchor="nw", relx=0.061, rely=0.268)
+        emailLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Email:",
+            text_color="#000000",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=20, weight="bold", family="Times New Roman")
+        )
+        emailLabel.place(anchor="nw", relx=0.045, rely=0.4)
+        self.emailEntry = ctk.CTkEntry(
+            self.SelectionFrame,
+            placeholder_text="Your email...",
+            fg_color="white",
             text_color="black",
-            font=ctk.CTkFont(size=30, weight="bold"),
+            width=490,
+            height=45,
         )
-        mainLabel.place(anchor="nw", relx=0.35, rely=0.05)
+        self.emailEntry.place(anchor="nw", relx=0.061, rely=0.46)
+        passwordLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Password:",
+            text_color="#000000",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=20, weight="bold", family="Times New Roman")
+        )
+        passwordLabel.place(anchor="nw", relx=0.061, rely=0.59)
+        self.passwordEntry = ctk.CTkEntry(
+            self.SelectionFrame,
+            placeholder_text="Your password...",
+            fg_color="white",
+            text_color="black",
+            width=490,
+            height=45,
+            bg_color="transparent",
+            show="*"
+        )
+        self.passwordEntry.place(anchor="nw", relx=0.061, rely=0.65)
+        forgotpassLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Forgot Password?",
+            text_color="#808080",
+            width=100,
+            height=25,
+            font=ctk.CTkFont(size=15, family="Aerial 18", underline=True),
+            cursor="hand2",
+        )
+        forgotpassLabel.bind('<Button-1>', self.forgot_password)
+        forgotpassLabel.place(anchor="nw", relx=0.065, rely=0.725)
+        self.LoginButton = ctk.CTkButton(self.SelectionFrame,text="Login", width= 170, height=50,corner_radius=30,font=ctk.CTkFont(size=18, family="Aerial 18",weight='bold'), command=self.login_verify)
+        self.LoginButton.place(anchor="nw", relx=0.061, rely=0.8)
 
+
+    def login_verify(self):
+        from User import User
+        self.email = self.emailEntry.get()
+        self.password = self.passwordEntry.get()
+        if len(self.email) == 0 or len(self.password) == 0:
+            return messagebox.showerror("Error", self.systemError.get(1), icon="error", parent=self.SelectionFrame)
+        userinfo = User.Login(self.email, self.password)
+        suspended = self.suspended(userinfo[0])
+        if suspended != -1:
+            return messagebox.showerror("Error", self.systemError.get(suspended), icon="error", parent=self.SelectionFrame)
+        if userinfo != "ok":
+            if userinfo[1] in ["Specialist","Consultant"]:
+                res = SelectQuery("SELECT Verified FROM doctordata WHERE Doctor_ID=%s",[userinfo[0]])[0][0]
+                if res == 0:
+                    return messagebox.showerror("Error", self.systemError.get(15), icon="error", parent=self.SelectionFrame)
+            self.MoveTo(userinfo)
+            
+
+    def forgot_password(self, event):
+        mail = self.emailEntry.get()
+        if len(mail) == 0:
+            return messagebox.showerror("Error", self.systemError.get(14), icon="error", parent=self.SelectionFrame)
+
+        password = SelectQuery("SELECT Password FROM users WHERE Mail LIKE %s",[mail])
+        if len(password) == 0:
+            return messagebox.showerror("Error", self.systemError.get(3), icon="error", parent=self.SelectionFrame)
+        password = password[0][0]
+
+        # Define email sender and receiver
+        email_sender = 'livehealthy171@gmail.com'
+        email_password = 'gowdfobqansntowb'
+        email_receiver = mail
+
+        # Set the subject and body of the email
+        subject = 'Your Account Password'
+        body = f"Here is your account password: {password}"
+
+        em = EmailMessage()
+        em['From'] = email_sender
+        em['To'] = email_receiver
+        em['Subject'] = subject
+        em.set_content(body)
+
+        # Add SSL (layer of security)
+        context = ssl.create_default_context()
+
+        # Log in and send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.sendmail(email_sender, email_receiver, em.as_string())
+        messagebox.showinfo("Success", "Email Sent")
+
+    def suspended(self, id):
+        res = SelectQuery("SELECT COUNT(*) FROM suspended WHERE User_ID = %s",[id])[0][0]
+        return 26 if res == 1 else -1
+
+
+    # Start of Register Part 
     def mainRegister(self):
-        mainFrame = ctk.CTkFrame(
-            self.backgroundFrame,
-            fg_color="#b3c7e5",
-            bg_color="#b3c7e5",
-            width=650,
-            height=580
-        )
-        mainFrame.place(anchor="nw", relx=0.01, rely=0.17)
 
-        FirstLabel = ctk.CTkLabel(
-            mainFrame,
-            text="First Name*",
+        FullNameLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Full Name*",
+            fg_color="transparent",
+            bg_color="transparent",
             text_color="black",
             width=100,
             height=25,
             font=ctk.CTkFont(size=20),
         )
-        FirstLabel.place(anchor="nw", relx=0.015, rely=0.06)
+        FullNameLabel.place(anchor="nw", relx=0.015, rely=0.06)
 
-        self.firstEntry = ctk.CTkEntry(
-        mainFrame,
-        placeholder_text="Input Your First Name...",
-        fg_color="#b3c7e5",
-        bg_color="#b3c7e5",
+        self.FullNameEntry = ctk.CTkEntry(
+        self.SelectionFrame,
+        placeholder_text="Input Your Full Name...",
         border_color="black",
         text_color="black",
         placeholder_text_color="black",
+        fg_color="transparent",
+        bg_color="transparent",
         width=250,
         height=35,
         )
-        self.firstEntry.place(anchor="nw",relx=0.015,rely=0.12)
-
-        SecondLabel = ctk.CTkLabel(
-            mainFrame,
-            text="Second Name*",
-            text_color="black",
-            width=100,
-            height=25,
-            font=ctk.CTkFont(size=20),
-        )
-        SecondLabel.place(anchor="nw", relx=0.55, rely=0.06)
-
-        self.SecondEntry = ctk.CTkEntry(
-        mainFrame,
-        placeholder_text="Input Your Last Name...",
-        fg_color="#b3c7e5",
-        bg_color="#b3c7e5",
-        border_color="black",
-        text_color="black",
-        placeholder_text_color="black",
-        width=250,
-        height=35
-        )
-        self.SecondEntry.place(anchor="nw",relx=0.55,rely=0.12)
+        self.FullNameEntry.place(anchor="nw",relx=0.015,rely=0.10)
 
         MailLabel = ctk.CTkLabel(
-            mainFrame,
+            self.SelectionFrame,
             text="Email*",
             text_color="black",
             width=65,
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        MailLabel.place(anchor="nw", relx=0.015, rely=0.22)
+        MailLabel.place(anchor="nw", relx=0.25, rely=0.06)
 
         self.MailEntry = ctk.CTkEntry(
-        mainFrame,
+        self.SelectionFrame,
         placeholder_text="Input Your Email...",
         text_color="black",
-        fg_color="#b3c7e5",
-        bg_color="#b3c7e5",
+        fg_color="transparent",
+        bg_color="transparent",
         border_color="black",
         placeholder_text_color="black",
         width=250,
         height=35
         )
-        self.MailEntry.place(anchor="nw",relx=0.015,rely=0.27)
+        self.MailEntry.place(anchor="nw",relx=0.25,rely=0.10)
 
-        PhoneLabel = ctk.CTkLabel(
-            mainFrame,
-            text="Phone Number*",
-            text_color="black",
-            width=65,
-            height=20,
-            font=ctk.CTkFont(size=20),
-        )
-        PhoneLabel.place(anchor="nw",relx=0.55, rely=0.22)
 
-        self.PhoneEntry = ctk.CTkEntry(
-        mainFrame,
-        placeholder_text="Input Your Phone Number...",
-        text_color="black",
-        fg_color="#b3c7e5",
-        bg_color="#b3c7e5",
-        border_color="black",
-        placeholder_text_color="black",
-        width=250,
-        height=35
-        )
-        self.PhoneEntry.place(anchor="nw",relx=0.55,rely=0.27)
 
         PassLabel = ctk.CTkLabel(
-            mainFrame,
+            self.SelectionFrame,
             text="Password*",
             text_color="black",
             width=65,
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        PassLabel.place(anchor="nw",relx=0.015, rely=0.37)
+        PassLabel.place(anchor="nw",relx=0.015, rely=0.17)
 
         self.PassEntry = ctk.CTkEntry(
-        mainFrame,
+        self.SelectionFrame,
         placeholder_text="Input Your Password...",
         text_color="black",
-        fg_color="#b3c7e5",
-        bg_color="#b3c7e5",
+        fg_color="transparent",
+        bg_color="transparent",
         border_color="black",
         placeholder_text_color="black",
         width=250,
         height=35,
         show="*"
         )
-        self.PassEntry.place(anchor="nw",relx=0.015,rely=0.43)
+        self.PassEntry.place(anchor="nw",relx=0.015,rely=0.21)
 
         ConfirmPassLabel = ctk.CTkLabel(
-            mainFrame,
+            self.SelectionFrame,
             text="Confirm Password*",
             text_color="black",
             width=65,
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        ConfirmPassLabel.place(anchor="nw",relx=0.55, rely=0.37)
+        ConfirmPassLabel.place(anchor="nw",relx=0.25, rely=0.17)
 
         self.ConfirmPassEntry = ctk.CTkEntry(
-        mainFrame,
+        self.SelectionFrame,
         placeholder_text="Confirm Your Password...",
         text_color="black",
-        fg_color="#b3c7e5",
-        bg_color="#b3c7e5",
+        fg_color="transparent",
+        bg_color="transparent",
         border_color="black",
         placeholder_text_color="black",
         width=250,
         height=35,
         show="*"
         )
-        self.ConfirmPassEntry.place(anchor="nw",relx=0.55,rely=0.43)
+        self.ConfirmPassEntry.place(anchor="nw",relx=0.25,rely=0.21)
+
+        PhoneLabel = ctk.CTkLabel(
+            self.SelectionFrame,
+            text="Phone Number*",
+            text_color="black",
+            width=65,
+            height=20,
+            font=ctk.CTkFont(size=20),
+        )
+        PhoneLabel.place(anchor="nw",relx=0.015, rely=0.28)
+
+        self.PhoneEntry = ctk.CTkEntry(
+        self.SelectionFrame,
+        placeholder_text="Input Your Phone Number...",
+        text_color="black",
+        fg_color="transparent",
+        bg_color="transparent",
+        border_color="black",
+        placeholder_text_color="black",
+        width=250,
+        height=35
+        )
+        self.PhoneEntry.place(anchor="nw",relx=0.015,rely=0.32)
+
+        
 
         AgeLabel = ctk.CTkLabel(
-            mainFrame,
+            self.SelectionFrame,
             text="Date of Birth*",
             text_color="black",
             width=65,
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        AgeLabel.place(anchor="nw",relx=0.015, rely=0.52)
-        self.cal = Calendar(mainFrame,
+        AgeLabel.place(anchor="nw",relx=0.25, rely=0.28)
+        self.cal = Calendar(self.SelectionFrame,
         selectmode = 'day',
         year = 2001,
         month = 1,
         day = 1)
-        self.cal.place(anchor="nw", relx=0.015,rely=0.58)
+        self.cal.place(anchor="nw", relx=0.25,rely=0.32)
 
 
         GenderLabel = ctk.CTkLabel(
-            mainFrame,
+            self.SelectionFrame,
             text="Gender*",
             text_color="black",
             width=65,
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        GenderLabel.place(anchor="nw",relx=0.55, rely=0.52)
+        GenderLabel.place(anchor="nw",relx=0.015, rely=0.39)
 
         self.GenderVar = tk.IntVar(value = -1)
         MaleRadio = ctk.CTkRadioButton(
-            mainFrame,
+            self.SelectionFrame,
             text="Male",
             text_color="black",
             hover_color="black",
             variable=self.GenderVar,
             value=1
         )
-        MaleRadio.place(anchor="nw",relx=0.57, rely=0.58)
+        MaleRadio.place(anchor="nw",relx=0.015, rely=0.45)
         FemaleRadio = ctk.CTkRadioButton(
-            mainFrame,
+            self.SelectionFrame,
             text="Female",
             text_color="black",
             hover_color="black",
             variable=self.GenderVar,
             value=2
         )
-        FemaleRadio.place(anchor="nw",relx=0.57, rely=0.64)
+        FemaleRadio.place(anchor="nw",relx=0.1, rely=0.45)
 
 
 
         TypeLabel = ctk.CTkLabel(
-            mainFrame,
+            self.SelectionFrame,
             text="User Type*",
             text_color="black",
             width=65,
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        TypeLabel.place(anchor="nw",relx=0.55, rely=0.7)
+        TypeLabel.place(anchor="nw",relx=0.015, rely=0.5)
 
-        self.TypeCombo = ctk.CTkOptionMenu(mainFrame,
+        self.TypeCombo = ctk.CTkOptionMenu(self.SelectionFrame,
         width=250,
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
         values=["Patient", "Radiologist", "Consultant", "Specialist"],
         command=self.UserType
         )
-        self.TypeCombo.place(anchor="nw",relx=0.55, rely=0.76)
+        self.TypeCombo.place(anchor="nw",relx=0.015, rely=0.55)
+        self.patient()
+        self.Registerbutton()
+
 
     def UserType(self, Utype):
         if Utype=="Patient":
@@ -306,18 +444,20 @@ class RegisterGUI(ctk.CTk):
             self.radiologist()
             self.Registerbutton()
 
+
+
+    
     def HoldFrame(self):
         with contextlib.suppress(Exception):
             self.Secondframe.destroy()
 
         self.Secondframe = ctk.CTkFrame(
-            self.backgroundFrame,
-            bg_color="#b3c7e5",#"#b3c7e5"
-            fg_color="#b3c7e5",
+            self.SelectionFrame,
+            fg_color="transparent",
             width=520,
             height=300
         )
-        self.Secondframe.place(anchor="nw",relx=0.57, rely=0.17)
+        self.Secondframe.place(anchor="nw",relx=0.015, rely=0.61)
 
     def patient(self):
         self.HoldFrame()
@@ -333,8 +473,7 @@ class RegisterGUI(ctk.CTk):
     def patientsHealthCheck (self):
         self.PatientHealthFrame = ctk.CTkFrame(
             self.Secondframe,
-            bg_color="#b3c7e5",#"#b3c7e5"
-            fg_color="#b3c7e5",
+            fg_color="transparent",
             width=520,
             height=300
         )
@@ -445,12 +584,13 @@ class RegisterGUI(ctk.CTk):
         )
         self.BloodTypeCombo.place(anchor="nw", relx=0.186, rely=0.7)
 
+
+
     def doctor(self):
         self.HoldFrame()
         self.DoctorFrame = ctk.CTkFrame(
             self.Secondframe,
-            bg_color="#b3c7e5",
-            fg_color="#b3c7e5",
+            fg_color="transparent",
             width=600,
             height=580
         )
@@ -458,28 +598,28 @@ class RegisterGUI(ctk.CTk):
 
         self.ImageFrame = ctk.CTkFrame(
             self.DoctorFrame,
-            bg_color="#b3c7e5",
-            fg_color="#b3c7e5",
+            bg_color="transparent",
+            fg_color="transparent",
             border_color="black",
-            width=350,
+            width=150,
             height=100
         )
         self.ImageFrame.place(anchor="nw",relx=0, rely=0.01)
 
         self.ImageFrame2 = ctk.CTkFrame(
             self.DoctorFrame,
-            bg_color="#b3c7e5",
-            fg_color="#b3c7e5",
-            width=350,
+            bg_color="transparent",
+            fg_color="transparent",
+            width=150,
             height=100
         )
-        self.ImageFrame2.place(anchor="nw",relx=0, rely=0.2)
+        self.ImageFrame2.place(anchor="nw",relx=0.4, rely=0.01)
 
         ImportIDButton = ctk.CTkButton(self.DoctorFrame,text="Import ID", command=self.ImportID,width=50)
-        ImportIDButton.place(anchor="nw", relx=0.66, rely=0.08)
+        ImportIDButton.place(anchor="nw", relx=0.26, rely=0.08)
 
-        ImportLicenseButton = ctk.CTkButton(self.DoctorFrame,text="Import Profession License", command=self.ImportLicense,width=100)
-        ImportLicenseButton.place(anchor="nw", relx=0.59, rely=0.3)
+        ImportLicenseButton = ctk.CTkButton(self.DoctorFrame,text="Import Prof. License", command=self.ImportLicense,width=100)
+        ImportLicenseButton.place(anchor="nw", relx=0.653, rely=0.08)
 
         UniLabel = ctk.CTkLabel(
             self.DoctorFrame,
@@ -489,37 +629,37 @@ class RegisterGUI(ctk.CTk):
             height=20,
             font=ctk.CTkFont(size=20),
         )
-        UniLabel.place(anchor="nw",relx=0, rely=0.4)
+        UniLabel.place(anchor="nw",relx=0, rely=0.2)
         self.UniEntry = ctk.CTkEntry(
         self.DoctorFrame,
         placeholder_text="Input The University You Graduated From...",
         placeholder_text_color="black",
         text_color="black",
-        fg_color="#b3c7e5",
+        fg_color="transparent",
+        bg_color="transparent",
         border_color="black",
         width=300,
         height=30
         )
-        self.UniEntry.place(anchor="nw",relx=0.2,rely=0.4)
+        self.UniEntry.place(anchor="nw",relx=0.2,rely=0.2)
 
     IDPath = ""
     def ImportID(self):
         self.IDPath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        IDImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(350,100)))
+        IDImage = ctk.CTkLabel(self.ImageFrame,text="",image=ctk.CTkImage(Image.open(self.IDPath),size=(150,100)))
         IDImage.place(anchor="nw", relx=0, rely=0)
 
     LicensePath = ""
     def ImportLicense(self):
         self.LicensePath = askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        LicenseImage = ctk.CTkLabel(self.ImageFrame2,text="",image=ctk.CTkImage(Image.open(self.LicensePath),size=(350,100)))
+        LicenseImage = ctk.CTkLabel(self.ImageFrame2,text="",image=ctk.CTkImage(Image.open(self.LicensePath),size=(150,100)))
         LicenseImage.place(anchor="nw", relx=0, rely=0)
 
     def radiologist(self):
         self.HoldFrame()
         RadiologistFrame = ctk.CTkFrame(
             self.Secondframe,
-            bg_color="#b3c7e5",
-            fg_color="#b3c7e5",
+            fg_color="transparent",
             width=600,
             height=580
         )
@@ -531,7 +671,7 @@ class RegisterGUI(ctk.CTk):
             text_color="black",
             width=65,
             height=20,
-            font=ctk.CTkFont(size=30),
+            font=ctk.CTkFont(size=20),
         )
         RadioCenterLabel.place(anchor="nw",relx=0, rely=0.05)
 
@@ -543,9 +683,9 @@ class RegisterGUI(ctk.CTk):
         dropdown_text_color="#DCD427",
         dropdown_hover_color="#969696",
         values=RadioCenters,
-        font=ctk.CTkFont(size = 25),
+        font=ctk.CTkFont(size = 20),
         )
-        self.RadioCenterCombo.place(anchor="nw",relx=0, rely=0.13)
+        self.RadioCenterCombo.place(anchor="nw",relx=0.3, rely=0.05)
 
         RadioCenterCodeLabel = ctk.CTkLabel(
             RadiologistFrame,
@@ -553,24 +693,25 @@ class RegisterGUI(ctk.CTk):
             text_color="black",
             width=65,
             height=20,
-            font=ctk.CTkFont(size=28),
+            font=ctk.CTkFont(size=20),
         )
-        RadioCenterCodeLabel.place(anchor="nw",relx=0, rely=0.25)
+        RadioCenterCodeLabel.place(anchor="nw",relx=0, rely=0.12)
 
         self.RadioCenterCodeEntry = ctk.CTkEntry(
         RadiologistFrame,
         placeholder_text="Input Your Center's Verification Code...",
         text_color="black",
-        fg_color="#b3c7e5",
+        fg_color="transparent",
+        bg_color="transparent",
         border_color="black",
         width=400,
         height=35
         )
-        self.RadioCenterCodeEntry.place(anchor="nw",relx=0,rely=0.33)
+        self.RadioCenterCodeEntry.place(anchor="nw",relx=0.2,rely=0.17)
 
-    def Registerbutton(self):
+    def Registerbutton(self,):
         RegisterButton = ctk.CTkButton(
-        self,
+        self.SelectionFrame,
         bg_color="#b3c7e5",
         text="Register",
         width= 150,
@@ -578,10 +719,10 @@ class RegisterGUI(ctk.CTk):
         font = ctk.CTkFont(size=23),
         command=self.fetchAllData
         )
-        RegisterButton.place(anchor="nw", relx=0.535, rely=0.83)
+        RegisterButton.place(anchor="nw", relx=0.35, rely=0.87)
 
     def fetchAllData(self):
-        self.userName = f"{self.firstEntry.get()} {self.SecondEntry.get()}"
+        self.userName = self.FullNameEntry.get()
         self.Email = self.MailEntry.get()
         self.Phone = self.PhoneEntry.get()
         self.Password = self.PassEntry.get()
@@ -630,7 +771,7 @@ class RegisterGUI(ctk.CTk):
         return -1
 
     def emptyMainFields(self):
-        if self.firstEntry.get() == "" or self.SecondEntry.get() == "" or self.Phone == "" or self.Email == "" or self.Password == "" or self.ConfirmPassword == "" or self.Gender == 0:
+        if self.FullNameEntry.get() == "" or self.Phone == "" or self.Email == "" or self.Password == "" or self.ConfirmPassword == "" or self.Gender == 0:
             return 1
         else:
             return -1
@@ -720,11 +861,34 @@ class RegisterGUI(ctk.CTk):
         if self.UsType in ["Consultant", "Specialist"]:
             doctordata = Doctor.CreateDoctor(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.uni, self.IDbinary, self.LicenseBinary)
             doctordata.SaveData()
-        x= messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
+        messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
+
+    def MoveTo(self,UserInfo):
         self.destroy()
-        # StartGUI()
+        
+        id = str(UserInfo[0])
+        from UserFactory import UserFactory
+        if UserInfo[1].lower() == "patient": # sali@gmail.com       pw: 123
+            from PatientGUI import PatGUI
+            patient = PatGUI(id)
+            patient.mainloop()
+        if UserInfo[1].lower() == "radiologist": # salma@gmail.com     PW: 123
+            from RadiologistGUI import RadioloGUI
+            Radiologist = RadioloGUI(id)
+            Radiologist.mainloop()
+        if UserInfo[1].lower() == "administrator": # admin   PW: admin
+            from AdministratorGUI import AdminGUI
+            Admin = AdminGUI(id)
+            Admin.mainloop()
+        if UserInfo[1].lower() in ["specialist","consultant"]: # sherif_mohamed@gmail.com       pw: 123
+            from DoctorGUI import DocGUI
+            Doctor = DocGUI(id)
+            Doctor.mainloop()
+        
+
+
 
 
 if __name__ == "__main__":
-    app = RegisterGUI()
+    app = Starter()
     app.mainloop()

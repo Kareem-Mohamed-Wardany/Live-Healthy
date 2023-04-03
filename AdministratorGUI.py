@@ -184,8 +184,12 @@ class AdminGUI(ctk.CTk):
             row=10, column=0, padx=20, pady=20, sticky="s")
         
     def logout(self):
-        self.destroy()
-        from Runner import Runit
+        with contextlib.suppress(OSError):
+            shutil.rmtree("Data/images/")
+
+        
+        self.user.Logout(self)
+
 
     def select_frame_by_name(self, name):
         # set button color for selected button
@@ -400,10 +404,8 @@ class AdminGUI(ctk.CTk):
         self.user.SetApperanceMode(new_appearance_mode)
 
     def exit_function(self):
-        try:
+        with contextlib.suppress(OSError):
             shutil.rmtree("Data/images/")
-        except OSError as e:
-            pass
         self.destroy()
 
 if __name__ == "__main__":

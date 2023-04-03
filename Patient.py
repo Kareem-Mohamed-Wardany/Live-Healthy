@@ -4,7 +4,6 @@ from tkinter import filedialog
 from datetime import date, timedelta
 from Model import *
 from Error import *
-from typing_extensions import Self
 
 class Patient(User):
 
@@ -220,14 +219,6 @@ class Patient(User):
             [self.userid, id],
         )[0][0]
         return len(res) != 0
-
-    def ShowPrescription(self, event, id, master):
-        path = f"Data\Prescriptions\{self.userName}.pdf"
-        if self.MyPrescriptionGenerated(id):
-            return MessageBox(master, "info", "Prescription is not created yet")
-        self.Prescription = SelectQuery("SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",[self.userid, id])[0][0]
-        write_file(self.Prescription, path)
-        subprocess.Popen([path], shell=True)
 
     def MyPrescriptions(self):
         return SelectQuery("SELECT Doc_ID, prescriptionDate, prescriptionPDF FROM prescriptions WHERE Patient_ID = %s ORDER BY prescriptionDate DESC",[self.userid]) 

@@ -1,4 +1,9 @@
+from AdministratorGUI import *
+from DoctorGUI import *
+from PatientGUI import *
+from RadiologistGUI import *
 from LoginGUI import *
+from RegisterGUI import RegisterGUI
 
 def MoveTo(UserInfo):
     id = str(UserInfo[0])
@@ -15,8 +20,10 @@ def MoveTo(UserInfo):
         Doctor = DocGUI(id)
         Doctor.mainloop()
 
-def Runit():
-    app = Login()
+
+def StartGUI():
+    print("Running")
+    app = LoginGUI()
     app.mainloop()
 
 
@@ -25,9 +32,5 @@ def Runit():
         MoveTo(userinfo)
 
     if app.MovetoReg:
-        reg = Register()
+        reg = RegisterGUI()
         reg.mainloop()
-
-
-
-Runit()

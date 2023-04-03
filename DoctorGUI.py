@@ -14,7 +14,7 @@ from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from Images import *
-from User import *
+
 from UserFactory import *
 from Error import *
 
@@ -233,8 +233,7 @@ class DocGUI(ctk.CTk):
             shutil.rmtree("Data/PatientScans/")
             shutil.rmtree("Data/Prescriptions/")
             self.Userclient.end()
-        self.destroy()
-        from Runner import Runit
+        self.user.Logout(self)
     # Active Chat Section
     def LoadActiveChat(self):
         # Prevent Error for stucking in this frame and can not enter other Frames
@@ -674,7 +673,7 @@ class DocGUI(ctk.CTk):
         patient = UserFactory.createUser(id, "patient")
         path = f"Data\Prescriptions\{patient.userName}.pdf"
         if len(self.MedicineFrame.winfo_children()) == 0:
-            return messagebox.showerror("Error", self.systemError.get(20), icon="error", parent=self.LeftSideBar_frame)
+            return messagebox.showerror("Error", self.systemError.get(20), icon="error", parent=self.MedicineFrame)
         Medicines = []
         MedicinesNotes = []
         for pos, widget in enumerate(
@@ -682,7 +681,7 @@ class DocGUI(ctk.CTk):
         ):
             if pos % 2 == 0:
                 if len(widget.get()) == 0:
-                    return messagebox.showerror("Error", self.systemError.get(21), icon="error", parent=self.LeftSideBar_frame)
+                    return messagebox.showerror("Error", self.systemError.get(21), icon="error", parent=self.MedicineFrame)
                 else:
                     Medicines.append(widget.get())
             else:
@@ -1131,11 +1130,11 @@ class DocGUI(ctk.CTk):
 
     def delType(self):
         # Try to handle error if any type was not shown so it will throw an error
-        with contextlib.suppress(NameError, AttributeError):
+        with contextlib.suppress(Exception):
             self.Americanlabel.destroy()
-        with contextlib.suppress(NameError, AttributeError):
+        with contextlib.suppress(Exception):
             self.Visalabel.destroy()
-        with contextlib.suppress(NameError, AttributeError):
+        with contextlib.suppress(Exception):
             self.Masterlabel.destroy()
 
     def CreditCardBlock(self):
@@ -1241,21 +1240,21 @@ class DocGUI(ctk.CTk):
                     text="",
                     image=ctk.CTkImage(americanexpress, size=(25, 25)),
                 )
-                self.Americanlabel.place(anchor="nw", relx=0.318, rely=0.25)
+                self.Americanlabel.place(anchor="nw", relx=0.36, rely=0.15)
             elif int(string[0]) == 4:
                 self.Visalabel = ctk.CTkLabel(
                     self.credits_frame,
                     text="",
                     image=ctk.CTkImage(visa, size=(25, 25)),
                 )
-                self.Visalabel.place(anchor="nw", relx=0.2, rely=0.25)
+                self.Visalabel.place(anchor="nw", relx=0.25, rely=0.15)
             elif int(string[0]) == 5:
                 self.Masterlabel = ctk.CTkLabel(
                     self.credits_frame,
                     text="",
                     image=ctk.CTkImage(mastercard, size=(25, 25)),
                 )
-                self.Masterlabel.place(anchor="nw", relx=0.2, rely=0.25)
+                self.Masterlabel.place(anchor="nw", relx=0.25, rely=0.15)
 
     def FormateCreditCard(self):
 
@@ -1432,6 +1431,7 @@ class DocGUI(ctk.CTk):
     # Other functions
     def select_frame_by_name(self, name):
         # set button color for selected button
+        self.delType()
         self.Active_Chats_button.configure(
             fg_color=self.configfile.get("BackgroundColor") if name == "Active_Chats" else "transparent"
         )

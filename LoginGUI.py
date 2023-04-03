@@ -8,18 +8,15 @@ from tkinter import *
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
-from AdministratorGUI import *
 from Config import *
 from Database import *
-from DoctorGUI import *
-from RegisterGUI import *
-from PatientGUI import *
-from RadiologistGUI import *
 from Error import *
 from GUIHelperFunctions import *
 from Images import *
+from Runner import *
 
-class Login(ctk.CTk):
+
+class LoginGUI(ctk.CTk):
     # load Config dict
     config = SystemConfig()
     MovetoReg = False

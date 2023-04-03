@@ -7,6 +7,7 @@ from Database import *
 from GUIHelperFunctions import *
 from datetime import date
 from fpdf import FPDF
+from Starter import Starter
 
 
 class User:
@@ -73,8 +74,10 @@ class User:
         cls.userType = res[0][1]
         return cls.userid, cls.userType
 
-    def Logout(self):
-        pass
+    def Logout(self,frame):
+        frame.destroy()
+        app = Starter()
+        app.mainloop()
 
     def SaveData(self):
         InsertQuery(

@@ -16,7 +16,6 @@ from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from Images import *
-from User import *
 from UserFactory import *
 
 
@@ -190,8 +189,8 @@ class RadioloGUI(ctk.CTk):
         
 
     def logout(self):
-        self.destroy()
-        from Runner import Runit
+        self.user.Logout(self)
+        
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
