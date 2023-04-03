@@ -12,11 +12,11 @@ import customtkinter as ctk
 from client import *
 from Config import *
 from Database import *
+from Doctor import *
+from Error import *
 from GUIHelperFunctions import *
 from Images import *
-
 from UserFactory import *
-from Error import *
 
 
 class DocGUI(ctk.CTk):
