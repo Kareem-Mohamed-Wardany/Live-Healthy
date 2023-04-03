@@ -1,0 +1,45 @@
+@startuml
+title Chat With Doctor
+actor       Patient       as User
+boundary    PatientPage  as PatientPage
+control     SystemHandler     as SystemHandler
+entity      Patient as Patient
+entity      Doctor as Doctor
+entity      Database as db
+entity      Client as Client
+entity      Server as Server
+
+User -> PatientPage : Chat with our Doctor
+PatientPage -> SystemHandler: Load Chat with our Doctor Frame
+SystemHandler ->  Patient: checkRequest()
+Patient --> SystemHandler: result
+alt result equals True
+    SystemHandler -> db: Request Status
+    db --> SystemHandler: result
+    alt result equals waiting
+        SystemHandler --> PatientPage: Show info message\n Waiting for a doctor to respond
+    else
+        SystemHandler --> PatientPage: Show Chat Frame
+
+        SystemHandler -> Doctor: Get Doctor Data
+        Doctor --> SystemHandler: DoctorData
+        SystemHandler --> PatientPage: Show Doctor Information
+        SystemHandler -> db: Get ChatLogs
+        db --> SystemHandler: ChatLogs
+        SystemHandler --> PatientPage: Show Old Chat
+        SystemHandler -> Client: Create a new Client
+        Client -> Server: Connect
+        loop
+            Server --> Client: Encode Message
+            Client --> SystemHandler: Decoded Message
+            SystemHandler --> PatientPage: Show Decoded Message
+        end
+        User -> PatientPage : Send Message
+        PatientPage -> SystemHandler: get Message
+        SystemHandler --> PatientPage: Show Message in Chat
+        SystemHandler-> Client: Encode Message
+        Client-> Server: send Encode Message
+    end
+    
+end
+@enduml

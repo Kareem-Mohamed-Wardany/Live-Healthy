@@ -1,0 +1,32 @@
+@startuml
+title Show All Prescriptions
+actor       Patient       as User
+boundary    PatientPage  as PatientPage
+control     SystemHandler     as SystemHandler
+entity      Patient as Patient
+
+
+
+User -> PatientPage : Show All Prescriptions
+PatientPage -> SystemHandler: Load Prescriptions Frame
+SystemHandler --> PatientPage : Show Prescriptions Frame
+SystemHandler -> Patient : MyPrescriptions()
+Patient --> SystemHandler: Data
+alt Data is empty
+  SystemHandler --> PatientPage : Show "No Prescriptions Found!"
+  else
+  SystemHandler --> PatientPage : Show All Prescriptions
+  User -> PatientPage : Download
+  PatientPage->SystemHandler: Download Current Prescription
+  SystemHandler -> Patient : DownloadPrescription()
+  Patient-->SystemHandler: Load File Dialog
+  SystemHandler-->PatientPage: Show File Dialog
+  User -> PatientPage : Select a location
+  PatientPage -> SystemHandler: location Path
+  SystemHandler->Patient: save Prescription
+  Patient-->SystemHandler:Confirm message
+  SystemHandler-->PatientPage: Show info message "Prescription saved successfully"
+end
+
+@enduml
+

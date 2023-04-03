@@ -7,7 +7,6 @@ from Database import *
 from GUIHelperFunctions import *
 from datetime import date
 from fpdf import FPDF
-from Starter import Starter
 
 
 class User:
@@ -75,6 +74,7 @@ class User:
         return cls.userid, cls.userType
 
     def Logout(self,frame):
+        from Starter import Starter
         frame.destroy()
         app = Starter()
         app.mainloop()

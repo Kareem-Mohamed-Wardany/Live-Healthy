@@ -102,9 +102,9 @@ class Patient(User):
 
     def PredictMyScan(self, ScanPath, SaveType):
         m = ResNetModel()
-        prediction = m.PredictScan(ScanPath)
-        self.max1 = -99
         if SaveType == "Two":
+            prediction = m.PredictScan(ScanPath)
+            self.max1 = -99
             self.max2 = -98
             self.p1=""
             self.p2=""
@@ -130,12 +130,8 @@ class Patient(User):
             Label2 = f"{self.p2} ➜ {self.max2}%"
             return Label1, Label2
         elif SaveType == "One":
-            for i in prediction:
-                value = float(i[1].split("%")[0])
-                if value > self.max1:
-                    self.max1 = value
-                    res= i[0]
-            return res
+            prediction = m.PredictScan(ScanPath, True)
+            return prediction
 
     def SavePrediction(self, Scanpath):
         newpath = Scanpath.split(".")[0]

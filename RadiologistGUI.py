@@ -16,8 +16,8 @@ from Config import *
 from Database import *
 from GUIHelperFunctions import *
 from Images import *
+from Radiologist import *
 from UserFactory import *
-
 
 
 class RadioloGUI(ctk.CTk):

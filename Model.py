@@ -211,6 +211,7 @@ class ResNetModel:
         return trained_resnet
 
     def PredictScan(self, Scanpath, OneValue = False):
+        import tensorflow
         IP = ImageProcessing()
         if os.path.exists("Data/ResNet.h5"):
             trained_resnet = load_model("Data/ResNet.h5")
@@ -244,3 +245,6 @@ class ResNetModel:
                 res= i[0]
         return res
     
+# m = ResNetModel()
+# prediction = m.PredictScan("TestFolder\COVID-992.png",True)
+# print(prediction)

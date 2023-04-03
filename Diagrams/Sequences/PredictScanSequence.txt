@@ -1,0 +1,41 @@
+@startuml
+title Predict Scan
+actor       Patient       as User
+boundary    PatientPage  as PatientPage
+control     SystemHandler     as SystemHandler
+entity      Patient as Patient
+entity      ResNetModel as Model
+
+
+
+User -> PatientPage : Predict X-Ray Scan
+PatientPage -> SystemHandler: Load PredictScanFrame
+SystemHandler -> PatientPage : Show PredictScanFrame
+SystemHandler -> Patient: PriceInfo()
+Patient --> SystemHandler: Price, Text of \nInfo Message
+alt patient is Non VIP
+    SystemHandler --> PatientPage : Show Info Message "You are going\n to pay 75 Credits"
+else patient is Bronze VIP
+    SystemHandler --> PatientPage : Show Info Message "You are going\n to pay 63 Credits"
+else patient is Silver VIP
+    SystemHandler --> PatientPage : Show Info Message "You are going\n to pay 37 Credits"
+else 
+ SystemHandler --> PatientPage : Show Info Message "X-ray Scan \n prediction is Free"
+end
+User -> PatientPage : Import Scan
+PatientPage -> SystemHandler: Load file dialog
+SystemHandler --> PatientPage : Show file dialog
+User -> PatientPage : Select a scan
+PatientPage -> SystemHandler: Scan Path
+alt credits greater than \nor equals to price
+    SystemHandler -> Patient : updateBalance()
+    SystemHandler -> Patient : predict()
+    Patient -> Model: PredictMyScan()
+    Model --> Patient: Predictions
+    Patient --> SystemHandler: Two Highest percentages
+    SystemHandler --> PatientPage: Show Two Highest percentages\n Show Scan Image
+else
+    SystemHandler --> PatientPage: Show Error Insufficient Funds
+end
+
+@enduml

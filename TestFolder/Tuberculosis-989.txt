@@ -1,0 +1,2 @@
+Highest Class Percentage: Tuberculosis --> 100.0% 
+Second Class Percentage: Viral PNEUMONIA --> 26.41%

@@ -1,25 +1,20 @@
-self.configfile.get("BackgroundColor")
-self.configfile.get("FrameColor")
-self.configfile.get("TextColor")
-
-
-
-self.configure(bg_color=self.configfile.get("BackgroundColor"))
-self.configure(fg_color=self.configfile.get("BackgroundColor"))
-
-
-text_color=self.configfile.get("TextColor"),
-hover_color=self.configfile.get("BackgroundColor"),
-
-
-
-text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"),
-
-scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor")
-
-
-self.ChatWithDoctor()
-
-UpdateQuery
-SelectQuery
-InsertQuery
+"""
+@startuml
+title Example Title
+participant Participant as Foo
+actor       Actor       as Foo1
+boundary    Boundary    as Foo2
+control     Control     as Foo3
+entity      Entity      as Foo4
+database    Database    as Foo5
+collections Collections as Foo6
+queue       Queue       as Foo7
+Foo -> Foo1 : To actor 
+Foo -> Foo2 : To boundary
+Foo -> Foo3 : To control
+Foo -> Foo4 : To entity
+Foo -> Foo5 : To database
+Foo -> Foo6 : To collections
+Foo -> Foo7: To queue
+@enduml
+"""

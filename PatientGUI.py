@@ -14,10 +14,11 @@ import customtkinter as ctk
 from client import *
 from Config import *
 from Database import *
+from Error import *
 from GUIHelperFunctions import *
 from Images import *
+from Patient import *
 from UserFactory import *
-from Error import *
 
 
 class PatGUI(ctk.CTk):
@@ -1107,5 +1108,5 @@ class PatGUI(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = PatGUI(14)
+    app = PatGUI(5)
     app.mainloop()

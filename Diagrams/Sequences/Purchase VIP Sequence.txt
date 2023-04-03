@@ -1,0 +1,28 @@
+@startuml
+title Purchase VIP
+actor       Patient       as User
+boundary    PatientPage  as PatientPage
+control     SystemHandler     as SystemHandler
+entity      Patient as Patient
+entity      Database as db
+
+
+
+User -> PatientPage : Purchase VIP
+PatientPage -> SystemHandler: Load Purchase VIP Frame
+SystemHandler -> PatientPage : Show Purchase VIP Frame
+User -> PatientPage : Subscribe
+PatientPage -> SystemHandler: Get Subscription level
+alt level equals to bronze
+    SystemHandler -> Patient:Subscribe()
+    Patient -> Patient: updateBalance()
+    alt credits less than Vip Price
+      Patient --> SystemHandler:Error    
+      SystemHandler -->PatientPage: Show Error Message \n"Insufficient Funds"
+    else
+        Patient-> db: Update VIP
+        Patient--> SystemHandler: Confirm Subscription
+        SystemHandler-->PatientPage:Show Info Message \n"Purchase Complete"
+    end
+end
+@enduml

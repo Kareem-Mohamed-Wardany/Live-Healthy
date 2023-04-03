@@ -22,8 +22,6 @@ from Images import *
 from PatientGUI import *
 from RadiologistGUI import *
 
-# from Runner import *
-
 
 class Starter(ctk.CTk):
     # load Config dict
