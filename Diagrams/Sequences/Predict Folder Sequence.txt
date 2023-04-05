@@ -1,0 +1,33 @@
+@startuml
+title Predict Folder
+actor       Radiologist       as User
+boundary    RadiologistPage  as PatientPage
+control     SystemHandler     as SystemHandler
+entity      Radiologist as Radiologist
+entity      ResNetModel as Model
+
+
+
+User -> PatientPage : Predict X-Ray Scan
+PatientPage -> SystemHandler: Load PredictScanFrame
+SystemHandler -> PatientPage : Show PredictScanFrame
+User -> PatientPage : Import Scan
+PatientPage -> SystemHandler: Load file dialog
+SystemHandler --> PatientPage : Show file dialog
+User -> PatientPage : Select a Folder
+PatientPage -> SystemHandler: Folder Path
+SystemHandler -> Radiologist:PredictScanFolder()
+Loop for each image
+Radiologist-> Model:PredictScan()
+Model-->Radiologist: Prediction
+Radiologist->Radiologist: Save Prediction
+end
+Radiologist->Radiologist: Create CSV
+Radiologist --> SystemHandler:All Predictions
+SystemHandler -->PatientPage: Show All Predictions
+User -> PatientPage : image or Prediction
+PatientPage->SystemHandler:required image
+SystemHandler-->PatientPage: Show image
+
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+title Handle Report
+actor       Administrator       as User
+boundary    AdministratorPage  as PatientPage
+control     SystemHandler     as SystemHandler
+entity      Administrator as Administrator
+
+
+
+User -> PatientPage : Handle Reports
+PatientPage -> SystemHandler: Load Reports Frame
+SystemHandler -> PatientPage : Show Reports Frame
+SystemHandler-> Administrator:getAllReports()
+Administrator -->SystemHandler: All Reports
+SystemHandler -->PatientPage: Show All Reports
+User -> PatientPage : Show Chat
+PatientPage->SystemHandler: Show required Chat
+SystemHandler-->PatientPage: Display required Chat
+
+alt Revoke
+User -> PatientPage : Revoke Suspension
+PatientPage -> SystemHandler: Revoke Patient Suspension
+SystemHandler -> Administrator: RevokeSuspension()
+Administrator -->SystemHandler:Confirm
+SystemHandler-->PatientPage: show info message\n "Suspension revoked for the patient"
+else Confirm
+User -> PatientPage : Confirm Suspension
+PatientPage -> SystemHandler: Confirm Patient Suspension
+SystemHandler -> Administrator: ConfirmSuspension()
+Administrator -->SystemHandler:Confirm
+SystemHandler-->PatientPage: show info message\n "Patient permanently suspended"
+end
+PatientPage->PatientPage: Update Reports Frame
+
+@enduml

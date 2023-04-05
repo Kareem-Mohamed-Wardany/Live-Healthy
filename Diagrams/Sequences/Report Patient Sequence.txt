@@ -1,0 +1,27 @@
+@startuml
+title Report Patient
+actor       Doctor       as User
+boundary    DoctorPage  as Page
+control     SystemHandler     as SystemHandler
+entity      Doctor as Doctor
+
+
+
+User -> Page : Report icon
+Page -> SystemHandler: Load Report Frame
+SystemHandler --> Page : Show Report Frame
+User -> Page : Report Button
+Page -> SystemHandler: Handle Report
+alt Empty Reason
+    SystemHandler--> Page : Show Error Message\n "Reason Should not be empty"
+else
+SystemHandler-> Doctor:ReportUser()
+Doctor--> SystemHandler:Confirm
+SystemHandler-> Doctor:EndChat()
+Doctor--> SystemHandler:Confirm
+SystemHandler-> Doctor:updateBalance()
+Doctor--> SystemHandler:Confirm
+SystemHandler--> Page:Show info message \n "User Reported Refund added to your balance"
+Page->Page:LoadActiveChat
+end
+@enduml

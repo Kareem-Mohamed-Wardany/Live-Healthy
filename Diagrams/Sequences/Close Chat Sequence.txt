@@ -1,0 +1,26 @@
+@startuml
+title Close Chat
+actor       Doctor       as User
+boundary    DoctorPage  as Page
+control     SystemHandler     as SystemHandler
+entity      Doctor as Doctor
+
+
+
+User -> Page : Close icon
+Page -> SystemHandler: Handle Close Chat
+SystemHandler-> Doctor:PrescriptionGenerated()
+Doctor--> SystemHandler:Result
+
+
+alt Empty Result
+    SystemHandler--> Page : Show warning Message\n "Report Should be Generated"
+else
+SystemHandler-> Doctor:EndChat()
+Doctor--> SystemHandler:Confirm
+SystemHandler-> Doctor:updateBalance()
+Doctor--> SystemHandler:Confirm
+SystemHandler--> Page:Show info message \n "Credits added to your balance!"
+Page->Page:LoadActiveChat
+end
+@enduml

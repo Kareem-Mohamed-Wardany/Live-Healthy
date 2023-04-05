@@ -1,0 +1,24 @@
+@startuml
+title Assign New Patients
+actor       Doctor       as User
+boundary    DoctorPage  as Page
+control     SystemHandler     as SystemHandler
+entity      Doctor as Doctor
+
+
+
+User -> Page : Patients Requests
+Page -> SystemHandler: Load Assign Patients Frame
+SystemHandler --> Page : Show Assign Patients Frame
+SystemHandler-> Doctor:LoadWaitingPatientRequests()
+Doctor -->SystemHandler: Result
+alt Empty Result
+    SystemHandler --> Page : Show ''No Patients Found!''
+end
+SystemHandler --> Page : Show Patients Requests
+User -> Page : Chat
+Page -> SystemHandler: Required Patient ID
+SystemHandler->Doctor:AssignMePatient()
+Doctor -->SystemHandler:Confirm
+Page->Page: Update Assign Patients Frame
+@enduml

@@ -1,3 +1,5 @@
+import os
+import sys
 from Dataset import *
 from imageprocessing import *
 from Model_Config import *
@@ -5,18 +7,9 @@ from Model_Config import *
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import tensorflow
 from keras import Model
+from keras.layers import (Activation, Add, BatchNormalization, Conv2D, Dense,
+                          Flatten, GlobalAveragePooling2D, Input, Lambda)
 from keras.models import load_model
-from keras.layers import (
-    Add,
-    GlobalAveragePooling2D,
-    Dense,
-    Flatten,
-    Conv2D,
-    Lambda,
-    Input,
-    BatchNormalization,
-    Activation,
-)
 
 
 class ResNetModel:
@@ -213,8 +206,8 @@ class ResNetModel:
     def PredictScan(self, Scanpath, OneValue = False):
         import tensorflow
         IP = ImageProcessing()
-        if os.path.exists("Data/ResNet.h5"):
-            trained_resnet = load_model("Data/ResNet.h5")
+        if os.path.exists(resource_path("Data/ResNet.h5")):
+            trained_resnet = load_model(resource_path("Data/ResNet.h5"))
         else:
             trained_resnet = self.training_process()
         img = IP.load_image(Scanpath)
@@ -248,3 +241,11 @@ class ResNetModel:
 # m = ResNetModel()
 # prediction = m.PredictScan("TestFolder\COVID-992.png",True)
 # print(prediction)
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS2
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
