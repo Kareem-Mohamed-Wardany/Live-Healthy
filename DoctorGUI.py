@@ -18,7 +18,7 @@ from GUIHelperFunctions import *
 from Images import *
 from UserFactory import *
 
-
+# Chatgpt api = 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
 class DocGUI(ctk.CTk):
     # load Config dict
     configfile = SystemConfig()
@@ -335,7 +335,7 @@ class DocGUI(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        self.JoinChatServer(id)
+        # self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -502,36 +502,24 @@ class DocGUI(ctk.CTk):
         PatientData = UserFactory.createUser(id, "patient")  # Get the patient Data
         res = PatientData.RequestData()
         (
-            Symptoms,
             X_ray_scan,
             Prediction,
-            Medications,
-            Extra_Info,
-            Illness_Time,
+            BotChat,
         ) = PatientData.fillindata(res)
 
-        if Extra_Info is None:
-            Extra_Info = "-"
-        if Medications is None:
-            Medications = "-"
-
-        # Create blocks that will contain Symptoms, Medications, Illness_Time, Extra_Info
-        self.Createblock(master, 0.71, 0.24, 230, 90, "Symptoms:", Symptoms)
-        self.Createblock(master, 0.71, 0.38, 230, 90, "Medications:", Medications)
-        self.Createblock(master, 0.71, 0.52, 230, 90, "Illness_Time:", Illness_Time)
-        self.Createblock(master, 0.71, 0.66, 230, 90, "Extra_Info:", Extra_Info)
-
+        self.LoadBOTChatData(BotChat)
         # Scan Block will contain Patient X-ray Scan with the prediction made by the system
-        self.createScanBlock(
-            master,
-            PatientData.userName,
-            0.39,
-            0.63,
-            250,
-            250,
-            X_ray_scan,
-            Prediction,
-        )
+        if Prediction !="":
+            self.createScanBlock(
+                master,
+                PatientData.userName,
+                0.39,
+                0.63,
+                250,
+                250,
+                X_ray_scan,
+                Prediction,
+            )
 
     def EndChatButton(self, master, id):
         # END Chat
@@ -733,6 +721,14 @@ class DocGUI(ctk.CTk):
         except Exception:
             print("Error with chat")
 
+    def LoadBOTChatData(self, BotChat):
+        # Load the chat of Patient with id
+        msg = BotChat.split(
+            "&,&"
+        )  # split the chat as queue was saved as one string each item separated by &,&
+        for i in msg: 
+            self.ChatBlock(i)
+
     def LoadChatData(self, Patientid):
         # Load the chat of Patient with id
         res = SelectQuery(
@@ -744,41 +740,6 @@ class DocGUI(ctk.CTk):
         for i in msg:  # put each message in two Queues
             self.LoaddedChat.put(i)  # Queue that will be Loaded at chat box
             self.ChatLOGS.put(i)  # Queue that will save old chat with the new chat
-
-    def Createblock(self, master, x, y, w, h, Title, Content):
-        # Frame that will hold label with Title and Textbox that is disabled to use the scroll feature in it
-        blockFrame = ctk.CTkFrame(
-            master,
-            corner_radius=0,
-            width=w,
-            height=h,
-            fg_color="transparent"
-        )
-        blockFrame.place(anchor="nw", relx=x, rely=y)
-
-        firsttextLabel = ctk.CTkLabel(
-            blockFrame,
-            height=10,
-            text=Title,
-            text_color=self.configfile.get("TextColor"),
-            font=ctk.CTkFont(size=12, weight="bold"),
-        )
-        firsttextLabel.place(anchor="nw", relx=0.01, rely=0.01)
-
-        wid = w - ((20 / w) * 100)
-        text = ctk.CTkTextbox(
-            blockFrame,
-            height=50,
-            width=wid,
-            font=ctk.CTkFont(size=12, weight="bold"),
-            text_color=self.configfile.get("TextColor"),
-            fg_color=self.configfile.get("FrameColor"),
-            border_color=self.configfile.get("TextColor"),
-            border_width=1
-        )
-        text.place(anchor="nw", relx=0.03, rely=0.36)
-        text.insert("end", Content)
-        text.configure(state="disabled")
 
     def createScanBlock(self, master, name, x, y, w, h, scan, prediction):
         # Frame that will hold Scan Image and Label for its prediction
@@ -873,7 +834,7 @@ class DocGUI(ctk.CTk):
 
         m_label = ctk.CTkLabel(
             m_frame,
-            wraplength=800,
+            wraplength=500,
             text=msg,
             height=20,
             text_color=self.configfile.get("TextColor"),

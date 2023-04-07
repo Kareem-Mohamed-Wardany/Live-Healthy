@@ -27,5 +27,6 @@ def SystemErrors():
         24:"Medications can not be empty",
         25:"No Credit Card details found",
         26:"You are suspended",
+        27:"Please chat first with our assistant",
     }
 # messagebox.showerror("Error", self.systemError.get(16), icon="error", parent=self.LeftSideBar_frame)

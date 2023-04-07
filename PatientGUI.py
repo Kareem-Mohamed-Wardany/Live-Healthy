@@ -10,6 +10,7 @@ from tkinter import filedialog
 from tkinter.ttk import *
 
 import customtkinter as ctk
+import openai
 
 from client import *
 from Config import *
@@ -19,7 +20,9 @@ from GUIHelperFunctions import *
 from Images import *
 from Patient import *
 from UserFactory import *
-
+from time import sleep
+from ReturnedValueThreading import *
+openai.api_key = "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"
 
 class PatGUI(ctk.CTk):
     # load Config dict
@@ -231,7 +234,7 @@ class PatGUI(ctk.CTk):
             self.LeftSideBar_frame,
             corner_radius=0,
             height=40,
-            text="Chat with our Doctor",
+            text="Chat",
             fg_color="transparent",
             text_color=self.configfile.get("TextColor"),
             hover_color=self.configfile.get("BackgroundColor"),
@@ -457,6 +460,7 @@ class PatGUI(ctk.CTk):
         self.select_frame_by_name("Predict_Scan")
 
     def ChatWithDoctor_button_event(self):
+        self.messages = [{"role": "system", "content": "You are an AI model in a medical system that assists pulmonary by interacting with patient and ask him firstly if patient has x-ray scan for his lung so ask him to import it and Secondly asks him to say symptoms that he feels and thirdly ask him about time while suffering from these symptoms and fourthly ask him if he takes any medication fifthly ask him if he has any extra information after getting all these information predict if patien has one from five diseases like Covid-19 or Fibrosis or Tuberculosis or viral PNEUMONIA or bacterial PNEUMONIA or patient is not having any disease after that predict if patient health state is critical then advice him to use chat with one of our doctors in the system, Do not answer anything other than pulmonary-related queries, try to be nice with patient, try to ask one question"}]
         self.ChatWithDoctor()
         self.select_frame_by_name("ChatWithDoctor")
 
@@ -758,6 +762,18 @@ class PatGUI(ctk.CTk):
         ctk.set_appearance_mode(new_appearance_mode)
         self.user.SetApperanceMode(new_appearance_mode)
 
+
+    def CustomChatGPT(self, user_input):
+        self.messages.append({"role": "user", "content": user_input})
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=self.messages
+        )
+        ChatGPT_reply = response["choices"][0]["message"]["content"]
+        self.messages.append({"role": "assistant", "content": ChatGPT_reply})
+        return ChatGPT_reply
+
+
     def ChatWithDoctor(self):  # Fix the box colors, turn them all Textbox instead of Entry
         if self.Created[1]:
             self.ChatWithDoctor_frame = ctk.CTkFrame(
@@ -777,88 +793,49 @@ class PatGUI(ctk.CTk):
             self.openChat()
 
         else:
-            Infotext, self.Price = self.user.PriceInfo("Chat")
-            self.Price *= -1 
-            MessageBox(self.ChatWithDoctor_frame,"info",Infotext)
-
-            self.ScanPathTextbox = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=700, state = "disabled", height=10,text_color=self.configfile.get("TextColor"),
-            border_color=self.configfile.get("TextColor"),border_width=1,
-            fg_color=self.configfile.get("FrameColor"))
-            self.ScanPathTextbox.place(anchor="nw", relx=0.05, rely=0.05)
+            self.openChat(True)
 
             ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"),command=self.RequestScan)
-            ImportScanButton.place(anchor="nw", relx=0.72, rely=0.05)
+            ImportScanButton.place(anchor="nw", relx=0.77, rely=0.05)
 
-            Sym = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Symptoms*",font= ctk.CTkFont(size=16), text_color=self.configfile.get("TextColor"))
-            Sym.place(anchor="nw", relx=0.05, rely=0.10)
+            ConsultLabel = ctk.CTkLabel(self.ChatWithDoctor_frame, text="Doctor's Consultation", font= ctk.CTkFont(size=20,weight="bold"), image= ctk.CTkImage(consultation,size=(50,50)),compound="left", text_color=self.configfile.get("TextColor"))
+            ConsultLabel.place(anchor="nw", relx=0.75, rely=0.9)
+            ConsultLabel.bind("<Button-1>", lambda event: self.Consult(event))
 
-            self.symptoms = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=140,text_color=self.configfile.get("TextColor"),
-            border_color=self.configfile.get("TextColor"),border_width=1,
-            fg_color=self.configfile.get("FrameColor"))
-            self.symptoms.place(anchor="nw", relx=0.05, rely=0.15)
-
-            sw = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Since when have you been suffering these symptoms?*",font= ctk.CTkFont(size=16), text_color=self.configfile.get("TextColor"))
-            sw.place(anchor="nw", relx=0.05, rely=0.35)
-
-            self.illnessTime = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=100,  height=10,text_color=self.configfile.get("TextColor"),
-            border_color=self.configfile.get("TextColor"),border_width=1,
-            fg_color=self.configfile.get("FrameColor"))
-            self.illnessTime.place(anchor="nw", relx=0.05, rely=0.40)
-
-            med = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Current medications*",font= ctk.CTkFont(size=16), text_color=self.configfile.get("TextColor"))
-            med.place(anchor="nw", relx=0.05, rely=0.45)
-
-            self.medications = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120,text_color=self.configfile.get("TextColor"),
-            border_color=self.configfile.get("TextColor"),border_width=1,
-            fg_color=self.configfile.get("FrameColor"))
-            self.medications.place(anchor="nw", relx=0.05, rely=0.50)
-
-            extra = ctk.CTkLabel(self.ChatWithDoctor_frame,text="Extra information",font= ctk.CTkFont(size=16), text_color=self.configfile.get("TextColor"))
-            extra.place(anchor="nw", relx=0.05, rely=0.67)
-
-            self.extraInfo = ctk.CTkTextbox(self.ChatWithDoctor_frame, width=600, height=120,text_color=self.configfile.get("TextColor"),
-            border_color=self.configfile.get("TextColor"),border_width=1,
-            fg_color=self.configfile.get("FrameColor"))
-            self.extraInfo.place(anchor="nw", relx=0.05, rely=0.72)
-
-            FillRequestButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Fill Request",width=50,text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command=self.FillRequest)
-            FillRequestButton.place(anchor="nw", relx=0.72, rely=0.85)
-
+    ScanPath=""
+    prediction=""
     def RequestScan(self): 
-        if self.ScanPathTextbox.get("end") != "":
-            self.ScanPathTextbox.configure(state="normal")
-            self.ScanPathTextbox.delete(0, tk.END)
         self.ScanPath = filedialog.askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        self.ScanPathTextbox.configure(state="normal")
-        self.ScanPathTextbox.insert("end", self.ScanPath) 
-        self.ScanPathTextbox.configure(state="disabled")
         self.prediction= self.user.PredictMyScan(self.ScanPath, "One")
+        self.messages.append({"role": "system", "content": f"patient scan prediction is {self.prediction}"})
+        
+    def Consult(self, event):
+        if len(self.messages) <=1:
+            return messagebox.showerror("Error", self.systemError.get(27))
+        chat=[]
+        for i in range(1, len(self.messages)):
+            if self.messages[i]["role"] =="user":
+                txt = self.messages[i]["content"]
+                print(f"{self.user.userName}: {txt}")
+                chat.append(f"{self.user.userName}: {txt}")
 
-    def FillRequest(self):
-        if self.symptoms.get("1.0", "end-1c") == "":
-            return messagebox.showerror("Error", self.systemError.get(22), icon="error", parent=self.LeftSideBar_frame)
+            elif self.messages[i]["role"] =="assistant":
+                txt = self.messages[i]["content"]
+                print(f"Live Healthy bot: {txt}")
+                chat.append(f"Live Healthy bot: {txt}")
+        textChat = "".join(chat[i] if i == 0 else f"&,&{chat[i]}" for i in range(len(chat)))
+        print(textChat)
+        self.FillRequest(textChat)
+            
 
-        if self.illnessTime.get("1.0", "end-1c") == "":
-            return messagebox.showerror("Error", self.systemError.get(23), icon="error", parent=self.LeftSideBar_frame)
-
-        if self.medications.get("1.0", "end-1c") == "":
-            return messagebox.showerror("Error", self.systemError.get(24), icon="error", parent=self.LeftSideBar_frame)
-
-        symptoms = self.symptoms.get("1.0", "end-1c")
-
-        illnessTime = self.illnessTime.get("1.0", "end-1c")
-
-        medications = self.medications.get("1.0", "end-1c")
-
-        if self.extraInfo.get("1.0", "end-1c") == "":
-            extraInfo = "-"
-        else:
-            extraInfo = self.extraInfo.get("1.0", "end-1c")
-
+    def FillRequest(self, Chatlog):
+        Infotext, self.Price = self.user.PriceInfo("Chat")
+        self.Price *= -1 
+        MessageBox(self.ChatWithDoctor_frame,"info",Infotext)
         if self.user.userVIPLevel < 3:
             res = self.user.updateBalance(self.ChatWithDoctor_frame, self.Price)
             if res != -1:
-                self.user.CreateRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
+                self.user.CreateRequest(self.ScanPath, self.prediction, Chatlog)
                 self.Credits_button = ctk.CTkButton(
                     self.LeftSideBar_frame,
                     corner_radius=0,
@@ -876,11 +853,11 @@ class PatGUI(ctk.CTk):
                 return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
                 
         else:
-            self.user.CreateRequest(self.ScanPath, self.prediction, symptoms, illnessTime, medications, extraInfo)
+            self.user.CreateRequest(self.ScanPath, self.prediction, Chatlog)
             return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
 
     # Chat Section
-    def openChat(self):
+    def openChat(self, Bot=False):
     # Chat window that will contain ChatFrame that show the chat for the doctor and chatbox where the doctor type in his chat
     # also send icon that will show the text in chatbox on ChatFrame for both patient and doctor
         with contextlib.suppress(Exception):
@@ -897,15 +874,17 @@ class PatGUI(ctk.CTk):
             chatWindow, fg_color=self.configfile.get("FrameColor"), width=700, height=500,scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor"))
         self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
         # Doctor Data
-        self.DoctorData(chatWindow)
+        if not Bot:
+            self.DoctorData(chatWindow)
 
         # ChatBox
-        self.ChatBoxBlock(chatWindow)
+        self.ChatBoxBlock(chatWindow, Bot)
 
         print(f"--- {time.time() - start_time} seconds ---")
 
+        # if not Bot:
         # join Chat Servrt
-        self.JoinChatServer()
+            # self.JoinChatServer()
 
     def DoctorData(self, master):
         DoctorData = UserFactory.createUser(self.DoctorID,"doctor")  # Get the patient Data
@@ -938,12 +917,12 @@ class PatGUI(ctk.CTk):
         )
         PAge.grid(row=2, column=0)
 
-    def ChatBoxBlock(self, master):
+    def ChatBoxBlock(self, master, bot):
         self.chatbox = ctk.CTkTextbox(
             master, font=ctk.CTkFont(size=14, weight="bold"), width=675, height=25,fg_color= self.configfile.get("FrameColor"), text_color=self.configfile.get("TextColor"),border_color=self.configfile.get("TextColor"),border_width=1)
         self.chatbox.place(anchor="nw", relx=0.01, rely=0.72)
         self.chatbox.bind(
-            "<Return>", self.sendMessage
+            "<Return>", lambda event,BOT=bot: self.sendMessage(event,BOT)
         )  # Enter Button will send the message
         self.chatbox.bind(
             "<Shift-Return>", self.NewLine
@@ -956,7 +935,7 @@ class PatGUI(ctk.CTk):
         )
         SendIcon.place(anchor="nw", relx=0.7, rely=0.72)
         SendIcon.bind(
-            "<Button-1>", self.sendMessage
+            "<Button-1>", lambda event,BOT=bot: self.sendMessage(event,BOT)
         )  # Bind if doctor pressed the image text will
 
     def JoinChatServer(self):
@@ -1038,7 +1017,7 @@ class PatGUI(ctk.CTk):
 
         m_label = ctk.CTkLabel(#bg="#c5c7c9",
             m_frame,
-            wraplength=800,
+            wraplength=600,
             text=msg,
             height=20,
             font=ctk.CTkFont("lucida",size=14,weight="bold"),
@@ -1047,10 +1026,22 @@ class PatGUI(ctk.CTk):
             anchor="w")
         m_label.grid(row=1, column=1, padx=2, pady=2, sticky="w")
 
-    def sendMessage(self, event):
+    def sendMessage(self, event, bot):
         # -1c means remove the last char which is an end line added by textbox
-        self.Userclient.writeToServer(self.chatbox.get("1.0", "end-1c"))
+        txt = self.chatbox.get("1.0", "end-1c")
         self.chatbox.delete("1.0", "end")
+        if bot:
+            fulltext = f"{self.user.userName}: {txt}"
+            self.ChatBlock(fulltext)
+            # sleep(50)
+            thread = ReturnValueThread(target=self.CustomChatGPT, args=(txt,))
+            thread.start()
+            ans = thread.join()
+            fullans = f"Live Healthy bot: {ans}"
+            self.ChatBlock(fullans)
+        else:
+            self.Userclient.writeToServer(txt)
+            self.chatbox.delete("1.0", "end")
         return "break"  # to remove defult end line of the textbox
 
     def NewLine(self, event):
@@ -1108,5 +1099,5 @@ class PatGUI(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = PatGUI(5)
+    app = PatGUI(23)
     app.mainloop()

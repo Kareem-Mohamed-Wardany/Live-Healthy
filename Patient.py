@@ -73,29 +73,24 @@ class Patient(User):
         res = SelectQuery("SELECT * FROM requests WHERE Patient_ID= %s", [self.userid])
         return len(res) > 0
 
-    def CreateRequest(
-        self, ScanPath, prediction, symptoms, illnessTime, medications, extraInfo
-    ):
-        binaryimage = convertToBinaryData(ScanPath)
+    def CreateRequest(self, ScanPath, prediction, Chatlog):
+        binaryimage = convertToBinaryData(ScanPath) if ScanPath != "" else ""
         RequestDate = date.today()
         InsertQuery(
-            "INSERT INTO requests (Patient_ID, Request_Date, Request_Status, Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO requests (Patient_ID, Request_Date, Request_Status, X_ray_scan, Prediction, BotChat) VALUES (%s, %s, %s, %s, %s, %s)",
             [
                 self.userid,
                 RequestDate,
                 "waiting",
-                symptoms,
                 binaryimage,
                 prediction,
-                medications,
-                extraInfo,
-                illnessTime,
+                Chatlog
             ],
         )
 
     def RequestData(self):
         res = SelectQuery(
-            "SELECT Symptoms, X_ray_scan, Prediction, Medications, Extra_Info, Illness_Time FROM requests WHERE Patient_ID= %s",
+            "SELECT X_ray_scan, Prediction, BotChat FROM requests WHERE Patient_ID= %s",
             [self.userid],
         )
         return res[0]

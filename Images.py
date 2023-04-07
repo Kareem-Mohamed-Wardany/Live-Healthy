@@ -28,6 +28,7 @@ ChatFemaleImage = Image.open("asset\ChatFemale.png")
 ActiveChats = Image.open("asset\ActiveChats.png")
 Chat = Image.open("asset\Chat.png")
 coin = Image.open("asset\coin.png")
+consultation = Image.open("asset\consultation.png")
 
 # Money Images
 cashlvl1 = Image.open("asset\cashlvl1.png")

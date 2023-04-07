@@ -238,9 +238,6 @@ class ResNetModel:
                 res= i[0]
         return res
     
-# m = ResNetModel()
-# prediction = m.PredictScan("TestFolder\COVID-992.png",True)
-# print(prediction)
 
 def resource_path(relative_path):
     try:
