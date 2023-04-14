@@ -1,0 +1,58 @@
+{"intents": [
+    {
+    "tag" : "defult",
+    "patterns" : [],
+    "responses" : ["Sorry, I didn't get it"]
+    },
+    {
+      "tag" : "Covid",
+      "patterns" : ["Fever", "chills", "Cough", "Shortness of breath", "difficulty breathing", "Fatigue", "Muscle aches", "body aches", "Headache", "loss of taste", "loss of smell", "Sore throat", "Congestion", "runny nose", "Nausea", "vomiting", "Diarrhea"],
+      "responses" : ["You might have Covid-19, For how long have you been feeling these Symptoms?"]
+    },
+    {
+      "tag" : "Tuberculosis",
+      "patterns" : ["cough brings up phlegm", "weight loss", "night sweats", "high temperature", "tiredness", "fatigue", "loss of appetite",  "swellings in the neck"],
+      "responses" : ["You might have Tuberculosis, For how long have you been feeling these Symptoms?"]
+    },
+    {
+      "tag" : "Fibrosis",
+      "patterns" : ["Shortness of breath", "dry cough", "Fatigue", "weight loss",  "Aching muscles and joints",  "Widening and rounding of the tips of the fingers or toes"],
+      "responses" : ["You might have Fibrosis, For how long have you been feeling these Symptoms?"]
+    },
+    {
+      "tag" : "Pneumonia",
+      "patterns" : ["cough brings up phlegm", "shortness of breath", "high temperature", "chest pain", "aching body","feeling very tired","loss of appetite", "wheezing noises while you breathing","feeling confused"],
+      "responses" : ["You might have Pneumonia, For how long have you been feeling these Symptoms?"]
+    },
+    {
+        "tag" : "greeting",
+        "patterns" : ["hello", "hi","greet", "Hi there", "Whats up"],
+        "responses" : ["Hello, How can I assist you ?"]
+      },
+      {
+        "tag" : "ill",
+        "patterns" : ["ill", "sick","not good", "not feeling good", "bad"],
+        "responses" : ["Sad for that, Do you have an x-ray scan for your lungs? answer with: (Yes I have a scan or No I have not a scan)"]
+      },
+      {
+        "tag" : "has Scan",
+        "patterns" : ["Yes I have a scan"],
+        "responses" : ["Great, can you import it to the system so I can analyze it for you?"]
+      },
+      {
+        "tag" : "Scan imported",
+        "patterns" : ["imported", "uploaded","sure","done"],
+        "responses" : ["Thanks, can you tell me what symptoms do you feel?"]
+      },
+      {
+        "tag" : "has no Scan",
+        "patterns" : ["No I have not a scan"],
+        "responses" : ["Okey No problem, can you tell me what symptoms do you feel?"]
+      },
+      {
+        "tag" : "time",
+        "patterns" : ["day", "week", "hour"],
+        "responses" : ["hmmm, I would like to recommed you to use our feature to chat with our doctors"]
+      }
+    ]
+  }

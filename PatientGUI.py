@@ -8,7 +8,7 @@ import tkinter as tk
 from datetime import date, timedelta
 from tkinter import filedialog
 from tkinter.ttk import *
-
+from threading import Timer
 import customtkinter as ctk
 import openai
 
@@ -762,18 +762,6 @@ class PatGUI(ctk.CTk):
         ctk.set_appearance_mode(new_appearance_mode)
         self.user.SetApperanceMode(new_appearance_mode)
 
-
-    def CustomChatGPT(self, user_input):
-        self.messages.append({"role": "user", "content": user_input})
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=self.messages
-        )
-        ChatGPT_reply = response["choices"][0]["message"]["content"]
-        self.messages.append({"role": "assistant", "content": ChatGPT_reply})
-        return ChatGPT_reply
-
-
     def ChatWithDoctor(self):  # Fix the box colors, turn them all Textbox instead of Entry
         if self.Created[1]:
             self.ChatWithDoctor_frame = ctk.CTkFrame(
@@ -808,6 +796,7 @@ class PatGUI(ctk.CTk):
         self.ScanPath = filedialog.askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
         self.prediction= self.user.PredictMyScan(self.ScanPath, "One")
         self.messages.append({"role": "system", "content": f"patient scan prediction is {self.prediction}"})
+        return messagebox.showinfo("Info", "Your scan has been imported")
         
     def Consult(self, event):
         if len(self.messages) <=1:
@@ -816,15 +805,12 @@ class PatGUI(ctk.CTk):
         for i in range(1, len(self.messages)):
             if self.messages[i]["role"] =="user":
                 txt = self.messages[i]["content"]
-                print(f"{self.user.userName}: {txt}")
                 chat.append(f"{self.user.userName}: {txt}")
 
             elif self.messages[i]["role"] =="assistant":
                 txt = self.messages[i]["content"]
-                print(f"Live Healthy bot: {txt}")
                 chat.append(f"Live Healthy bot: {txt}")
         textChat = "".join(chat[i] if i == 0 else f"&,&{chat[i]}" for i in range(len(chat)))
-        print(textChat)
         self.FillRequest(textChat)
             
 
@@ -936,7 +922,7 @@ class PatGUI(ctk.CTk):
         SendIcon.place(anchor="nw", relx=0.7, rely=0.72)
         SendIcon.bind(
             "<Button-1>", lambda event,BOT=bot: self.sendMessage(event,BOT)
-        )  # Bind if doctor pressed the image text will
+        )  # Bind if patient pressed the image text will
 
     def JoinChatServer(self):
         # Check if the Chat server is online
@@ -1013,9 +999,7 @@ class PatGUI(ctk.CTk):
         # Create Frame that will hold message of the user
         m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
         m_frame.pack(anchor="nw", pady=5)
-        m_frame.columnconfigure(0, weight=1)
-
-        m_label = ctk.CTkLabel(#bg="#c5c7c9",
+        m_label = ctk.CTkLabel(
             m_frame,
             wraplength=600,
             text=msg,
@@ -1033,16 +1017,26 @@ class PatGUI(ctk.CTk):
         if bot:
             fulltext = f"{self.user.userName}: {txt}"
             self.ChatBlock(fulltext)
-            # sleep(50)
-            thread = ReturnValueThread(target=self.CustomChatGPT, args=(txt,))
-            thread.start()
-            ans = thread.join()
-            fullans = f"Live Healthy bot: {ans}"
-            self.ChatBlock(fullans)
+            t = Timer(0.2, self.chatwithbot, [txt]) 
+            t.start()
         else:
             self.Userclient.writeToServer(txt)
-            self.chatbox.delete("1.0", "end")
         return "break"  # to remove defult end line of the textbox
+
+    def chatwithbot(self, msg):
+        # Handle Run time to get no error with response
+        gptthread = ReturnValueThread(target=self.CustomChatGPT,args=(msg,))
+        gptthread.start()
+        ans = gptthread.join()
+        fullans = f"Live Healthy bot: {ans}"
+        self.ChatBlock(fullans)
+
+    def CustomChatGPT(self, user_input):
+        self.messages.append({"role": "user", "content": user_input})
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.messages)
+        ChatGPT_reply = response["choices"][0]["message"]["content"]
+        self.messages.append({"role": "assistant", "content": ChatGPT_reply})
+        return ChatGPT_reply
 
     def NewLine(self, event):
         self.chatbox.insert("end", "\n")  # add an endline to the end of text in textbox
