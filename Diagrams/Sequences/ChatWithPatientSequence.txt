@@ -1,0 +1,46 @@
+@startuml
+title Chat With Doctor
+actor       Doctor       as User
+boundary    DoctorPage  as DoctorPage
+control     SystemHandler     as SystemHandler
+entity      Patient as Patient
+entity      Doctor as Doctor
+entity      Database as db
+entity      Client as Client
+entity      Server as Server
+
+User -> DoctorPage : Chat with our Doctor
+DoctorPage -> SystemHandler: Load All Chats
+SystemHandler --> DoctorPage: Show All Chats
+User -> DoctorPage : Select any patient
+DoctorPage -> SystemHandler: Get patient ID
+SystemHandler -> Patient: Get Patient Data
+Patient --> SystemHandler: Show Patient Data
+SystemHandler --> DoctorPage: Show Patient Information
+SystemHandler -> db: Get BOTChatLogs
+db --> SystemHandler: Show BOTChatLogs
+SystemHandler --> DoctorPage: Show BOT Chat with patient
+SystemHandler -> db: Get ChatLogs
+db --> SystemHandler: ChatLogs
+SystemHandler --> DoctorPage: Show Old Chat
+SystemHandler -> Client: Create a new Client
+Client -> Server: Connect
+loop
+    Server --> Client: Encode Message
+    Client --> SystemHandler: Decoded Message
+    SystemHandler --> DoctorPage: Show Decoded Message
+end
+User -> DoctorPage : Send Message
+DoctorPage -> SystemHandler: get Message
+SystemHandler --> DoctorPage: Show Message in Chat
+SystemHandler-> Client: Encode Message
+Client-> Server: send Encode Message
+User -> DoctorPage : End Chat
+DoctorPage -> SystemHandler: Get patient ID
+SystemHandler -> Patient: createdPrescreption()
+Patient --> SystemHandler: result
+alt no Prescreption
+SystemHandler --> DoctorPage: Show Error Message
+end
+
+@enduml

@@ -794,10 +794,16 @@ class PatGUI(ctk.CTk):
     prediction=""
     def RequestScan(self): 
         self.ScanPath = filedialog.askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
+        self.ChatBlock("Bot is analyzing...")
         self.prediction= self.user.PredictMyScan(self.ScanPath, "One")
         self.messages.append({"role": "system", "content": f"patient scan prediction is {self.prediction}"})
+        ScanImage = ctk.CTkLabel(self.ChatWithDoctor_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
+        ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
+        answer = f"Live Healthy bot: {self.CustomChatGPT2()}"
+        self.ChatBlock(answer, True)
         return messagebox.showinfo("Info", "Your scan has been imported")
-        
+    
+
     def Consult(self, event):
         if len(self.messages) <=1:
             return messagebox.showerror("Error", self.systemError.get(27))
@@ -847,24 +853,24 @@ class PatGUI(ctk.CTk):
     # Chat window that will contain ChatFrame that show the chat for the doctor and chatbox where the doctor type in his chat
     # also send icon that will show the text in chatbox on ChatFrame for both patient and doctor
         with contextlib.suppress(Exception):
-            for widget in chatWindow.winfo_children():
+            for widget in self.chatWindow.winfo_children():
                 widget.destroy()
             self.Userclient.end()
         start_time = time.time()
-        chatWindow = ctk.CTkFrame(
+        self.chatWindow = ctk.CTkFrame(
             self.ChatWithDoctor_frame, corner_radius=0, width=1000, fg_color="transparent", height=720
         )
-        chatWindow.place(anchor="nw",relx = 0.01,rely = 0.01)
+        self.chatWindow.place(anchor="nw",relx = 0.01,rely = 0.01)
 
         self.ChatFrame = ctk.CTkScrollableFrame(
-            chatWindow, fg_color=self.configfile.get("FrameColor"), width=700, height=500,scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor"))
+            self.chatWindow, fg_color=self.configfile.get("FrameColor"), width=700, height=500,scrollbar_button_color=self.configfile.get("FrameColor"), scrollbar_button_hover_color=self.configfile.get("TextColor"))
         self.ChatFrame.place(anchor="nw", relx=0.01, rely=0)
         # Doctor Data
         if not Bot:
-            self.DoctorData(chatWindow)
+            self.DoctorData(self.chatWindow)
 
         # ChatBox
-        self.ChatBoxBlock(chatWindow, Bot)
+        self.ChatBoxBlock(self.chatWindow, Bot)
 
         print(f"--- {time.time() - start_time} seconds ---")
 
@@ -995,20 +1001,36 @@ class PatGUI(ctk.CTk):
         self.ChatFrame.after(
             1000, self.AddTochatBox)  # Repeat the function after 1000 ms
 
-    def ChatBlock(self, msg):
+    def ChatBlock(self, msg, last=False):
         # Create Frame that will hold message of the user
-        m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
-        m_frame.pack(anchor="nw", pady=5)
-        m_label = ctk.CTkLabel(
-            m_frame,
-            wraplength=600,
-            text=msg,
-            height=20,
-            font=ctk.CTkFont("lucida",size=14,weight="bold"),
-            text_color=self.configfile.get("TextColor"),
-            justify="left",
-            anchor="w")
-        m_label.grid(row=1, column=1, padx=2, pady=2, sticky="w")
+        if last:  
+            with contextlib.suppress(Exception):            
+                self.ChatFrame.winfo_children()[-1].destroy()
+            m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
+            m_frame.pack(anchor="nw", pady=5)
+            m_label = ctk.CTkLabel(
+                m_frame,
+                wraplength=600,
+                text=msg,
+                height=20,
+                font=ctk.CTkFont("lucida",size=14,weight="bold"),
+                text_color="#ffc0cb",
+                justify="left",
+                anchor="w")
+            m_label.grid(row=1, column=1, padx=2, pady=2, sticky="w")
+        else:
+            m_frame = ctk.CTkFrame(self.ChatFrame,fg_color="transparent")
+            m_frame.pack(anchor="nw", pady=5)
+            m_label = ctk.CTkLabel(
+                m_frame,
+                wraplength=600,
+                text=msg,
+                height=20,
+                font=ctk.CTkFont("lucida",size=14,weight="bold"),
+                text_color=self.configfile.get("TextColor"),
+                justify="left",
+                anchor="w")
+            m_label.grid(row=1, column=1, padx=2, pady=2, sticky="w")
 
     def sendMessage(self, event, bot):
         # -1c means remove the last char which is an end line added by textbox
@@ -1017,6 +1039,7 @@ class PatGUI(ctk.CTk):
         if bot:
             fulltext = f"{self.user.userName}: {txt}"
             self.ChatBlock(fulltext)
+            self.ChatBlock("Bot is typing...")
             t = Timer(0.2, self.chatwithbot, [txt]) 
             t.start()
         else:
@@ -1029,10 +1052,16 @@ class PatGUI(ctk.CTk):
         gptthread.start()
         ans = gptthread.join()
         fullans = f"Live Healthy bot: {ans}"
-        self.ChatBlock(fullans)
+        self.ChatBlock(fullans, True)
 
     def CustomChatGPT(self, user_input):
         self.messages.append({"role": "user", "content": user_input})
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.messages)
+        ChatGPT_reply = response["choices"][0]["message"]["content"]
+        self.messages.append({"role": "assistant", "content": ChatGPT_reply})
+        return ChatGPT_reply
+    
+    def CustomChatGPT2(self):
         response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.messages)
         ChatGPT_reply = response["choices"][0]["message"]["content"]
         self.messages.append({"role": "assistant", "content": ChatGPT_reply})

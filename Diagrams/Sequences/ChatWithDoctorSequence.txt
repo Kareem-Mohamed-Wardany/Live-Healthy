@@ -40,6 +40,5 @@ alt result equals True
         SystemHandler-> Client: Encode Message
         Client-> Server: send Encode Message
     end
-    
 end
 @enduml

@@ -16,7 +16,5 @@ def SystemConfig():
         "ServerPort": 4073,
         "BackgroundColor":"#6883bc",
         "FrameColor":"#1e2761",
-        "TextColor":"#f3ca20"
+        "TextColor":"#f3ca20" 
     }
-
-

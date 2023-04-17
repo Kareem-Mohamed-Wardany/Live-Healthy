@@ -27,6 +27,5 @@ alt Data is empty
   Patient-->SystemHandler:Confirm message
   SystemHandler-->PatientPage: Show info message "Prescription saved successfully"
 end
-
 @enduml
 
