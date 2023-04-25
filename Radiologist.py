@@ -59,7 +59,6 @@ class Radiologist(User):
             print(FullPath)
             imageName= os.path.splitext(f)[0]
             output.append((imageName, m.PredictScan(FullPath,True)))
-
         return output
 
     # Generate Excel file

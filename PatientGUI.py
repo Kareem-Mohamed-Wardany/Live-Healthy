@@ -1040,7 +1040,7 @@ class PatGUI(ctk.CTk):
             fulltext = f"{self.user.userName}: {txt}"
             self.ChatBlock(fulltext)
             self.ChatBlock("Bot is typing...")
-            t = Timer(0.2, self.chatwithbot, [txt]) 
+            t = Timer(15, self.chatwithbot, [txt]) 
             t.start()
         else:
             self.Userclient.writeToServer(txt)
