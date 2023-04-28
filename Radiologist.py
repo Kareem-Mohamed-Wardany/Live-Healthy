@@ -6,7 +6,7 @@ from PIL import Image
 
 from Model import *
 from User import *
-
+from ReturnedValueThreading import *
 
 class Radiologist(User):
 
@@ -58,7 +58,9 @@ class Radiologist(User):
             FullPath = os.path.join(FolderPath,f)
             print(FullPath)
             imageName= os.path.splitext(f)[0]
-            output.append((imageName, m.PredictScan(FullPath,True)))
+            ScanThread = ReturnValueThread(target=m.PredictScan,args=(FullPath,True))
+            ScanThread.start()
+            output.append((imageName, ScanThread.join()))
         return output
 
     # Generate Excel file

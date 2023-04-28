@@ -51,7 +51,6 @@ class Starter(ctk.CTk):
         )  # Get Frame size from config File and center the window
         self.resizable(False, False)
 
-    
     def login_gui(self):
         self.backgroundFrame = ctk.CTkFrame(
             self,
@@ -233,10 +232,8 @@ class Starter(ctk.CTk):
         res = SelectQuery("SELECT COUNT(*) FROM suspended WHERE User_ID = %s",[id])[0][0]
         return 26 if res == 1 else -1
 
-
     # Start of Register Part 
     def mainRegister(self):
-
         FullNameLabel = ctk.CTkLabel(
             self.SelectionFrame,
             text="Full Name*",
@@ -430,7 +427,6 @@ class Starter(ctk.CTk):
         self.patient()
         self.Registerbutton()
 
-
     def UserType(self, Utype):
         if Utype=="Patient":
             self.patient()
@@ -442,9 +438,6 @@ class Starter(ctk.CTk):
             self.radiologist()
             self.Registerbutton()
 
-
-
-    
     def HoldFrame(self):
         with contextlib.suppress(Exception):
             self.Secondframe.destroy()
@@ -581,8 +574,6 @@ class Starter(ctk.CTk):
         font = ctk.CTkFont(size =17)
         )
         self.BloodTypeCombo.place(anchor="nw", relx=0.186, rely=0.7)
-
-
 
     def doctor(self):
         self.HoldFrame()

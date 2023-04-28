@@ -16,28 +16,18 @@ from GUIHelperFunctions import *
 from Images import *
 from UserFactory import *
 
-# from Model import *
-
-# importing askopenfile function
-# from class filedialo
-
 
 class AdminGUI(ctk.CTk):
     # load Config dict
     configfile = SystemConfig()
 
-    # connect to DB
-    db = Database()
-
-    # Define the Patient
+    # Define the Admin
     
 
     Created = [
         True,
-        True,
-        True,
-        True,
-    ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
+        True
+    ]  # LoadVerifyDoctorsFrame, LoadHandleReportsFrame PREVENTS duplications
 
     def __init__(self, id):
         super().__init__()
@@ -186,10 +176,7 @@ class AdminGUI(ctk.CTk):
     def logout(self):
         with contextlib.suppress(OSError):
             shutil.rmtree("Data/images/")
-
-        
         self.user.Logout(self)
-
 
     def select_frame_by_name(self, name):
         # set button color for selected button

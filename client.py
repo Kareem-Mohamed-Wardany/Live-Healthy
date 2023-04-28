@@ -1,12 +1,3 @@
-# Maxim ABdbdulkhalikov
-# 7876165
-# COMP4300 Assignment 1
-# =======================
-# Client file that creates a new client to connect to the server
-# =======================
-# To lauch a file, open in in cmd/powershell and write "python3 client.py <name> <chanelname>"
-# If the chanel does not exist, it will be created, otherwise you will be connected to chanel
-
 # imports
 import socket
 import sys
@@ -59,19 +50,19 @@ class Client:
         self.clientsocket.close()
 
 
-def StartClient(name, Channel):
-    # taking inputs from the user on launch
-    # write an error if input is incorrect
-    # INPUT: NAME, CHANELNAME
-    # creating a client
-    ADDR = ("127.0.0.1", 4073)
-    client = Client(name, ADDR, Channel)
+# def StartClient(name, Channel):
+#     # taking inputs from the user on launch
+#     # write an error if input is incorrect
+#     # INPUT: NAME, CHANELNAME
+#     # creating a client
+#     ADDR = ("127.0.0.1", 4073)
+#     client = Client(name, ADDR, Channel)
 
-    # creating threads for writing and listenting
-    # recieve thread
-    receiveThread = threading.Thread(target=client.receiveFromServer)
-    receiveThread.start()
+#     # creating threads for writing and listenting
+#     # recieve thread
+#     receiveThread = threading.Thread(target=client.receiveFromServer)
+#     receiveThread.start()
 
-    # write thread
-    writeThread = threading.Thread(target=client.writeToServer)
-    writeThread.start()
+#     # write thread
+#     writeThread = threading.Thread(target=client.writeToServer)
+#     writeThread.start()

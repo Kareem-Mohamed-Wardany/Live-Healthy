@@ -693,7 +693,6 @@ class PatGUI(ctk.CTk):
                 self.Masterlabel.place(anchor="nw", relx=0.25, rely=0.15)
 
     def FormateCreditCard(self):
-
         if len(self.CardNumber.get()) != 0:  # check if Card Number is not Empty
             # load card Types Images into its label
             string = self.CardNumber.get()
@@ -803,7 +802,6 @@ class PatGUI(ctk.CTk):
         self.ChatBlock(answer, True)
         return messagebox.showinfo("Info", "Your scan has been imported")
     
-
     def Consult(self, event):
         if len(self.messages) <=1:
             return messagebox.showerror("Error", self.systemError.get(27))
@@ -818,7 +816,6 @@ class PatGUI(ctk.CTk):
                 chat.append(f"Live Healthy bot: {txt}")
         textChat = "".join(chat[i] if i == 0 else f"&,&{chat[i]}" for i in range(len(chat)))
         self.FillRequest(textChat)
-            
 
     def FillRequest(self, Chatlog):
         Infotext, self.Price = self.user.PriceInfo("Chat")

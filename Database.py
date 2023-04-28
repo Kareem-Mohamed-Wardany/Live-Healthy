@@ -7,6 +7,9 @@ class Database:
     config = SystemConfig()
 
     def __init__(self):
+        self.Connect()
+
+    def Connect(self):
         try:
             self.mydb = mysql.connector.connect(
                 host=self.config.get("host"),

@@ -24,11 +24,8 @@ class DocGUI(ctk.CTk):
     configfile = SystemConfig()
     systemError = SystemErrors()
 
-    # connect to DB
-    db = Database()
 
     # Define the Doctor
-
     Created = [
         True,
         True,
@@ -808,6 +805,7 @@ class DocGUI(ctk.CTk):
         UpdateQuery(
             "UPDATE chatdata SET Chat_Logs= %s WHERE Patient_ID= %s", [textChat, id]
         )
+    
     def AddLoadedChat(self):
         # check that there is no items in LoaddedChat
         while self.LoaddedChat.qsize() > 0:
@@ -1218,7 +1216,6 @@ class DocGUI(ctk.CTk):
                 self.Masterlabel.place(anchor="nw", relx=0.25, rely=0.15)
 
     def FormateCreditCard(self):
-
         if len(self.CardNumber.get()) != 0:  # check if Card Number is not Empty
             # load card Types Images into its label
             string = self.CardNumber.get()

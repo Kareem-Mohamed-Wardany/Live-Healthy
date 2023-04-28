@@ -4,8 +4,6 @@ from User import *
 
 class Doctor(User):
 
-    db = Database()  # Create connection with Database to access it
-
     def __init__(self, id):
         if id != -1:
             super().__init__(id)

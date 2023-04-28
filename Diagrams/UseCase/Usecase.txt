@@ -1,0 +1,51 @@
+@startuml
+:User: as user
+:Patient: as patient
+:Doctor: as doctor
+:Radiologist: as radiologist
+:Administrator: as admin
+
+user <|-- admin
+user <|-- patient
+user <|-- doctor
+user <|-- radiologist
+
+user --> (Register)
+user --> (Login)
+user --> (Logout)
+user --> (Change Appearance Mode)
+
+admin --> (Show All Reports)
+admin --> (Ban Doctor)
+admin ---> (Verify Doctor)
+admin ---> (Suspend Patient)
+admin ---> (Revoke Patient Suspension)
+
+
+patient--> (Predict Scan)
+(Predict Scan) .> (Check Coins) : include
+patient--> (Save Scan Prediction)
+patient--> (Show All Prescriptions)
+patient---> (Download Prescription)
+patient---> (Purchase Coins)
+patient---> (Purchase VIP)
+(Purchase Coins) .> (Validate Credit Card) : include
+
+doctor--> (Write Prescription)
+doctor--> (End Chat)
+doctor--> (Report Patient)
+doctor--> (Withdraw Money)
+doctor--> (Assign Patient)
+(Withdraw Money) .> (Validate Credit Card) : include
+
+
+radiologist--> (Predict Many Scans)
+radiologist--> (Generate CSV file)
+
+
+
+:ChatGPT: --> (Chat)
+doctor --> (Chat)
+patient -->(Chat)
+(Check Coins) .> (Chat) : extend
+@enduml

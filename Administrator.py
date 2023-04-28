@@ -1,6 +1,10 @@
-from User import *
-from tkinter import filedialog
+import smtplib
+import ssl
 from datetime import date, timedelta
+from email.message import EmailMessage
+from tkinter import filedialog
+
+from User import *
 
 
 class Administrator(User):
@@ -17,12 +21,16 @@ class Administrator(User):
     def RevokeSuspension(self, master, id, Update):
         DeleteQuery("DELETE FROM reports WHERE Issuer_ID = %s",[id])
         DeleteQuery("DELETE FROM suspended WHERE User_ID= %s",[id])
+        Mail = self.GetMail(id)
+        self.SendMail(Mail, "Account Activation", "Your account has been re-activated successfully")
         Update()
         MessageBox(master,"info","Suspension revoked for the patient")
 
     def ConfirmSuspension(self, master, id, update):
         DeleteQuery("DELETE FROM reports WHERE Issuer_ID = %s",[id])
         UpdateQuery("UPDATE suspended SET Suspention_Type= %s WHERE User_ID= %s",["Permanent",id])
+        Mail = self.GetMail(id)
+        self.SendMail(Mail, "Account Activation", "Your account has been permanently suspended")
         update()
         MessageBox(master,"info","Patient permanently suspended")
 
@@ -31,13 +39,46 @@ class Administrator(User):
 
     def VerifyDoctor(self, event, master, id, update):
         UpdateQuery("UPDATE doctordata SET Verified= %s WHERE Doctor_ID= %s",[1, id])
+        Mail = self.GetMail(id)
+        self.SendMail(Mail, "Account Activation", "Your account has been verified successfully")
         update()
         MessageBox(master,"info","Doctor Verified")
 
     def BanDoctor(self, event, master, id, update):
         UpdateQuery("UPDATE doctordata SET Verified= %s WHERE Doctor_ID= %s",[-1, id])
         InsertQuery("INSERT INTO suspended (User_ID, Suspention_Type, Suspention_Date, Reason) VALUES (%s, %s, %s, %s)",[id, "Permanent",date.today(),"Register With Fake ID and License",])
+        Mail = self.GetMail(id)
+        self.SendMail(Mail, "Account Activation", "Your account has been suspended")
         update()
         MessageBox(master,"info","Doctor Suspended")
 
+    def GetMail(self, id):
+        return SelectQuery("SELECT Mail FROM users WHERE ID =%s",[id])[0][0]
+    
+    def SendMail(self, mail, Subject, msg):
+        # Define email sender and receiver
+        email_sender = 'livehealthy171@gmail.com'
+        email_password = 'gowdfobqansntowb'
+        email_receiver = mail
 
+        # Set the subject and body of the email
+        subject = Subject
+        body = msg
+
+        em = EmailMessage()
+        em['From'] = email_sender
+        em['To'] = email_receiver
+        em['Subject'] = subject
+        em.set_content(body)
+
+        # Add SSL (layer of security)
+        context = ssl.create_default_context()
+
+        # Log in and send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+
+a = Administrator(0)
+print(a.GetMail(10))
