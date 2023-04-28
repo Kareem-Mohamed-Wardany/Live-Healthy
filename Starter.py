@@ -29,10 +29,6 @@ class Starter(ctk.CTk):
     MovetoReg = False
     Moveto = False
     systemError = SystemErrors()
-
-    # connect to DB
-    db = Database()
-
     def __init__(self):
         super().__init__()
         self.WindowSettings()
