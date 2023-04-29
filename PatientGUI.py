@@ -1113,5 +1113,5 @@ class PatGUI(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = PatGUI(23)
+    app = PatGUI(5)
     app.mainloop()
