@@ -29,11 +29,7 @@ class PatGUI(ctk.CTk):
     configfile = SystemConfig()
     systemError = SystemErrors()
 
-    # connect to DB
-    db = Database()
-
     # Define the Patient
-
     Created = [
         True,
         True,
@@ -42,13 +38,12 @@ class PatGUI(ctk.CTk):
         True,
     ]  # Predict X-ray frame, Chat With doctor frame, vipPurchase Frame, Prescriptions Frame , credits PREVENTS duplications
 
+    # Main Constructor
     def __init__(self, id):
         super().__init__()
         self.user = UserFactory.createUser(id, "patient")  
         self.WindowSettings()
         self.LeftSideBar()
-
-    # Main Constructor
 
     def WindowSettings(self):
         # load Apperance model of the user
@@ -318,13 +313,12 @@ class PatGUI(ctk.CTk):
             self.LeftSideBar_frame, values=v, command=self.change_appearance_mode
         )
         self.appearance_mode_menu.grid(row=12, column=0, padx=20, pady=20, sticky="s")
-        
+
     def logout(self):
         with contextlib.suppress(Exception):
             shutil.rmtree("Data/Prescriptions/")
             self.Userclient.end()
         self.user.Logout(self)
-        
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
@@ -344,7 +338,7 @@ class PatGUI(ctk.CTk):
         
         ImportScanButton = ctk.CTkButton(self.Predict_Scan_frame,text="Import Scan", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command=self.ImportScan)
         ImportScanButton.place(anchor="nw", relx=0.72, rely=0.05)
-        
+
     def ImportScan(self):
         if self.ScanPathEntry.get() != "":
             self.ScanPathEntry.configure(state="normal")
@@ -460,7 +454,7 @@ class PatGUI(ctk.CTk):
         self.select_frame_by_name("Predict_Scan")
 
     def ChatWithDoctor_button_event(self):
-        self.messages = [{"role": "system", "content": "You are an AI model in a medical system that assists pulmonary by interacting with patient and ask him firstly if patient has x-ray scan for his lung so ask him to import it and Secondly asks him to say symptoms that he feels and thirdly ask him about time while suffering from these symptoms and fourthly ask him if he takes any medication fifthly ask him if he has any extra information after getting all these information predict if patien has one from five diseases like Covid-19 or Fibrosis or Tuberculosis or viral PNEUMONIA or bacterial PNEUMONIA or patient is not having any disease after that predict if patient health state is critical then advice him to use chat with one of our doctors in the system, Do not answer anything other than pulmonary-related queries, try to be nice with patient, try to ask one question"}]
+        self.messages = [{"role": "system", "content": "You are an AI model in a medical system that assists pulmonary by interacting with patient and ask him firstly if patient has x-ray scan for his lung so ask him to import it and Secondly asks him to say symptoms that he feels and thirdly ask him about time while suffering from these symptoms and fourthly ask him if he takes any medication fifthly ask him if he has any extra information after getting all these information predict if patien has one from five diseases like Covid-19 or Fibrosis or Tuberculosis or viral PNEUMONIA or bacterial PNEUMONIA or patient is not having any disease after that predict if patient health state is critical then advice him to press on Chat With doctor button in the system to be able to talk to a doctor, Do not answer anything other than pulmonary-related queries, try to be nice with patient, try to ask one question"}]
         self.ChatWithDoctor()
         self.select_frame_by_name("ChatWithDoctor")
 
@@ -785,7 +779,7 @@ class PatGUI(ctk.CTk):
             ImportScanButton = ctk.CTkButton(self.ChatWithDoctor_frame,text="Import Scan", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"),command=self.RequestScan)
             ImportScanButton.place(anchor="nw", relx=0.77, rely=0.05)
 
-            ConsultLabel = ctk.CTkLabel(self.ChatWithDoctor_frame, text="Doctor's Consultation", font= ctk.CTkFont(size=20,weight="bold"), image= ctk.CTkImage(consultation,size=(50,50)),compound="left", text_color=self.configfile.get("TextColor"))
+            ConsultLabel = ctk.CTkLabel(self.ChatWithDoctor_frame, text="Chat With Doctor", font= ctk.CTkFont(size=20,weight="bold"), image= ctk.CTkImage(consultation,size=(50,50)),compound="left", text_color=self.configfile.get("TextColor"))
             ConsultLabel.place(anchor="nw", relx=0.75, rely=0.9)
             ConsultLabel.bind("<Button-1>", lambda event: self.Consult(event))
 
