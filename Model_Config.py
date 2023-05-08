@@ -51,9 +51,9 @@ def model_configuration():
     optimizer = SGD(learning_rate=lr_schedule, momentum=optimizer_momentum)
 
     # Load Tensorboard callback
-    tensorboard = TensorBoard(
-        log_dir=os.path.join(os.getcwd(), "logs"), histogram_freq=1, write_images=True
-    )
+    # tensorboard = TensorBoard(
+    #     log_dir=os.path.join(os.getcwd(), "logs"), histogram_freq=1, write_images=True
+    # )
 
     # Save a model checkpoint after every epoch
     checkpoint = ModelCheckpoint(
@@ -62,7 +62,7 @@ def model_configuration():
     early = EarlyStopping(monitor="val_accuracy", min_delta=0, patience=30, verbose=1)
 
     # Add callbacks to list
-    callbacks = [tensorboard, checkpoint, early]
+    callbacks =  [checkpoint, early] #[tensorboard, checkpoint, early]
 
     return {
         "width": width,

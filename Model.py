@@ -212,7 +212,7 @@ class ResNetModel:
             trained_resnet = self.training_process()
         img = IP.load_image(Scanpath)
         img = np.array(img)
-        x = trained_resnet.predict(img)
+        x = trained_resnet.predict(img,verbose=0)
         percentage_list = []
         classes = [
             "Normal",

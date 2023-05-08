@@ -72,6 +72,8 @@ User <|-- Patient
 
 Class Database{
     SystemConfig config
+    - instance
+    getInstance()
     Connect()
     Close()
     Update()
@@ -293,5 +295,18 @@ RadioloGUI "1"--"1" Starter
 PatGUI "1"--"1" Starter
 DocGUI "1"--"1" Starter
 AdminGUI "1"--"1" Starter
+
+Class UserFactory{
+    createUser()
+}
+RadioloGUI "1"--"1" UserFactory
+PatGUI "1"--"1" UserFactory
+DocGUI "1"--"1" UserFactory
+AdminGUI "1"--"1" UserFactory
+
+Doctor "1"--"1" UserFactory
+Patient "1"--"1" UserFactory
+Radiologist "1"--"1" UserFactory
+Administrator "1"--"1" UserFactory
 
 @enduml
