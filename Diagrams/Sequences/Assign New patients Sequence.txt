@@ -1,5 +1,4 @@
 @startuml
-title Assign New Patients
 actor       Doctor       as User
 boundary    DoctorPage  as Page
 control     SystemHandler     as SystemHandler

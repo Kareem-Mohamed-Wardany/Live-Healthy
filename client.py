@@ -43,26 +43,8 @@ class Client:
                 elif message != "Please enter message" or message != "":
                     q.put(message)
             except Exception:
-                self.clientsocket.close()
+                self.end()
                 break
 
     def end(self):
         self.clientsocket.close()
-
-
-# def StartClient(name, Channel):
-#     # taking inputs from the user on launch
-#     # write an error if input is incorrect
-#     # INPUT: NAME, CHANELNAME
-#     # creating a client
-#     ADDR = ("127.0.0.1", 4073)
-#     client = Client(name, ADDR, Channel)
-
-#     # creating threads for writing and listenting
-#     # recieve thread
-#     receiveThread = threading.Thread(target=client.receiveFromServer)
-#     receiveThread.start()
-
-#     # write thread
-#     writeThread = threading.Thread(target=client.writeToServer)
-#     writeThread.start()

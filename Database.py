@@ -21,7 +21,6 @@ class Database:
 
     def Connect(self):
         try:
-            print("Connecting to")
             self.mydb = mysql.connector.connect(
                 host=self.configfile.get("host"),
                 user=self.configfile.get("user"),
@@ -29,7 +28,6 @@ class Database:
                 database=self.configfile.get("database"),
             )
             self.mycursor = self.mydb.cursor()
-            print("Connected")
         except Exception:
             print("Error, Database is not connected")
 
@@ -65,10 +63,6 @@ class Database:
     def Commit(self):
         self.mydb.commit()
 
-    def Close(self):
-        self.mydb.close()
-
-
 def UpdateQuery(Query, Values):
     db = Database.getInstance()
     db.Update(Query, Values)
@@ -76,7 +70,6 @@ def UpdateQuery(Query, Values):
 
 def SelectQuery(Query, Values=None):
     db = Database.getInstance()
-    print("test query")
     res = db.Select(Query, Values)
     return res
 

@@ -1,5 +1,5 @@
 @startuml
-title Predict Folder
+
 actor       Radiologist       as User
 boundary    RadiologistPage  as PatientPage
 control     SystemHandler     as SystemHandler

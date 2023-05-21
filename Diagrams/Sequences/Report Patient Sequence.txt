@@ -1,5 +1,4 @@
 @startuml
-title Report Patient
 actor       Doctor       as User
 boundary    DoctorPage  as Page
 control     SystemHandler     as SystemHandler

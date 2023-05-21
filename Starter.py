@@ -721,8 +721,6 @@ class Starter(ctk.CTk):
             return messagebox.showerror("Error", self.systemError.get(CheckData), icon="error", parent=self.backgroundFrame)
         else:
             self.insertUserInfo()
-            
-
 
     def dataValidator(self):  
         EmptyFields = self.emptyMainFields()

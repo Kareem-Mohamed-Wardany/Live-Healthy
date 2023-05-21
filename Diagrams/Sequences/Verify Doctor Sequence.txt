@@ -1,5 +1,4 @@
 @startuml
-title Verify Doctor
 actor       Administrator       as User
 boundary    AdministratorPage  as PatientPage
 control     SystemHandler     as SystemHandler

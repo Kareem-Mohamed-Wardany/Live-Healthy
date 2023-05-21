@@ -204,13 +204,6 @@ class Patient(User):
                 LeftSideBar() # Update Left Side bar in GUI passed as a function
                 MessageBox(master,"info","Balance Recharge Completed")
 
-    def MyPrescriptionGenerated(self, id):
-        res = SelectQuery(
-            "SELECT prescriptions.prescriptionPDF FROM prescriptions, chatdata WHERE prescriptions.Patient_ID= %s AND prescriptions.Doc_ID= %s AND DATE(prescriptions.prescriptionDate) >= DATE(chatdata.StartDate)",
-            [self.userid, id],
-        )[0][0]
-        return len(res) != 0
-
     def MyPrescriptions(self):
         return SelectQuery("SELECT Doc_ID, prescriptionDate, prescriptionPDF FROM prescriptions WHERE Patient_ID = %s ORDER BY prescriptionDate DESC",[self.userid]) 
 

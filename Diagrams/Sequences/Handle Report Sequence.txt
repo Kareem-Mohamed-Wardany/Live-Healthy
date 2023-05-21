@@ -1,5 +1,5 @@
 @startuml
-title Handle Report
+
 actor       Administrator       as User
 boundary    AdministratorPage  as PatientPage
 control     SystemHandler     as SystemHandler

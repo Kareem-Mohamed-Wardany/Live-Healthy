@@ -1,5 +1,4 @@
 @startuml
-title Purchase Credits
 actor       Patient       as User
 boundary    PatientPage  as PatientPage
 control     SystemHandler     as SystemHandler

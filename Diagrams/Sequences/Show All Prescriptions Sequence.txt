@@ -1,5 +1,4 @@
 @startuml
-title Show All Prescriptions
 actor       Patient       as User
 boundary    PatientPage  as PatientPage
 control     SystemHandler     as SystemHandler

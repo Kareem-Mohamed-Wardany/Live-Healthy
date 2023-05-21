@@ -1,5 +1,4 @@
 @startuml
-title Chat With Doctor
 actor       Doctor       as User
 boundary    DoctorPage  as DoctorPage
 control     SystemHandler     as SystemHandler

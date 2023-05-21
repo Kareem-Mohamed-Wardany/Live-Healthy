@@ -186,11 +186,9 @@ class RadioloGUI(ctk.CTk):
         )
         self.appearance_mode_menu.grid(
             row=7, column=0, padx=20, pady=20, sticky="s")
-        
 
     def logout(self):
         self.user.Logout(self)
-        
 
     def LoadPredictScanFrame(self):
         if self.Created[0]:
