@@ -88,17 +88,17 @@ class Starter(ctk.CTk):
         self.segbutton.place(anchor="nw", relx=0.7, rely=0.03)
         self.segbutton.set("Login")
         self.ShowLoginFrame()
-        # self.mainRegister()
 
     def ShowFrame(self, selection):
         with contextlib.suppress(Exception):
             for widget in self.SelectionFrame.winfo_children():
                 widget.destroy()
         if selection == "Login":
-            self.ShowLoginFrame()
+            loginTimer= Timer(0.2, self.ShowLoginFrame) 
+            loginTimer.start()
         else:
-            self.mainRegister()
-
+            RegisterTimer= Timer(0.2, self.mainRegister) 
+            RegisterTimer.start()
 
     def ShowLoginFrame(self):
         welcomeLabel = ctk.CTkLabel(
@@ -171,7 +171,6 @@ class Starter(ctk.CTk):
         self.LoginButton = ctk.CTkButton(self.SelectionFrame,text="Login", width= 170, height=50,corner_radius=30,font=ctk.CTkFont(size=18, family="Aerial 18",weight='bold'), command=self.login_verify)
         self.LoginButton.place(anchor="nw", relx=0.061, rely=0.8)
 
-
     def login_verify(self):
         from User import User
         self.email = self.emailEntry.get()
@@ -188,7 +187,6 @@ class Starter(ctk.CTk):
                 if res == 0:
                     return messagebox.showerror("Error", self.systemError.get(15), icon="error", parent=self.SelectionFrame)
             self.MoveTo(userinfo)
-            
 
     def forgot_password(self, event):
         mail = self.emailEntry.get()
@@ -844,26 +842,26 @@ class Starter(ctk.CTk):
         if self.UsType in ["Consultant", "Specialist"]:
             doctordata = Doctor.CreateDoctor(self.userName ,self.Email, self.Password, self.UsType, self.Phone, self.DoB, self.Gender, self.uni, self.IDbinary, self.LicenseBinary)
             doctordata.SaveData()
-        messagebox.showinfo("✅Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
+        messagebox.showinfo("✅ Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
 
     def MoveTo(self,UserInfo):
         self.destroy()
         
         id = str(UserInfo[0])
         from UserFactory import UserFactory
-        if UserInfo[1].lower() == "patient": # sali@gmail.com       pw: 123
+        if UserInfo[1].lower() == "patient": 
             from PatientGUI import PatGUI
             patient = PatGUI(id)
             patient.mainloop()
-        if UserInfo[1].lower() == "radiologist": # salma@gmail.com     PW: 123
+        if UserInfo[1].lower() == "radiologist": 
             from RadiologistGUI import RadioloGUI
             Radiologist = RadioloGUI(id)
             Radiologist.mainloop()
-        if UserInfo[1].lower() == "administrator": # admin   PW: admin
+        if UserInfo[1].lower() == "administrator":
             from AdministratorGUI import AdminGUI
             Admin = AdminGUI(id)
             Admin.mainloop()
-        if UserInfo[1].lower() in ["specialist","consultant"]: # sherif_mohamed@gmail.com       pw: 123
+        if UserInfo[1].lower() in ["specialist","consultant"]:
             from DoctorGUI import DocGUI
             Doctor = DocGUI(id)
             Doctor.mainloop()

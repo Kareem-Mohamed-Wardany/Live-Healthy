@@ -5,7 +5,7 @@ def SystemConfig():
         "user": "root",
         "password": "",
         "database": "Systemdb",
-        "IMAGE_SIZE": 224,
+        "IMAGE_SIZE": 512,
         "ClassLabels": 6,
         "FramesSizeWidth": 1280,
         "FramesSizeHeight": 720,

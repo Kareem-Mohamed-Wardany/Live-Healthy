@@ -1,6 +1,9 @@
 import csv
 import os
 import os.path
+from multiprocessing import Pool
+from functools import partial
+
 
 from PIL import Image
 
@@ -46,21 +49,17 @@ class Radiologist(User):
         r.CenterName = CenterName
         return r
     
-
     def PredictScanFolder(self, FolderPath):
         output = []
         m = ResNetModel()
-        valid_images = [".jpg",".gif",".png",".tga"]
+        valid_images = [".jpg",".gif",".png",".tga",".jpeg"]
         for f in os.listdir(FolderPath):
             ext = os.path.splitext(f)[1]
             if ext.lower() not in valid_images:
                 continue
             FullPath = os.path.join(FolderPath,f)
-            print(FullPath)
             imageName= os.path.splitext(f)[0]
-            ScanThread = ReturnValueThread(target=m.PredictScan,args=(FullPath,True))
-            ScanThread.start()
-            output.append((imageName, ScanThread.join()))
+            output.append((imageName, m.PredictScan(FullPath, True, True)))
         return output
 
     # Generate Excel file

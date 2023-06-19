@@ -121,19 +121,20 @@ class Patient(User):
                 self.p2 = temptext
                 self.max2=temp
 
-            Label1 = f"{self.p1} ➜ {self.max1}%"
-            Label2 = f"{self.p2} ➜ {self.max2}%"
+            Label1 = f"{self.p1} -> {self.max1}%"
+            Label2 = f"{self.p2} -> {self.max2}%"
             return Label1, Label2
         elif SaveType == "One":
             prediction = m.PredictScan(ScanPath, True)
             return prediction
 
-    def SavePrediction(self, Scanpath):
+    def SavePrediction(self, Scanpath, botmsg):
         newpath = Scanpath.split(".")[0]
         newpath = f"{newpath}.txt"
         with open(newpath, "w") as f:
             f.write(f"Highest Class Percentage: {self.p1} --> {self.max1}% \n")
-            f.write(f"Second Class Percentage: {self.p2} --> {self.max2}%")
+            f.write(f"Second Class Percentage: {self.p2} --> {self.max2}%\n")
+            f.write(botmsg)
         messagebox.showinfo("Info","Text File saved successfully")
 
     def PriceInfo(self, ContextType):

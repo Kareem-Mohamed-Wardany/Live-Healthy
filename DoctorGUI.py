@@ -332,7 +332,7 @@ class DocGUI(ctk.CTk):
         self.PatientRequestData(chatWindow, id)
         print(f"--- {time.time() - start_time} seconds ---")
         # join Chat Servrt
-        # self.JoinChatServer(id)
+        self.JoinChatServer(id)
 
     def ChatBoxBlock(self, master):
         self.chatbox = ctk.CTkTextbox(
@@ -716,7 +716,7 @@ class DocGUI(ctk.CTk):
             )  # Send any message to the Patient
             writeThread.start()
         except Exception:
-            print("Error with chat")
+            messagebox.showerror("Error","Chat Server is offline")
 
     def LoadBOTChatData(self, BotChat):
         # Load the chat of Patient with id

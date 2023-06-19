@@ -359,37 +359,54 @@ class PatGUI(ctk.CTk):
         self.ClassTwo = ctk.CTkLabel(self.Predict_Scan_frame, width=400, text="", font=ctk.CTkFont(size=15),text_color=self.configfile.get("TextColor"))
         self.ClassTwo.place(anchor="nw", relx=0.05, rely=0.2)
 
-        if self.user.userVIPLevel < 3:
-            res = self.user.updateBalance(self.Predict_Scan_frame, self.Price)
-            if res != -1:
+
+        if len(self.ScanPath) >0:
+            if self.user.userVIPLevel < 3:
+                res = self.user.updateBalance(self.Predict_Scan_frame, self.Price)
+                if res != -1:
+                    self.Predict()
+                    self.Credits_button = ctk.CTkButton(
+                        self.LeftSideBar_frame,
+                        corner_radius=0,
+                        height=40,
+                        border_spacing=10,
+                        text=self.user.userBalance,
+                        fg_color="transparent",
+                        text_color=self.configfile.get("TextColor"),
+                        hover_color=self.configfile.get("BackgroundColor"),
+                        image=self.coin_image,
+                        anchor="w",
+                        command=self.Credits_button_event,
+                    )
+                    self.Credits_button.grid(row=10, column=0, sticky="ew")
+                    SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath,self.answer))
+                    SavePredictionButton.place(anchor="nw", relx=0.5, rely=0.175)
+            else:
                 self.Predict()
-                self.Credits_button = ctk.CTkButton(
-                    self.LeftSideBar_frame,
-                    corner_radius=0,
-                    height=40,
-                    border_spacing=10,
-                    text=self.user.userBalance,
-                    fg_color="transparent",
-                    text_color=self.configfile.get("TextColor"),
-                    hover_color=self.configfile.get("BackgroundColor"),
-                    image=self.coin_image,
-                    anchor="w",
-                    command=self.Credits_button_event,
-                )
-                self.Credits_button.grid(row=10, column=0, sticky="ew")
-                SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath))
-                SavePredictionButton.place(anchor="nw", relx=0.15, rely=0.26)
-        else:
-            self.Predict()
-            SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath))
-            SavePredictionButton.place(anchor="nw", relx=0.15, rely=0.26)
+                SavePredictionButton = ctk.CTkButton(self.Predict_Scan_frame,text="Save Prediction", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"), hover_color=self.configfile.get("FrameColor"), command= lambda: self.user.SavePrediction(self.ScanPath,self.answer))
+                SavePredictionButton.place(anchor="nw", relx=0.5, rely=0.175)
 
     def Predict(self):
         Label1 , Label2 =  self.user.PredictMyScan(self.ScanPath, "Two")
         self.pr1 = f"Highest Class Percentage: {Label1}"
+        disease = Label1.split(" -")[0]
+
         self.pr2 = f"Second Class Percentage: {Label2}"
+        self.Predictionmessage = [{"role": "system", "content": f"You are an AI Chatbot that assists pulmonary by giving patient a medical advice, this patient has {disease}, give him only advice to help him"}]
+        gptthread = ReturnValueThread(target=self.PredictionAdvice)
+        gptthread.start()
+        self.answer = gptthread.join()
         self.ClassOne.configure(text=self.pr1)
         self.ClassTwo.configure(text=self.pr2)
+        Advicelabel = ctk.CTkTextbox(self.Predict_Scan_frame,width=650,height=400,font= ctk.CTkFont(size=16),text_color=self.configfile.get("TextColor"),fg_color=self.configfile.get("FrameColor"),scrollbar_button_color=self.configfile.get("TextColor"), scrollbar_button_hover_color=self.configfile.get("TextColor"))
+        Advicelabel.place(anchor="nw", relx=0.05, rely=0.25)
+        Advicelabel.insert("end", self.answer) 
+        Advicelabel.configure(state="disabled")
+
+    def PredictionAdvice(self):
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.Predictionmessage)
+        ChatGPT_reply = response["choices"][0]["message"]["content"]
+        return ChatGPT_reply
 
     def select_frame_by_name(self, name):
         # set button color for selected button
@@ -787,14 +804,14 @@ class PatGUI(ctk.CTk):
     prediction=""
     def RequestScan(self): 
         self.ScanPath = filedialog.askopenfilename(filetypes=(("Image File", ["*.png","*.jpg","*.jpeg"]),))
-        self.ChatBlock("Bot is analyzing...")
-        self.prediction= self.user.PredictMyScan(self.ScanPath, "One")
-        self.messages.append({"role": "system", "content": f"patient scan prediction is {self.prediction}, but don't share it immediately with the patient and share it at the end of the conversation after them answering all the questions you ask"})
-        ScanImage = ctk.CTkLabel(self.ChatWithDoctor_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
-        ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
-        answer = f"Live Healthy bot: {self.CustomChatGPT2()}"
-        self.ChatBlock(answer, True)
-        return messagebox.showinfo("Info", "Your scan has been imported")
+        if len(self.ScanPath) >0:
+            self.prediction= self.user.PredictMyScan(self.ScanPath, "One")
+            self.messages.append({"role": "system", "content": f"patient scan prediction is {self.prediction}, but don't share it immediately with the patient and share it at the end of the conversation after them answering all the questions you ask"})
+            ScanImage = ctk.CTkLabel(self.ChatWithDoctor_frame,text="",image=ctk.CTkImage(Image.open(self.ScanPath),size=(300,300)))
+            ScanImage.place(anchor="nw", relx=0.7, rely=0.2)
+            answer = f"Live Healthy bot: {self.CustomChatGPT2()}"
+            self.ChatBlock(answer, True)
+            return messagebox.showinfo("Info", "Your scan has been imported")
     
     def Consult(self, event):
         if len(self.messages) <=1:
@@ -865,9 +882,9 @@ class PatGUI(ctk.CTk):
 
         print(f"--- {time.time() - start_time} seconds ---")
 
-        # if not Bot:
-        # join Chat Servrt
-            # self.JoinChatServer()
+        if not Bot:
+        # join Chat Server
+            self.JoinChatServer()
 
     def DoctorData(self, master):
         DoctorData = UserFactory.createUser(self.DoctorID,"doctor")  # Get the patient Data
@@ -953,7 +970,7 @@ class PatGUI(ctk.CTk):
             )  # Send any message to the Patient
             writeThread.start()
         except Exception:
-            print("Chat Server is offline")
+            messagebox.showerror("Error","Chat Server is offline")
 
     def LoadChatData(self):
         # Load the chat of Patient with id

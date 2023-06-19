@@ -68,7 +68,7 @@ class User:
             "SELECT ID, Account_Type FROM users WHERE Mail LIKE %s AND Password=%s", [email, password]
         )
         if len(res) == 0:
-            return messagebox.showerror("User not found","Please Enter a valid email address and password")
+            return messagebox.showerror("Error","Please Enter a valid email address and password")
         cls.userid = res[0][0]
         cls.userType = res[0][1]
         return cls.userid, cls.userType

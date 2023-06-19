@@ -3,6 +3,11 @@ import sys
 from Dataset import *
 from imageprocessing import *
 from Model_Config import *
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import tensorflow
@@ -189,8 +194,57 @@ class ResNetModel:
         Evaluate a trained model.
         """
         # Evaluate model
+        # Evaluate model
         score = model.evaluate(xtest, ytest, verbose=1)
-        print(f"Test loss: {score[0]} / Test accuracy: {score[1]}")
+        print(f'Test loss: {score[0]} / Test accuracy: {score[1]}')
+
+        # Predict labels
+        y_pred = model.predict(xtest)
+        print(len(y_pred))
+        y_pred = np.argmax(y_pred, axis=1)
+        ytest = np.argmax(ytest, axis=1)
+        print(y_pred)
+        print(ytest)
+        precision = precision_score(ytest, y_pred, average='weighted')
+        print("Precision:", precision)
+
+        # Calculate recall
+        recall = recall_score(ytest, y_pred, average='weighted')
+        print("Recall:", recall)
+
+        # Calculate F1 score
+        classes = ["Normal", "COVID", "Bacterial PNEUMONIA", "Viral PNEUMONIA", "Fibrosis", "Tuberculosis"]
+        self.plot_confusion_matrix(ytest, y_pred, classes)
+
+    def plot_confusion_matrix(self, y_true, y_pred, classes):
+        # Compute confusion matrix
+        cm = confusion_matrix(y_true, y_pred)
+
+        # Normalize the confusion matrix
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+        # Create a figure and axes
+        plt.figure(figsize=(8, 6))
+        ax = plt.gca()
+
+        # Plot the confusion matrix
+        sns.heatmap(cm, annot=True, cmap='Blues', fmt='.2f', cbar=False, ax=ax)
+
+        # Set the axis labels and title
+        ax.set_xlabel('Predicted labels')
+        ax.set_ylabel('True labels')
+        ax.set_title('Confusion Matrix')
+
+        # Set the x-axis and y-axis ticks
+        tick_marks = np.arange(len(classes))
+        ax.set_xticks(tick_marks + 0.5)
+        ax.set_yticks(tick_marks + 0.5)
+        ax.set_xticklabels(classes, rotation=45)
+        ax.set_yticklabels(classes, rotation=45)
+
+        # Show the plot
+        plt.tight_layout()
+        plt.show()
 
     def training_process(self, ev=False):
         # load test and train data
@@ -203,7 +257,7 @@ class ResNetModel:
             self.evaluate_model(trained_resnet, x_test, y_test)
         return trained_resnet
 
-    def PredictScan(self, Scanpath, OneValue = False):
+    def PredictScan(self, Scanpath, OneValue = False, Multiprocess = False, work = 1):
         import tensorflow
         IP = ImageProcessing()
         if os.path.exists(resource_path("Data/ResNet.h5")):
@@ -212,7 +266,7 @@ class ResNetModel:
             trained_resnet = self.training_process()
         img = IP.load_image(Scanpath)
         img = np.array(img)
-        x = trained_resnet.predict(img,verbose=0)
+        x = trained_resnet.predict(img, verbose=0, use_multiprocessing=Multiprocess, workers=work)
         percentage_list = []
         classes = [
             "Normal",
