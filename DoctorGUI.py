@@ -679,7 +679,7 @@ class DocGUI(ctk.CTk):
             subprocess.Popen([path], shell=True)  # Show the Prescription for the Doctor
         else:
             self.MedicineWindow.destroy()
-            return MessageBox(self, "info", "Prescription Created")
+            return messagebox.showinfo("info","Prescription Created")
 
     def JoinChatServer(self, id):
         # Check if the Chat server is online
@@ -863,7 +863,7 @@ class DocGUI(ctk.CTk):
             if res != -1:
                 self.UpdateBalanceButton("Credits added to your balance!")
         else:
-            MessageBox(self, "warning", "Report Should be Generated")   
+            messagebox.showwarning("Warning","Report Should be Generated")
 
     def ReportReasonBlock(self, event, name, id):
         # Create New Window
@@ -1178,7 +1178,7 @@ class DocGUI(ctk.CTk):
             len(self.CardNumber.get()) != 16 or self.CardNumber.get().isalpha()
         ):  # 5471462613718519
             self.CardChecked = False
-            return MessageBox(self, "warning", "Credit Card is not 16 digit")
+            return messagebox.showwarning("Warning", "Credit Card is not 16 digit")
         else:
             self.FormateCreditCard()
             self.CreditCardType()
@@ -1232,7 +1232,7 @@ class DocGUI(ctk.CTk):
     def HandleCVV(self, event):
         if len(self.CVV.get()) != 3 or self.CVV.get().isalpha():
             self.CardChecked = False
-            MessageBox(self, "warning", "CVV is not 3 digit")
+            messagebox.showwarning("Warning", "CVV is not 3 digit")
         else:
             self.CardChecked = True
 
@@ -1384,7 +1384,7 @@ class DocGUI(ctk.CTk):
             command=self.Credits_button_event,
         )
         self.Credits_button.grid(row=6, column=0, sticky="ew")
-        MessageBox(self, "info", arg0)
+        messagebox.showinfo("info", arg0)
 
     # Other functions
     def select_frame_by_name(self, name):

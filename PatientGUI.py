@@ -331,7 +331,7 @@ class PatGUI(ctk.CTk):
                 widget.destroy()
         Infotext, self.Price = self.user.PriceInfo("")
         self.Price *= -1 
-        MessageBox(self.Predict_Scan_frame,"info",Infotext)
+        messagebox.showinfo("info",Infotext)
 
         self.ScanPathEntry = ctk.CTkEntry(self.Predict_Scan_frame, width=700, state="disabled", text_color=self.configfile.get("TextColor"), fg_color=self.configfile.get("FrameColor"),border_color=self.configfile.get("TextColor"))
         self.ScanPathEntry.place(anchor="nw", relx=0.05, rely=0.05)
@@ -666,7 +666,7 @@ class PatGUI(ctk.CTk):
             len(self.CardNumber.get()) != 16 or self.CardNumber.get().isalpha()
         ):  # 5471462613718519
             self.CardChecked = False
-            return MessageBox(self.credits_frame, "warning", "Credit Card is not 16 digit")
+            return messagebox.showwarning("Warning", "Credit Card is not 16 digit")
         else:
             self.FormateCreditCard()
             self.CreditCardType()
@@ -720,7 +720,7 @@ class PatGUI(ctk.CTk):
     def HandleCVV(self, event):
         if len(self.CVV.get()) != 3 or self.CVV.get().isalpha():
             self.CardChecked = False
-            MessageBox(self.credits_frame, "warning", "CVV is not 3 digit")
+            messagebox.showwarning("Warning", "CVV is not 3 digit")
         else:
             self.CardChecked = True
 
@@ -786,7 +786,7 @@ class PatGUI(ctk.CTk):
         if self.user.checkRequest(): # Check if the Patient already has a request
             res = SelectQuery("SELECT Request_Status FROM requests WHERE Patient_ID= %s", [self.user.userid])[0][0]
             if res == "waiting":
-                return MessageBox(self.ChatWithDoctor_frame,"info", "Waiting for a doctor to respond")
+                return messagebox.showinfo("info", "Waiting for a doctor to respond")
             self.DoctorID = SelectQuery("SELECT Doc_ID FROM chatdata WHERE Patient_ID= %s", [self.user.userid])[0][0]
             self.openChat()
 
@@ -831,7 +831,7 @@ class PatGUI(ctk.CTk):
     def FillRequest(self, Chatlog):
         Infotext, self.Price = self.user.PriceInfo("Chat")
         self.Price *= -1 
-        MessageBox(self.ChatWithDoctor_frame,"info",Infotext)
+        messagebox.showinfo("info",Infotext)
         if self.user.userVIPLevel < 3:
             res = self.user.updateBalance(self.ChatWithDoctor_frame, self.Price)
             if res != -1:
@@ -850,11 +850,12 @@ class PatGUI(ctk.CTk):
                     command=self.Credits_button_event,
                 )
                 self.Credits_button.grid(row=10, column=0, sticky="ew")
-                return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
+                
+                return messagebox.showinfo("info","Successfully added")
                 
         else:
             self.user.CreateRequest(self.ScanPath, self.prediction, Chatlog)
-            return MessageBox(self.ChatWithDoctor_frame, "info","Successfully added")
+            return messagebox.showinfo("info","Successfully added")
 
     # Chat Section
     def openChat(self, Bot=False):

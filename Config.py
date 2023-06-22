@@ -11,7 +11,6 @@ def SystemConfig():
         "FramesSizeHeight": 720,
         "UserImageSize": 100,
         "ButtonIconsSize": 50,
-        "MessageBoxSize": "500x150",
         "ServerAddress": "127.0.0.1",
         "ServerPort": 4073,
         "BackgroundColor":"#6883bc",

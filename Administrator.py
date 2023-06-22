@@ -24,7 +24,7 @@ class Administrator(User):
         Mail = self.GetMail(id)
         self.SendMail(Mail, "Account Activation", "Your account has been re-activated successfully")
         Update()
-        MessageBox(master,"info","Suspension revoked for the patient")
+        messagebox.showinfo("info","Suspension revoked for the patient")
 
     def ConfirmSuspension(self, master, id, update):
         DeleteQuery("DELETE FROM reports WHERE Issuer_ID = %s",[id])
@@ -32,7 +32,7 @@ class Administrator(User):
         Mail = self.GetMail(id)
         self.SendMail(Mail, "Account Activation", "Your account has been permanently suspended")
         update()
-        MessageBox(master,"info","Patient permanently suspended")
+        messagebox.showinfo("info","Patient permanently suspended")
 
     def getUnverifiedDoctors(self):
         return SelectQuery("SELECT doctordata.Doctor_ID, users.Name, doctordata.University, doctordata.ID_Card, doctordata.Prof_License FROM doctordata,users WHERE doctordata.Doctor_ID = users.ID AND doctordata.Verified =%s ORDER BY doctordata.Doctor_ID ASC",[0])
@@ -42,7 +42,7 @@ class Administrator(User):
         Mail = self.GetMail(id)
         self.SendMail(Mail, "Account Activation", "Your account has been verified successfully")
         update()
-        MessageBox(master,"info","Doctor Verified")
+        messagebox.showinfo("info","Doctor Verified")
 
     def BanDoctor(self, event, master, id, update):
         UpdateQuery("UPDATE doctordata SET Verified= %s WHERE Doctor_ID= %s",[-1, id])
@@ -50,7 +50,7 @@ class Administrator(User):
         Mail = self.GetMail(id)
         self.SendMail(Mail, "Account Activation", "Your account has been suspended")
         update()
-        MessageBox(master,"info","Doctor Suspended")
+        messagebox.showinfo("info","Doctor Verified")
 
     def GetMail(self, id):
         return SelectQuery("SELECT Mail FROM users WHERE ID =%s",[id])[0][0]

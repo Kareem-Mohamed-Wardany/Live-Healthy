@@ -216,7 +216,7 @@ class RadioloGUI(ctk.CTk):
         self.ScanPathEntry.configure(state="disabled")
 
         if len(self.ScansFolderPath) >0:
-            MessageBox(self.Scan_frame, "info", "Kindly remain patient as we process your images!")
+            messagebox.showinfo("info","Kindly remain patient as we process your images!")
             output = self.user.PredictScanFolder(self.ScansFolderPath)
 
             ScrollableFrame = ctk.CTkScrollableFrame(
@@ -246,8 +246,7 @@ class RadioloGUI(ctk.CTk):
                                 imageName=i[0]: self.ShowImage(event, imageName))
 
             self.user.createcsv(self.ScansFolderPath, output)
-            MessageBox(self.Scan_frame, "info",
-                    "Predictions File Created successfully")
+            messagebox.showinfo("info","Predictions File Created successfully")
 
     def GetFullPath(self, Name):
         for i in os.listdir(self.ScansFolderPath):

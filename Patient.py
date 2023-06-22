@@ -188,7 +188,7 @@ class Patient(User):
             self.userVIPLevel = level
             UpdateQuery("UPDATE users SET Vip_Level= %s, Vip_End_Date= %s WHERE ID = %s",[self.userVIPLevel, self.userVIPEnd, self.userid])
             LeftSideBar() # Update Left Side bar in GUI passed as a function
-            MessageBox(master,"info","Purchase Complete")
+            messagebox.showinfo("info","Purchase Complete")
 
     def Purchase(self, button, master, LeftSideBar, CardChecked):
         if CardChecked == False:  #
@@ -203,7 +203,7 @@ class Patient(User):
             res = self.updateBalance(master, value)
             if res != -1:
                 LeftSideBar() # Update Left Side bar in GUI passed as a function
-                MessageBox(master,"info","Balance Recharge Completed")
+                messagebox.showinfo("info","Balance Recharge Completed")
 
     def MyPrescriptions(self):
         return SelectQuery("SELECT Doc_ID, prescriptionDate, prescriptionPDF FROM prescriptions WHERE Patient_ID = %s ORDER BY prescriptionDate DESC",[self.userid]) 
@@ -213,4 +213,4 @@ class Patient(User):
         FullPathName = f"{SavePath}/Prescription_{presDate}.pdf"
         write_file(presPDF, FullPathName)
         subprocess.Popen([FullPathName], shell=True)  # Show the Prescription for the patient
-        return MessageBox(master,"info","Prescription saved successfully")
+        return messagebox.showinfo("info","Prescription saved successfully")
