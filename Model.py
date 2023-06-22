@@ -18,13 +18,10 @@ from keras.models import load_model
 
 
 class ResNetModel:
-    def residual_block(self, x, number_of_filters, match_filter_size=False):
-        """
-        Residual block with
-        """
+    modelConfig = model_configuration()
+    def ResidualBlock(self, x, number_of_filters, match_filter_size=False):
         # Retrieve initializer
-        config = model_configuration()
-        initializer = config.get("initializer")
+        initializer = self.modelConfig.get("initializer")
 
         # Create skip connection
         x_skip = x
@@ -57,24 +54,8 @@ class ResNetModel:
         x = BatchNormalization(axis=3)(x)
 
         # Perform matching of filter numbers if necessary
-        if match_filter_size and config.get("shortcut_type") == "identity":
-            x_skip = Lambda(
-                lambda x: tensorflow.pad(
-                    x[:, ::2, ::2, :],
-                    tensorflow.constant(
-                        [
-                            [
-                                0,
-                                0,
-                            ],
-                            [0, 0],
-                            [0, 0],
-                            [number_of_filters // 4, number_of_filters // 4],
-                        ]
-                    ),
-                    mode="CONSTANT",
-                )
-            )(x_skip)
+        if match_filter_size:
+            x_skip = Lambda(lambda x: tensorflow.pad(x[:, ::2, ::2, :],tensorflow.constant([[0,0],[0, 0],[0, 0],[number_of_filters // 4, number_of_filters // 4]]),mode="CONSTANT",))(x_skip)
 
         # Add the skip connection to the regular mapping
         x = Add()([x, x_skip])
@@ -85,52 +66,27 @@ class ResNetModel:
         # Return the result
         return x
 
-    def ResidualBlocks(self, x):
-        """
-        Set up the residual blocks.
-        """
-        # Retrieve values
-        config = model_configuration()
-
+    def Blocks(self, x):
         # Set initial filter size
-        filter_size = config.get("initial_num_feature_maps")
-
-        # Paper: "Then we use a stack of 6n layers (...)
-        # 	with 2n layers for each feature map size."
-        # 6n/2n = 3, so there are always 3 groups.
-        for layer_group in range(3):
-
-            # Each block in our code has 2 weighted layers,
-            # and each group has 2n such blocks,
-            # so 2n/2 = n blocks per group.
-            for block in range(config.get("stack_n")):
-
-                # Perform filter size increase at every
-                # first layer in the 2nd block onwards.
-                # Apply Conv block for projecting the skip
-                # connection.
-                if layer_group > 0 and block == 0:
+        filter_size = self.modelConfig.get("initialNumberofFilters")
+        # Paper: "Then we use a stack of 6n layers (...) with 2n layers for each feature map size. 6n/2n = 3, so there are always 3 groups.
+        for Group in range(self.modelConfig.get("RepeatofBlocks")):
+            # Each block in our code has 2 weighted layers, and each group has 2n such blocks, so 2n/2 = n blocks per group.
+            for block in range(self.modelConfig.get("RepeatofBlocks")):
+                if Group > 0 and block == 0:
                     filter_size *= 2
-                    x = self.residual_block(x, filter_size, match_filter_size=True)
+                    x = self.ResidualBlock(x, filter_size, match_filter_size=True)
                 else:
-                    x = self.residual_block(x, filter_size)
-        # Return final layer
+                    x = self.ResidualBlock(x, filter_size)
         return x
 
-    def model_base(self, shp):
-        """
-        Base structure of the model, with residual blocks
-        attached.
-        """
+    def WholeModel(self, shp):
         # Get number of classes from model configuration
-        config = model_configuration()
-        initializer = model_configuration().get("initializer")
-
+        initializer = self.modelConfig.get("initializer")
         # Define model structure
-        # logits are returned because Softmax is pushed to loss function.
         inputs = Input(shape=shp)
         x = Conv2D(
-            config.get("initial_num_feature_maps"),
+            self.modelConfig.get("initialNumberofFilters"),
             kernel_size=(3, 3),
             strides=(1, 1),
             kernel_initializer=initializer,
@@ -138,69 +94,33 @@ class ResNetModel:
         )(inputs)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
-        x = self.ResidualBlocks(x)
+        x = self.Blocks(x)
         x = GlobalAveragePooling2D()(x)
         x = Flatten()(x)
-        outputs = Dense(config.get("num_classes"), kernel_initializer=initializer)(x)
+        outputs = Dense(self.modelConfig.get("num_classes"), kernel_initializer=initializer)(x)
 
         return inputs, outputs
 
-    def init_model(self):
-        """
-        Initialize a compiled ResNet model.
-        """
-        # Get shape from model configuration
-        config = model_configuration()
-
+    def ModelCompile(self): 
         # Get model base
-        inputs, outputs = self.model_base(
-            (config.get("width"), config.get("height"), config.get("dim"))
-        )
-
+        inputs, outputs = self.WholeModel((self.modelConfig.get("width"), self.modelConfig.get("height"), self.modelConfig.get("dim")))
         # Initialize and compile model
-        model = Model(inputs, outputs, name=config.get("name"))
-        model.compile(
-            loss=config.get("loss"),
-            optimizer=config.get("optim"),
-            metrics=config.get("optim_additional_metrics"),
-        )
+        model = Model(inputs, outputs)
+        model.compile(loss=self.modelConfig.get("loss"),optimizer=self.modelConfig.get("optimizer"),metrics=self.modelConfig.get("optimizer_additional_metrics"))
         return model
 
-    def train_model(self, model, x_train, x_valid, y_train, y_valid):
-        """
-        Train an initialized model.
-        """
-
-        # Get model configuration
-        config = model_configuration()
-
+    def ModelTrain(self, model, x_train, x_valid, y_train, y_valid):
         # Fit data to model
-        model.fit(
-            x_train,
-            y_train,
-            batch_size=config.get("batch_size"),
-            epochs=config.get("num_epochs"),
-            verbose=config.get("verbose"),
-            callbacks=config.get("callbacks"),
-            steps_per_epoch=config.get("steps_per_epoch"),
-            validation_data=(x_valid, y_valid),
-            validation_steps=config.get("val_steps_per_epoch"),
-        )
-
+        model.fit(x_train,y_train,batch_size=self.modelConfig.get("BatchSize"),epochs=self.modelConfig.get("epochs"),verbose=self.modelConfig.get("verbose"),callbacks=self.modelConfig.get("callbacks"),steps_per_epoch=self.modelConfig.get("TrainingStepsPerEpoch"),validation_data=(x_valid, y_valid),validation_steps=self.modelConfig.get("ValidationStepsPerEpoch"))
         return model
 
-    def evaluate_model(self, model, xtest, ytest):
-        """
-        Evaluate a trained model.
-        """
-        # Evaluate model
+    def ModelEvaluate(self, model, xtest, ytest):
         # Evaluate model
         score = model.evaluate(xtest, ytest, verbose=1)
         print(f'Test loss: {score[0]} / Test accuracy: {score[1]}')
 
         # Predict labels
         y_pred = model.predict(xtest)
-        print(len(y_pred))
         y_pred = np.argmax(y_pred, axis=1)
         ytest = np.argmax(ytest, axis=1)
         print(y_pred)
@@ -246,7 +166,7 @@ class ResNetModel:
         plt.tight_layout()
         plt.show()
 
-    def training_process(self, ev=False):
+    def TrainingProcess(self, ev=False):
         # load test and train data
         dsM = Dataset()
         x_test, y_test = dsM.loadTestData()
@@ -257,7 +177,7 @@ class ResNetModel:
             self.evaluate_model(trained_resnet, x_test, y_test)
         return trained_resnet
 
-    def PredictScan(self, Scanpath, OneValue = False, Multiprocess = False, work = 1):
+    def PredictScan(self, Scanpath, OneValue = False):
         import tensorflow
         IP = ImageProcessing()
         if os.path.exists(resource_path("Data/ResNet.h5")):
@@ -266,7 +186,7 @@ class ResNetModel:
             trained_resnet = self.training_process()
         img = IP.load_image(Scanpath)
         img = np.array(img)
-        x = trained_resnet.predict(img, verbose=0, use_multiprocessing=Multiprocess, workers=work)
+        x = trained_resnet.predict(img, verbose=0)
         percentage_list = []
         classes = [
             "Normal",
@@ -291,7 +211,6 @@ class ResNetModel:
                 max1 = value
                 res= i[0]
         return res
-    
 
 def resource_path(relative_path):
     try:
