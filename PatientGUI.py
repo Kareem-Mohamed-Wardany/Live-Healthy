@@ -352,7 +352,7 @@ class PatGUI(ctk.CTk):
         self.ClassTwo.place(anchor="nw", relx=0.05, rely=0.2)
 
 
-        if len(self.ScanPath) >0:
+        if len(self.ScanPath) > 0:
             if self.user.userVIPLevel < 3:
                 res = self.user.updateBalance(self.Predict_Scan_frame, self.Price)
                 if res != -1:
@@ -1122,5 +1122,5 @@ class PatGUI(ctk.CTk):
         self.destroy()
 
 if __name__ == "__main__":
-    app = PatGUI(23)
+    app = PatGUI(5)
     app.mainloop()

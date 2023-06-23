@@ -111,10 +111,10 @@ class User:
         if val < 0:
             check = val * (-1)
             if check > self.userBalance:
-                messagebox.showerrors("error", "Insufficient Funds")
+                messagebox.showerror("error", "Insufficient Funds")
                 return -1
         elif val == 0:
-            messagebox.showerrors("error", "Invalid Amount")
+            messagebox.showerror("error", "Invalid Amount")
             return -1
         self.userBalance += val
         UpdateQuery(

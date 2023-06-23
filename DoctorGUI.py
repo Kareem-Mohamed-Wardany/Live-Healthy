@@ -28,8 +28,8 @@ class DocGUI(ctk.CTk):
 
     def __init__(self, id):
         super().__init__()
-        self.Created = [True,True,True,True]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
-        self.user = UserFactory.createUser(id, "doctor")  # 2 Khaled Cons   4 Amira Spec
+        self.Created = [True, True, True, True]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
+        self.user = UserFactory.createUser(id, "doctor") 
         self.WindowSettings()
         self.LeftSideBar()
 
@@ -1063,7 +1063,6 @@ class DocGUI(ctk.CTk):
 
     # Credits section
     def loadCreditWithdraw(self):
-
         # Prevent Error for stucking in this frame and can not enter other Frames
         if self.Created[2]:
             self.credits_frame = ctk.CTkFrame(
