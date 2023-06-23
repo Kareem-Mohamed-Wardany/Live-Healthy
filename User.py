@@ -73,7 +73,7 @@ class User:
         cls.userType = res[0][1]
         return cls.userid, cls.userType
 
-    def Logout(self,frame):
+    def Logout(self, frame):
         from Starter import Starter
         frame.destroy()
         app = Starter()

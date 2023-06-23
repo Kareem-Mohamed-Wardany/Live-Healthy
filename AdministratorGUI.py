@@ -24,13 +24,11 @@ class AdminGUI(ctk.CTk):
     # Define the Admin
     
 
-    Created = [
-        True,
-        True
-    ]  # LoadVerifyDoctorsFrame, LoadHandleReportsFrame PREVENTS duplications
+    
 
     def __init__(self, id):
         super().__init__()
+        self.Created = [True,True]  # LoadVerifyDoctorsFrame, LoadHandleReportsFrame PREVENTS duplications
         self.user = UserFactory.createUser(id,"admin")
         self.configure(bg_color=self.configfile.get("BackgroundColor"))
         self.configure(fg_color=self.configfile.get("BackgroundColor"))

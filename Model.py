@@ -18,8 +18,9 @@ from keras.models import load_model
 
 
 class ResNetModel:
-    modelConfig = model_configuration()
+    modelConfig = None
     def ResidualBlock(self, x, number_of_filters, match_filter_size=False):
+        self.modelConfig = model_configuration()
         # Retrieve initializer
         initializer = self.modelConfig.get("initializer")
 
@@ -67,6 +68,7 @@ class ResNetModel:
         return x
 
     def Blocks(self, x):
+        self.modelConfig = model_configuration()
         # Set initial filter size
         filter_size = self.modelConfig.get("initialNumberofFilters")
         # Paper: "Then we use a stack of 6n layers (...) with 2n layers for each feature map size. 6n/2n = 3, so there are always 3 groups.
@@ -81,6 +83,7 @@ class ResNetModel:
         return x
 
     def WholeModel(self, shp):
+        self.modelConfig = model_configuration()
         # Get number of classes from model configuration
         initializer = self.modelConfig.get("initializer")
         # Define model structure
@@ -102,6 +105,7 @@ class ResNetModel:
         return inputs, outputs
 
     def ModelCompile(self): 
+        self.modelConfig = model_configuration()
         # Get model base
         inputs, outputs = self.WholeModel((self.modelConfig.get("width"), self.modelConfig.get("height"), self.modelConfig.get("dim")))
         # Initialize and compile model
@@ -110,11 +114,13 @@ class ResNetModel:
         return model
 
     def ModelTrain(self, model, x_train, x_valid, y_train, y_valid):
+        self.modelConfig = model_configuration()
         # Fit data to model
         model.fit(x_train,y_train,batch_size=self.modelConfig.get("BatchSize"),epochs=self.modelConfig.get("epochs"),verbose=self.modelConfig.get("verbose"),callbacks=self.modelConfig.get("callbacks"),steps_per_epoch=self.modelConfig.get("TrainingStepsPerEpoch"),validation_data=(x_valid, y_valid),validation_steps=self.modelConfig.get("ValidationStepsPerEpoch"))
         return model
 
     def ModelEvaluate(self, model, xtest, ytest):
+        self.modelConfig = model_configuration()
         # Evaluate model
         score = model.evaluate(xtest, ytest, verbose=1)
         print(f'Test loss: {score[0]} / Test accuracy: {score[1]}')
@@ -171,10 +177,10 @@ class ResNetModel:
         dsM = Dataset()
         x_test, y_test = dsM.loadTestData()
         x_train, x_valid, y_train, y_valid = dsM.CreateValidData()
-        resnet = self.init_model()
-        trained_resnet = self.train_model(resnet, x_train, x_valid, y_train, y_valid)
+        resnet = self.ModelCompile()
+        trained_resnet = self.ModelTrain(resnet, x_train, x_valid, y_train, y_valid)
         if ev:
-            self.evaluate_model(trained_resnet, x_test, y_test)
+            self.ModelEvaluate(trained_resnet, x_test, y_test)
         return trained_resnet
 
     def PredictScan(self, Scanpath, OneValue = False):

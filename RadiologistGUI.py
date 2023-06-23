@@ -29,15 +29,10 @@ class RadioloGUI(ctk.CTk):
 
     # Define the Patient
 
-    Created = [
-        True,
-        True,
-        True,
-        True,
-    ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
 
     def __init__(self, id):
         super().__init__()
+        self.Created = [True,True,True,True]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
         self.user = UserFactory.createUser(id, "radiologist")
         self.WindowSettings()
         self.LeftSideBar()

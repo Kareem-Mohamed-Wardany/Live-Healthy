@@ -29,18 +29,10 @@ class PatGUI(ctk.CTk):
     configfile = SystemConfig()
     systemError = SystemErrors()
 
-    # Define the Patient
-    Created = [
-        True,
-        True,
-        True,
-        True,
-        True,
-    ]  # Predict X-ray frame, Chat With doctor frame, vipPurchase Frame, Prescriptions Frame , credits PREVENTS duplications
-
     # Main Constructor
     def __init__(self, id):
         super().__init__()
+        self.Created = [True,True,True,True,True]  # Predict X-ray frame, Chat With doctor frame, vipPurchase Frame, Prescriptions Frame , credits PREVENTS duplications
         self.user = UserFactory.createUser(id, "patient")  
         self.WindowSettings()
         self.LeftSideBar()
@@ -390,7 +382,6 @@ class PatGUI(ctk.CTk):
         Label1 , Label2 =  self.user.PredictMyScan(self.ScanPath, "Two")
         self.pr1 = f"Highest Class Percentage: {Label1}"
         disease = Label1.split(" -")[0]
-
         self.pr2 = f"Second Class Percentage: {Label2}"
         self.Predictionmessage = [{"role": "system", "content": f"You are an AI Chatbot that assists pulmonary by giving patient a medical advice, this patient has {disease}, give him only advice to help him"}]
         gptthread = ReturnValueThread(target=self.PredictionAdvice)

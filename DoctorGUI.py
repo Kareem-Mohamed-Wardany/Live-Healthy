@@ -18,7 +18,6 @@ from GUIHelperFunctions import *
 from Images import *
 from UserFactory import *
 
-# Chatgpt api = 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
 class DocGUI(ctk.CTk):
     # load Config dict
     configfile = SystemConfig()
@@ -26,15 +25,10 @@ class DocGUI(ctk.CTk):
 
 
     # Define the Doctor
-    Created = [
-        True,
-        True,
-        True,
-        True,
-    ]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
 
     def __init__(self, id):
         super().__init__()
+        self.Created = [True,True,True,True]  # Active chat frame, Patient Req frame, Credits Frame, amount Frame in credits PREVENTS duplications
         self.user = UserFactory.createUser(id, "doctor")  # 2 Khaled Cons   4 Amira Spec
         self.WindowSettings()
         self.LeftSideBar()

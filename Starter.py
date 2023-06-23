@@ -844,29 +844,27 @@ class Starter(ctk.CTk):
             doctordata.SaveData()
         messagebox.showinfo("✅ Success", " You have successfully registered a new account ✅ ", icon="info", parent=self.backgroundFrame)
 
-    def MoveTo(self,UserInfo):
+    def MoveTo(self, UserInfo):
         self.destroy()
-        
-        id = str(UserInfo[0])
-        from UserFactory import UserFactory
-        if UserInfo[1].lower() == "patient": 
-            from PatientGUI import PatGUI
+        id = int(UserInfo[0])
+        user_type = UserInfo[1].lower()
+
+        if user_type == "patient":
+            # from PatientGUI import PatGUI
             patient = PatGUI(id)
             patient.mainloop()
-        if UserInfo[1].lower() == "radiologist": 
+        elif user_type == "radiologist":
             from RadiologistGUI import RadioloGUI
-            Radiologist = RadioloGUI(id)
-            Radiologist.mainloop()
-        if UserInfo[1].lower() == "administrator":
+            radiologist = RadioloGUI(id)
+            radiologist.mainloop()
+        elif user_type == "administrator":
             from AdministratorGUI import AdminGUI
-            Admin = AdminGUI(id)
-            Admin.mainloop()
-        if UserInfo[1].lower() in ["specialist","consultant"]:
+            admin = AdminGUI(id)
+            admin.mainloop()
+        elif user_type in ["specialist", "consultant"]:
             from DoctorGUI import DocGUI
-            Doctor = DocGUI(id)
-            Doctor.mainloop()
-        
-
+            doctor = DocGUI(id)
+            doctor.mainloop()
 
 
 
