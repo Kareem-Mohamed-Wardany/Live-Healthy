@@ -4,7 +4,6 @@ from tkinter import filedialog
 from datetime import date, timedelta
 from Model import *
 from Error import *
-
 class Patient(User):
 
     db = Database()  # Create connection with Database to access it

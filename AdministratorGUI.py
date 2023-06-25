@@ -21,11 +21,6 @@ class AdminGUI(ctk.CTk):
     # load Config dict
     configfile = SystemConfig()
 
-    # Define the Admin
-    
-
-    
-
     def __init__(self, id):
         super().__init__()
         self.Created = [True,True]  # LoadVerifyDoctorsFrame, LoadHandleReportsFrame PREVENTS duplications

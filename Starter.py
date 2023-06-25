@@ -55,8 +55,6 @@ class Starter(ctk.CTk):
             height=710,
         )
         self.backgroundFrame.place(anchor="nw", relx=0.01, rely=0.011)
-
-
         
         bgImage = ctk.CTkLabel(self.backgroundFrame, text="", image=ctk.CTkImage(LoginBG, size=(1255, 710)))
         bgImage.place(anchor="nw", relx=0, rely=0)
@@ -276,8 +274,6 @@ class Starter(ctk.CTk):
         )
         self.MailEntry.place(anchor="nw",relx=0.25,rely=0.10)
 
-
-
         PassLabel = ctk.CTkLabel(
             self.SelectionFrame,
             text="Password*",
@@ -349,8 +345,6 @@ class Starter(ctk.CTk):
         )
         self.PhoneEntry.place(anchor="nw",relx=0.015,rely=0.32)
 
-        
-
         AgeLabel = ctk.CTkLabel(
             self.SelectionFrame,
             text="Date of Birth*",
@@ -366,7 +360,6 @@ class Starter(ctk.CTk):
         month = 1,
         day = 1)
         self.cal.place(anchor="nw", relx=0.25,rely=0.32)
-
 
         GenderLabel = ctk.CTkLabel(
             self.SelectionFrame,
@@ -397,8 +390,6 @@ class Starter(ctk.CTk):
             value=2
         )
         FemaleRadio.place(anchor="nw",relx=0.1, rely=0.45)
-
-
 
         TypeLabel = ctk.CTkLabel(
             self.SelectionFrame,

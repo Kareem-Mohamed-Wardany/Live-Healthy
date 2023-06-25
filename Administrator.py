@@ -50,7 +50,7 @@ class Administrator(User):
         Mail = self.GetMail(id)
         self.SendMail(Mail, "Account Activation", "Your account has been suspended")
         update()
-        messagebox.showinfo("info","Doctor Verified")
+        messagebox.showinfo("info","Doctor permanently suspended")
 
     def GetMail(self, id):
         return SelectQuery("SELECT Mail FROM users WHERE ID =%s",[id])[0][0]
