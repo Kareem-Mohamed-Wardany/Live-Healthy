@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 25, 2023 at 12:43 PM
+-- Generation Time: Jul 03, 2023 at 09:54 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.2.0
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `systemdb`
 --
+CREATE DATABASE IF NOT EXISTS `systemdb` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `systemdb`;
 
 -- --------------------------------------------------------
 
@@ -27,6 +29,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `chatdata`
 --
 
+DROP TABLE IF EXISTS `chatdata`;
 CREATE TABLE `chatdata` (
   `Patient_ID` int(11) NOT NULL,
   `Doc_ID` int(11) NOT NULL,
@@ -53,6 +56,7 @@ INSERT INTO `chatdata` (`Patient_ID`, `Doc_ID`, `Chat_Logs`, `Chat_Status`, `Sta
 -- Table structure for table `doctordata`
 --
 
+DROP TABLE IF EXISTS `doctordata`;
 CREATE TABLE `doctordata` (
   `Doctor_ID` int(11) NOT NULL,
   `Verified` int(11) NOT NULL,
@@ -88,6 +92,7 @@ INSERT INTO `doctordata` (`Doctor_ID`, `Verified`, `University`, `ID_Card`, `Pro
 -- Table structure for table `oldchat`
 --
 
+DROP TABLE IF EXISTS `oldchat`;
 CREATE TABLE `oldchat` (
   `Patient_ID` int(11) NOT NULL,
   `Doc_ID` int(11) NOT NULL,
@@ -115,6 +120,7 @@ INSERT INTO `oldchat` (`Patient_ID`, `Doc_ID`, `ChatLOGS`, `StartDate`, `EndDate
 -- Table structure for table `patienthealthstatus`
 --
 
+DROP TABLE IF EXISTS `patienthealthstatus`;
 CREATE TABLE `patienthealthstatus` (
   `Patient_ID` int(11) NOT NULL,
   `Heart_Diseases` int(11) NOT NULL,
@@ -160,6 +166,7 @@ INSERT INTO `patienthealthstatus` (`Patient_ID`, `Heart_Diseases`, `Diabetes`, `
 -- Table structure for table `prescriptions`
 --
 
+DROP TABLE IF EXISTS `prescriptions`;
 CREATE TABLE `prescriptions` (
   `Patient_ID` int(11) NOT NULL,
   `prescriptionPDF` mediumblob DEFAULT NULL,
@@ -192,6 +199,7 @@ INSERT INTO `prescriptions` (`Patient_ID`, `prescriptionPDF`, `prescriptionDate`
 -- Table structure for table `radiologists`
 --
 
+DROP TABLE IF EXISTS `radiologists`;
 CREATE TABLE `radiologists` (
   `Radiologist_ID` int(11) NOT NULL,
   `Center_ID` int(11) NOT NULL
@@ -215,6 +223,7 @@ INSERT INTO `radiologists` (`Radiologist_ID`, `Center_ID`) VALUES
 -- Table structure for table `radiologycenters`
 --
 
+DROP TABLE IF EXISTS `radiologycenters`;
 CREATE TABLE `radiologycenters` (
   `ID` int(11) NOT NULL,
   `Name` varchar(32) NOT NULL,
@@ -239,6 +248,7 @@ INSERT INTO `radiologycenters` (`ID`, `Name`, `address`, `phone`, `mail`, `Regis
 -- Table structure for table `reports`
 --
 
+DROP TABLE IF EXISTS `reports`;
 CREATE TABLE `reports` (
   `Issuer_ID` int(2) NOT NULL,
   `Reporter_ID` int(2) NOT NULL,
@@ -261,6 +271,7 @@ INSERT INTO `reports` (`Issuer_ID`, `Reporter_ID`, `Reason`, `ReportDate`) VALUE
 -- Table structure for table `requests`
 --
 
+DROP TABLE IF EXISTS `requests`;
 CREATE TABLE `requests` (
   `Patient_ID` int(11) NOT NULL,
   `Request_Date` date NOT NULL,
@@ -294,6 +305,7 @@ INSERT INTO `requests` (`Patient_ID`, `Request_Date`, `Request_Status`, `X_ray_s
 -- Table structure for table `suspended`
 --
 
+DROP TABLE IF EXISTS `suspended`;
 CREATE TABLE `suspended` (
   `User_ID` int(11) NOT NULL,
   `Suspention_Type` varchar(32) NOT NULL,
@@ -317,6 +329,7 @@ INSERT INTO `suspended` (`User_ID`, `Suspention_Type`, `Suspention_Date`, `Reaso
 -- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `ID` int(8) NOT NULL,
   `Name` varchar(32) NOT NULL,
